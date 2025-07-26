@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(task-master:*)",
+      "Bash(export:*)",
+      "Bash(go build:*)",
+      "Bash(./garp init --help)",
+      "Bash(./garp serv)",
+      "Bash(./garp:*)",
+      "Bash(../garp serve)"
+    ],
+    "deny": []
+  }
+}

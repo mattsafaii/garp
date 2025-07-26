@@ -1,0 +1,663 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Create CLI Tool Framework and Basic Command Structure",
+        "description": "Build the foundational CLI tool with command parsing, help system, and basic project structure validation",
+        "details": "Implement the `garp` CLI using a language like Go or Ruby with command parsing library (cobra for Go, thor for Ruby). Create basic commands: init, build, serve, form-server, deploy. Implement help system, version display, and basic error handling. Structure: main.go/garp.rb with subcommands in separate files. Include proper flag parsing and validation.",
+        "testStrategy": "Unit tests for command parsing, integration tests for help output, test invalid command handling and version display",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Language Selection and Project Setup",
+            "description": "Choose implementation language (Go/Ruby) and set up project structure with dependency management",
+            "dependencies": [],
+            "details": "Select Go with Cobra CLI library or Ruby with Thor for command parsing. Initialize project with proper module/gem structure, dependency management (go.mod or Gemfile), and basic directory layout. Set up version management and build configuration.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Command Parsing Library Integration",
+            "description": "Integrate command parsing library and implement basic command structure for all CLI commands",
+            "dependencies": [
+              "1.1"
+            ],
+            "details": "Implement Cobra (Go) or Thor (Ruby) integration with main command 'garp' and subcommands: init, build, serve, form-server, deploy. Set up command routing, flag parsing, and basic command validation framework.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Help System and Version Display",
+            "description": "Implement comprehensive help system and version display functionality",
+            "dependencies": [
+              "1.2"
+            ],
+            "details": "Create help text for main command and all subcommands with usage examples, flag descriptions, and command explanations. Implement --version flag and version display. Add command suggestions for typos and invalid commands.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Error Handling and Input Validation Framework",
+            "description": "Build robust error handling system and input validation framework for all CLI operations",
+            "dependencies": [
+              "1.2"
+            ],
+            "details": "Implement centralized error handling with proper exit codes, user-friendly error messages, and logging. Create input validation framework for command arguments, flags, and file paths. Add validation for project structure and configuration files.",
+            "status": "done",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Implement Project Scaffolding (garp init)",
+        "description": "Create the `garp init` command that generates the complete project structure with all necessary files and directories",
+        "details": "Generate directory structure: site/, site/docs/, site/docs/markdown/, bin/. Create template files: _template.html with basic HTML5 structure, index.md with sample content, Caddyfile with markdown template configuration, input.css with Tailwind directives, build scripts (build-css, build-search-index), .env.example, .gitignore, Gemfile for optional Ruby dependencies. Use embedded templates or external template files.",
+        "testStrategy": "Test directory creation, file generation, template content validation, test with different project names, verify all required files are created",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Directory structure creation and validation",
+            "description": "Create the complete directory structure for a new Garp project including site/, site/docs/, site/docs/markdown/, and bin/ directories with proper validation",
+            "dependencies": [],
+            "details": "Implement directory creation logic that generates the required folder structure: site/ (main site directory), site/docs/ (documentation root), site/docs/markdown/ (markdown content), bin/ (build scripts). Include validation to check if directories already exist, handle permission errors, and ensure cross-platform compatibility. Add proper error handling for filesystem operations and provide clear feedback on directory creation status.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Template file generation with embedded templates",
+            "description": "Generate all template files using embedded templates including HTML templates, sample content, and configuration templates",
+            "dependencies": [
+              "2.1"
+            ],
+            "details": "Create embedded template system for generating: _template.html with basic HTML5 structure and Tailwind integration, index.md with sample markdown content, input.css with Tailwind directives (@tailwind base, components, utilities). Implement template rendering with project-specific variables (project name, etc.). Ensure templates are embedded in the binary for distribution and include proper error handling for template parsing and file writing.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Configuration file creation with proper defaults",
+            "description": "Generate configuration files including .env.example, Caddyfile, build scripts, and .gitignore with sensible defaults",
+            "dependencies": [
+              "2.1"
+            ],
+            "details": "Create configuration files: .env.example with default environment variables, Caddyfile with markdown template configuration for local development, build scripts (bin/build-css for Tailwind compilation, bin/build-search-index for Pagefind), .gitignore with appropriate exclusions, and optional Gemfile for Ruby dependencies. Ensure all files have proper permissions (executable for scripts) and include comprehensive comments explaining configuration options.",
+            "status": "done",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Integrate Caddy Server with Basic Markdown Rendering",
+        "description": "Set up Caddy server configuration to serve static files and render markdown files using Goldmark templates",
+        "details": "Configure Caddyfile to serve from site/ directory, set up template directive for .md files using Goldmark parser. Create basic template that reads markdown files from site/docs/markdown/ and renders them with _template.html layout. Handle routing so /docs/page maps to /docs/markdown/page.md. Ensure proper MIME types and error handling for missing files.",
+        "testStrategy": "Test markdown file rendering, verify template application, test routing from URLs to markdown files, test error handling for missing files",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "in-progress",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Caddyfile configuration for static file serving",
+            "description": "Configure Caddyfile to serve static files from site/ directory with proper root directive and file server settings",
+            "dependencies": [],
+            "details": "Set up basic Caddyfile with root directive pointing to site/ directory. Configure file_server directive for static file serving. Set up localhost binding with appropriate port. Ensure proper directory indexing and file serving capabilities for HTML, CSS, JS, and other static assets.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Goldmark template integration and markdown parsing",
+            "description": "Integrate Goldmark parser with Caddy's template system for markdown file processing",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "Configure Caddy's template directive to use Goldmark for markdown parsing. Set up template functions to read and parse markdown files from site/docs/markdown/ directory. Implement markdown-to-HTML conversion using Goldmark parser. Configure template context to pass parsed content to HTML templates.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "URL routing implementation for markdown files",
+            "description": "Implement URL routing logic to map /docs/page URLs to corresponding markdown files",
+            "dependencies": [
+              "3.1",
+              "3.2"
+            ],
+            "details": "Configure Caddy routing to handle /docs/* patterns and map them to corresponding .md files in site/docs/markdown/. Implement path rewriting logic to transform /docs/page to /docs/markdown/page.md. Set up template directive to process these routes and render markdown content with _template.html layout. Handle nested paths and ensure proper URL structure.",
+            "status": "done",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Error handling and MIME type configuration",
+            "description": "Configure proper error handling for missing files and set up correct MIME types for all file types",
+            "dependencies": [
+              "3.1",
+              "3.2",
+              "3.3"
+            ],
+            "details": "Implement 404 error handling for missing markdown files with custom error pages. Configure proper MIME types for .md files, HTML templates, CSS, and JavaScript files. Set up error templates for various HTTP status codes. Ensure graceful handling of template parsing errors and missing file scenarios. Configure appropriate HTTP headers for caching and content types.",
+            "status": "done",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Add YAML Frontmatter Support and Template Variables",
+        "description": "Implement YAML frontmatter parsing in Caddy templates and make metadata available as template variables",
+        "details": "Configure Caddy template to parse YAML frontmatter from markdown files. Extract metadata like title, description, date, etc. Make these available as template variables in _template.html (e.g., {{.title}}, {{.description}}). Handle cases where frontmatter is missing or malformed. Support common metadata fields and custom fields.",
+        "testStrategy": "Test frontmatter parsing with various YAML structures, verify template variable availability, test missing frontmatter handling, test malformed YAML handling",
+        "priority": "medium",
+        "dependencies": [
+          3
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "YAML frontmatter parsing implementation with error handling",
+            "description": "Implement robust YAML frontmatter parsing functionality that can extract metadata from markdown files while gracefully handling malformed or missing frontmatter",
+            "dependencies": [],
+            "details": "Create YAML parser that can identify and extract frontmatter delimited by '---' markers at the beginning of markdown files. Implement comprehensive error handling for malformed YAML syntax, invalid frontmatter structure, and encoding issues. Add validation for common metadata fields (title, description, date, author, tags) and support for custom fields. Include fallback mechanisms for files without frontmatter or with parsing errors.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Template variable extraction and mapping",
+            "description": "Extract parsed frontmatter metadata and map it to template variables that can be used in Caddy templates",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "Process parsed YAML frontmatter data and convert it into template variables accessible in Caddy templates. Create variable mapping system that makes metadata available as {{.title}}, {{.description}}, {{.date}}, etc. Handle data type conversion (strings, dates, arrays, booleans) and provide default values for missing fields. Implement variable scoping and context management for template rendering.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Integration with Caddy templates and fallback handling for missing metadata",
+            "description": "Integrate frontmatter parsing with Caddy's template system and implement robust fallback mechanisms for missing or invalid metadata",
+            "dependencies": [
+              "4.1",
+              "4.2"
+            ],
+            "details": "Configure Caddy template middleware to use extracted frontmatter variables in _template.html and other template files. Implement fallback handling that provides sensible defaults when frontmatter is missing, malformed, or incomplete. Add template helper functions for common operations (date formatting, tag processing, conditional rendering). Ensure seamless integration with existing Caddy template functionality and maintain backward compatibility.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Integrate Tailwind CSS Build Process",
+        "description": "Set up Tailwind CLI integration with build scripts and CSS compilation from input.css to site/style.css",
+        "details": "Create bin/build-css script that runs Tailwind CLI to compile input.css to site/style.css. Configure Tailwind to scan site/ directory for class usage. Set up proper Tailwind directives in input.css (@tailwind base, components, utilities). Implement CSS build as part of `garp build` command. Handle Tailwind CLI binary detection and provide installation instructions if missing.",
+        "testStrategy": "Test CSS compilation, verify Tailwind classes are properly processed, test file watching for changes, test error handling when Tailwind CLI is missing",
+        "priority": "medium",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Tailwind CLI Detection and Installation Guidance",
+            "description": "Implement detection of Tailwind CLI binary and provide clear installation instructions when missing",
+            "dependencies": [],
+            "details": "Create utility functions to detect if Tailwind CLI is installed on the system by checking common installation paths and running version commands. When Tailwind CLI is not found, provide helpful error messages with installation instructions for different package managers (npm, yarn, standalone binary). Include platform-specific guidance for Windows, macOS, and Linux. Handle different installation methods and provide fallback options.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Build Script Creation and Tailwind Configuration",
+            "description": "Create bin/build-css script and configure Tailwind CSS compilation settings",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "Create executable bin/build-css script that runs Tailwind CLI to compile input.css to site/style.css. Set up proper Tailwind directives in input.css (@tailwind base, components, utilities). Configure Tailwind to scan site/ directory for class usage detection. Implement proper error handling and output formatting. Ensure cross-platform compatibility for the build script execution.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Integration with garp build Command and File Watching Setup",
+            "description": "Integrate CSS compilation into garp build command and implement file watching capabilities",
+            "dependencies": [
+              "5.2"
+            ],
+            "details": "Integrate the CSS build process into the main `garp build` command workflow. Implement file watching functionality to automatically rebuild CSS when input.css or template files change. Provide progress feedback during compilation and clear error reporting when builds fail. Handle concurrent builds and prevent race conditions. Ensure proper cleanup of temporary files and graceful shutdown of watch processes.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Implement Development Server (garp serve)",
+        "description": "Create the `garp serve` command that starts Caddy server for local development with proper configuration",
+        "details": "Implement `garp serve` command that starts Caddy server using the project's Caddyfile. Configure for local development (localhost:8080 or configurable port). Ensure proper signal handling for graceful shutdown. Add options for different ports and host binding. Include basic logging and error reporting when server fails to start.",
+        "testStrategy": "Test server startup and shutdown, verify port configuration, test signal handling, test error cases (port in use, invalid Caddyfile)",
+        "priority": "medium",
+        "dependencies": [
+          3,
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Caddy server startup and configuration management",
+            "description": "Implement the core server startup logic that initializes Caddy with the project's Caddyfile configuration, handles configuration validation, and manages the server lifecycle",
+            "dependencies": [],
+            "details": "Create server initialization function that loads and validates the Caddyfile, starts the Caddy server instance, and provides configuration management. Include error handling for invalid configurations and missing Caddyfile.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Port configuration and host binding options",
+            "description": "Implement command-line options for configuring server port and host binding, with defaults for local development and validation for user inputs",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "Add CLI flags for --port and --host options with localhost:8080 as default. Validate port availability and handle conflicts. Support both IPv4 and IPv6 binding options.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Signal handling for graceful shutdown and error reporting",
+            "description": "Implement proper signal handling (SIGINT, SIGTERM) for graceful server shutdown and comprehensive error reporting for startup failures",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "Set up signal handlers for clean shutdown, implement graceful stop procedures, and provide detailed error messages for common failure scenarios like port conflicts or configuration errors.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Implement Unified Build Command (garp build)",
+        "description": "Create the `garp build` command that orchestrates CSS compilation and search index generation",
+        "details": "Implement `garp build` command that runs both CSS compilation and search index generation. Execute bin/build-css script for Tailwind compilation. Execute bin/build-search-index script for Pagefind indexing. Provide progress feedback and error reporting. Allow selective building (--css-only, --search-only flags). Handle missing dependencies gracefully.",
+        "testStrategy": "Test full build process, test selective building flags, test error handling when dependencies are missing, verify output file generation",
+        "priority": "medium",
+        "dependencies": [
+          5
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Build orchestration and script execution",
+            "description": "Implement the core build orchestration logic that executes CSS compilation and search index generation scripts",
+            "dependencies": [],
+            "details": "Create the main build command handler that executes bin/build-css for Tailwind compilation and bin/build-search-index for Pagefind indexing. Implement proper process spawning and execution flow control. Handle script execution order and ensure both processes complete successfully. Include timeout handling and process cleanup.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Progress feedback and error reporting system",
+            "description": "Implement comprehensive progress tracking and error reporting for the build process",
+            "dependencies": [
+              "7.1"
+            ],
+            "details": "Create progress indicators for each build step (CSS compilation, search indexing). Implement detailed error reporting with specific failure reasons and suggested fixes. Add logging capabilities for build process debugging. Include success/failure notifications and build time reporting. Handle and display script output appropriately.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Selective building flags and dependency validation",
+            "description": "Implement command-line flags for selective building and validate required dependencies",
+            "dependencies": [
+              "7.1"
+            ],
+            "details": "Add --css-only and --search-only flags to allow selective building of specific components. Implement dependency validation to check for required tools (Tailwind CSS, Pagefind) before execution. Handle missing dependencies gracefully with informative error messages. Validate input files and directories exist before starting build process.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Integrate Pagefind for Full-Text Search",
+        "description": "Set up Pagefind integration for client-side search functionality with index generation and UI components",
+        "details": "Create bin/build-search-index script that runs Pagefind binary to index site/ directory. Configure Pagefind to generate _pagefind/ directory with search index. Add search UI integration to _template.html with <div id=\"search\"></div> and Pagefind JavaScript. Handle Pagefind binary detection and provide installation instructions. Configure indexing options for markdown content.",
+        "testStrategy": "Test search index generation, verify search functionality in browser, test search UI integration, test handling of missing Pagefind binary",
+        "priority": "low",
+        "dependencies": [
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Pagefind Binary Detection and Installation Guidance",
+            "description": "Implement detection of Pagefind binary and provide clear installation instructions when missing",
+            "dependencies": [],
+            "details": "Create utility functions to detect if Pagefind binary is available in system PATH. Implement graceful error handling when binary is missing with helpful installation instructions. Support detection across different operating systems (Linux, macOS, Windows). Provide clear error messages with links to Pagefind installation documentation and recommended installation methods (npm, cargo, direct download).",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Search Index Generation Script and Configuration",
+            "description": "Create bin/build-search-index script with Pagefind configuration for markdown content indexing",
+            "dependencies": [
+              "8.1"
+            ],
+            "details": "Implement bin/build-search-index script that executes Pagefind binary to index site/ directory. Configure Pagefind options for markdown content processing, including proper content extraction and metadata handling. Set up generation of _pagefind/ directory with search index files. Configure indexing to properly handle markdown files and extract relevant content for search. Include error handling and progress reporting during index generation.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Search UI Integration in Templates",
+            "description": "Integrate Pagefind search UI components into _template.html with proper JavaScript initialization",
+            "dependencies": [
+              "8.2"
+            ],
+            "details": "Add search UI elements to _template.html including <div id=\"search\"></div> container. Integrate Pagefind JavaScript library for client-side search functionality. Implement proper initialization of search UI components. Configure search UI styling and behavior to work with existing template structure. Ensure search interface is responsive and accessible.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Search Functionality Testing and Optimization",
+            "description": "Test search index generation, UI integration, and optimize search performance across different content types",
+            "dependencies": [
+              "8.3"
+            ],
+            "details": "Test search index generation process with various markdown content types and structures. Verify search functionality works correctly in browser environment. Test search UI responsiveness and user experience. Optimize search performance and relevance scoring. Test error handling scenarios including missing index files and network issues. Validate search results accuracy and completeness across different content structures.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Create Contact Form with Sinatra and Resend Integration",
+        "description": "Implement optional contact form handling using Sinatra server with Resend API for email delivery",
+        "details": "Create form-server.rb with Sinatra application handling POST to /submit. Integrate Resend API for email delivery using API key from .env file. Implement input validation, honeypot spam protection, and form submission logging to form-submissions.log. Add CORS headers for cross-origin requests. Create `garp form-server` command to start the Sinatra server. Include proper error handling and response formatting.",
+        "testStrategy": "Test form submission handling, verify email delivery via Resend, test spam protection, test logging functionality, test CORS headers",
+        "priority": "low",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Sinatra Application Setup and Routing",
+            "description": "Set up the basic Sinatra application structure with routing for the contact form endpoint",
+            "dependencies": [],
+            "details": "Create form-server.rb with Sinatra application setup. Implement POST route to /submit for form handling. Set up basic application configuration, middleware, and server initialization. Configure port and host settings. Implement basic request/response structure and routing logic.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Resend API Integration and Email Handling",
+            "description": "Integrate Resend API for email delivery functionality with proper configuration management",
+            "dependencies": [
+              "9.1"
+            ],
+            "details": "Implement Resend API client integration using API key from .env file. Create email composition logic with form data. Handle email template formatting and recipient configuration. Implement proper API error handling and response validation. Add email delivery confirmation and failure handling.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Input Validation and Spam Protection Implementation",
+            "description": "Implement comprehensive input validation and honeypot spam protection mechanisms",
+            "dependencies": [
+              "9.1"
+            ],
+            "details": "Create input validation for form fields (required fields, email format, length limits). Implement honeypot spam protection with hidden fields. Add rate limiting and basic security measures. Validate and sanitize all user inputs. Create validation error responses and user feedback.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Logging and Error Handling",
+            "description": "Implement comprehensive logging system and robust error handling throughout the application",
+            "dependencies": [
+              "9.2",
+              "9.3"
+            ],
+            "details": "Set up form submission logging to form-submissions.log with proper formatting. Implement error handling for API failures, validation errors, and system errors. Create structured logging with timestamps and request details. Add error response formatting and user-friendly error messages. Implement log rotation and management.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "CORS Configuration and CLI Command Integration",
+            "description": "Configure CORS headers for cross-origin requests and integrate with the main CLI system",
+            "dependencies": [
+              "9.4"
+            ],
+            "details": "Implement CORS headers configuration for cross-origin form submissions. Create `garp form-server` CLI command integration. Add server startup and shutdown handling. Configure proper response headers and preflight request handling. Integrate with main CLI framework and add command help documentation.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Implement Deployment Automation (garp deploy)",
+        "description": "Create deployment command that handles Git integration and server deployment workflows",
+        "details": "Implement `garp deploy` command with multiple deployment strategies: Git-based deployment (push to remote), rsync to server, static hosting integration. Support configuration via .env or command flags for deployment targets. Include pre-deployment build step (run garp build automatically). Add deployment validation and rollback options. Support common hosting platforms (Netlify, Vercel, custom servers).",
+        "testStrategy": "Test Git deployment workflow, test rsync deployment, test pre-deployment build execution, test deployment validation and error handling",
+        "priority": "low",
+        "dependencies": [
+          7
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Git-based deployment strategy",
+            "description": "Create Git deployment functionality that handles pushing to remote repositories and managing Git-based deployment workflows",
+            "dependencies": [],
+            "details": "Implement Git deployment strategy that supports pushing to remote repositories (GitHub, GitLab, custom Git servers). Handle Git authentication (SSH keys, tokens). Support branch-specific deployments and tag-based releases. Include Git hooks integration for automated deployments. Add validation for Git repository state and clean working directory checks.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Implement Rsync and server deployment methods",
+            "description": "Create rsync-based deployment functionality for direct server file synchronization and custom server deployment workflows",
+            "dependencies": [],
+            "details": "Implement rsync deployment strategy for direct file synchronization to servers. Support SSH-based rsync with key authentication. Handle file exclusions and inclusion patterns. Add support for custom deployment scripts on target servers. Include bandwidth throttling and progress reporting for large deployments.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Integrate static hosting platform deployments",
+            "description": "Implement integrations with static hosting platforms like Netlify and Vercel for automated deployments",
+            "dependencies": [],
+            "details": "Create integrations for popular static hosting platforms (Netlify, Vercel, GitHub Pages). Implement API-based deployments using platform-specific SDKs or REST APIs. Handle authentication tokens and deployment configurations. Support custom build commands and environment variables for each platform. Add deployment status monitoring and URL generation.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Implement pre-deployment build automation and validation",
+            "description": "Create automated build processes and validation checks that run before deployment to ensure site integrity",
+            "dependencies": [
+              "10.1",
+              "10.2",
+              "10.3"
+            ],
+            "details": "Implement pre-deployment build automation that automatically runs 'garp build' before deployment. Add validation checks for required files, broken links, and build artifacts. Include content validation (markdown syntax, image references). Support custom validation scripts and hooks. Provide detailed error reporting and build failure handling with rollback capabilities.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 5,
+            "title": "Implement rollback mechanisms and deployment configuration management",
+            "description": "Create rollback functionality and comprehensive deployment configuration management system",
+            "dependencies": [
+              "10.4"
+            ],
+            "details": "Implement deployment rollback mechanisms that can revert to previous successful deployments. Create deployment history tracking and version management. Support configuration management via .env files and command-line flags. Add deployment target management (staging, production environments). Include deployment verification and health checks with automatic rollback on failure.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 11,
+        "title": "Add Comprehensive Error Handling and Validation",
+        "description": "Implement robust error handling, input validation, and user feedback across all CLI commands",
+        "details": "Add comprehensive error handling for all CLI commands with user-friendly error messages. Implement input validation for project names, file paths, and configuration options. Add dependency checking (Caddy, Tailwind CLI, Ruby, Pagefind) with helpful installation guidance. Include proper exit codes and error logging. Add validation for project structure and configuration files.",
+        "testStrategy": "Test error scenarios for each command, verify helpful error messages, test dependency checking, test input validation edge cases",
+        "priority": "medium",
+        "dependencies": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "CLI Command Error Handling and User-Friendly Messaging",
+            "description": "Implement comprehensive error handling for all CLI commands with user-friendly error messages and proper error propagation",
+            "dependencies": [],
+            "details": "Add try-catch blocks around all CLI command operations. Create standardized error message formatting with helpful context and suggestions. Implement error message templates for common scenarios (file not found, permission denied, invalid input). Add colored output for error messages using terminal colors. Include command usage hints in error messages when appropriate.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Input Validation Framework and Dependency Checking",
+            "description": "Create comprehensive input validation system and dependency checking with installation guidance",
+            "dependencies": [],
+            "details": "Build validation framework for project names, file paths, and configuration options. Implement dependency checking for Caddy, Tailwind CLI, Ruby, and Pagefind with version verification. Create helpful installation guidance messages for missing dependencies. Add path validation and sanitization. Include configuration option validation with allowed values and formats.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Project Structure and Configuration Validation",
+            "description": "Implement validation for project structure integrity and configuration file correctness",
+            "dependencies": [
+              "11.1"
+            ],
+            "details": "Add project structure validation to ensure required directories and files exist. Validate Caddyfile syntax and configuration. Check for required template files and assets. Validate frontmatter format and required fields in markdown files. Include configuration file schema validation for project settings and build options.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Error Logging and Exit Code Standardization",
+            "description": "Implement consistent error logging system and standardize exit codes across all commands",
+            "dependencies": [
+              "11.1",
+              "11.2",
+              "11.3"
+            ],
+            "details": "Create centralized error logging system with different log levels (error, warning, info, debug). Implement log file rotation and cleanup. Standardize exit codes following Unix conventions (0 for success, 1 for general errors, 2 for misuse, etc.). Add verbose logging option for debugging. Include timestamp and context information in log entries.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      },
+      {
+        "id": 12,
+        "title": "Create Documentation and Example Site",
+        "description": "Build comprehensive documentation and example site using Garp itself to demonstrate all features",
+        "details": "Create documentation site using Garp with examples of all features: markdown rendering, frontmatter usage, Tailwind styling, search functionality, contact forms. Include getting started guide, API reference, deployment guides, and troubleshooting. Create example templates and content. Set up automated documentation building and deployment. Include performance benchmarks and comparison with other static site generators.",
+        "testStrategy": "Test documentation site builds correctly, verify all examples work, test search functionality on docs, validate all links and references",
+        "priority": "low",
+        "dependencies": [
+          11
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Documentation Content Creation and Structure Planning",
+            "description": "Create comprehensive documentation content including getting started guide, API reference, deployment guides, and troubleshooting sections. Plan the overall documentation structure and navigation.",
+            "dependencies": [],
+            "details": "Write getting started guide with installation and basic usage. Create API reference documenting all CLI commands and options. Develop deployment guides for various hosting platforms. Create troubleshooting section with common issues and solutions. Plan documentation site structure with proper navigation and categorization. Include markdown examples showcasing frontmatter usage and Tailwind styling integration.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 2,
+            "title": "Example Site Implementation Showcasing All Features",
+            "description": "Build a comprehensive example site using Garp that demonstrates all available features including markdown rendering, frontmatter, Tailwind styling, search functionality, and contact forms.",
+            "dependencies": [
+              "12.1"
+            ],
+            "details": "Create example templates demonstrating various layouts and styling options. Implement sample content showcasing markdown rendering capabilities and frontmatter usage. Set up search functionality demonstration with indexed content. Create working contact form examples integrated with the form server. Include examples of Tailwind CSS integration and custom styling. Ensure all features are properly demonstrated with clear code examples.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 3,
+            "title": "Automated Documentation Building and Deployment Setup",
+            "description": "Set up automated build and deployment pipeline for the documentation site using Garp's own build system and deployment capabilities.",
+            "dependencies": [
+              "12.1",
+              "12.2"
+            ],
+            "details": "Configure automated documentation building using Garp's build system. Set up continuous integration pipeline for documentation updates. Implement automated deployment to hosting platform when documentation changes. Configure search index building and updating. Set up automated testing for documentation site functionality including link validation and build verification.",
+            "status": "pending",
+            "testStrategy": ""
+          },
+          {
+            "id": 4,
+            "title": "Performance Benchmarking and Comparison Documentation",
+            "description": "Create performance benchmarks comparing Garp with other static site generators and document the results with detailed analysis and recommendations.",
+            "dependencies": [
+              "12.2",
+              "12.3"
+            ],
+            "details": "Benchmark build times, site generation speed, and resource usage compared to Jekyll, Hugo, and other static site generators. Document performance metrics including build time, memory usage, and output file sizes. Create comparison charts and analysis of different use cases. Include recommendations for optimal performance configuration. Document performance optimization techniques and best practices for Garp users.",
+            "status": "pending",
+            "testStrategy": ""
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-07-25T22:12:13.688Z",
+      "updated": "2025-07-26T09:38:40.142Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
