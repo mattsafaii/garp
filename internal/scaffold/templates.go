@@ -604,6 +604,70 @@ group :test do
   gem "rspec", "~> 3.12"
   gem "rack-test", "~> 2.1"
 end`,
+
+	"index.html": `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.ProjectName}} Documentation</title>
+    <meta name="description" content="Welcome to {{.ProjectName}} - A fast, no-nonsense static site">
+    
+    <!-- Tailwind CSS -->
+    <link href="/style.css" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body class="bg-white text-gray-900 font-sans leading-relaxed">
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-gray-50 border-b border-gray-200">
+            <div class="container mx-auto px-4 py-6">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        <a href="/" class="hover:text-blue-600">{{.ProjectName}}</a>
+                    </h1>
+                    <nav class="hidden md:flex space-x-6">
+                        <a href="/" class="text-gray-600 hover:text-blue-600">Home</a>
+                        <a href="/docs/" class="text-gray-600 hover:text-blue-600">Docs</a>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-1">
+            <div class="container mx-auto px-4 py-8">
+                <!-- Markdown Content -->
+                <div class="prose prose-lg max-w-none">
+                    <div style="white-space: pre-wrap; font-family: 'Georgia', serif; line-height: 1.6;">
+{{include "site/docs/markdown/index.md"}}
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-50 border-t border-gray-200 mt-16">
+            <div class="container mx-auto px-4 py-8">
+                <div class="text-center text-gray-600">
+                    <p>&copy; 2024 {{.ProjectName}}. Built with <a href="https://github.com/yourusername/garp" class="text-blue-600 hover:underline">Garp</a>.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Search Integration (Pagefind) -->
+    <div id="search"></div>
+    <script src="/_pagefind/pagefind-ui.js" type="text/javascript"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            new PagefindUI({ element: "#search", showSubResults: true });
+        });
+    </script>
+</body>
+</html>`,
 }
 
 // CreateTemplateFiles generates all template files using embedded templates
@@ -615,6 +679,7 @@ func (ps *ProjectStructure) CreateTemplateFiles() error {
 	files := map[string]string{
 		filepath.Join(ps.ProjectName, "site", "docs", "_template.html"):      EmbeddedTemplates["_template.html"],
 		filepath.Join(ps.ProjectName, "site", "docs", "markdown", "index.md"): EmbeddedTemplates["index.md"],
+		filepath.Join(ps.ProjectName, "site", "docs", "index.html"):           EmbeddedTemplates["index.html"],
 		filepath.Join(ps.ProjectName, "input.css"):                            EmbeddedTemplates["input.css"],
 	}
 

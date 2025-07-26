@@ -110,7 +110,7 @@
         "dependencies": [
           2
         ],
-        "status": "in-progress",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -129,7 +129,7 @@
               "3.1"
             ],
             "details": "Configure Caddy's template directive to use Goldmark for markdown parsing. Set up template functions to read and parse markdown files from site/docs/markdown/ directory. Implement markdown-to-HTML conversion using Goldmark parser. Configure template context to pass parsed content to HTML templates.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -656,7 +656,7 @@
     ],
     "metadata": {
       "created": "2025-07-25T22:12:13.688Z",
-      "updated": "2025-07-26T09:38:40.142Z",
+      "updated": "2025-07-26T10:01:26.198Z",
       "description": "Tasks for master context"
     }
   }

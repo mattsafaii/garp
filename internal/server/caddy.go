@@ -170,13 +170,26 @@ http://%s:%d {
 	
 	handle /docs/* {
 		uri strip_prefix /docs
-		rewrite * /site/docs/markdown{path}.md
-		try_files {path} /site/docs/markdown/index.md
+		rewrite * /site/docs{path}.html
+		try_files {path} /site/docs/index.html
+		
+		# Apply templates for HTML files
+		templates {
+			mime text/html
+		}
 		file_server
 	}
 	
 	handle /docs {
-		rewrite * /site/docs/markdown/index.md
+		rewrite * /site/docs/index.html
+		templates {
+			mime text/html
+		}
+		file_server
+	}
+	
+	# Serve raw markdown files for now (temporary)
+	handle /docs/markdown/* {
 		file_server
 	}
 	
