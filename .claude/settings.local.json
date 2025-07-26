@@ -8,8 +8,23 @@
       "Bash(./garp serv)",
       "Bash(./garp:*)",
       "Bash(../garp serve)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "mcp__task-master-ai__get_tasks",
+      "mcp__task-master-ai__next_task",
+      "mcp__task-master-ai__set_task_status",
+      "mcp__task-master-ai__update_task"
     ],
     "deny": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "task-master-ai",
+    "sequential-thinking",
+    "context7",
+    "playwright",
+    "fetch"
+  ],
+  "disabledMcpjsonServers": [
+    "filesystem",
+    "airtable"
+  ]
 }

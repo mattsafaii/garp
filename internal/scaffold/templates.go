@@ -20,8 +20,8 @@ var EmbeddedTemplates = map[string]string{
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.title | default "{{.ProjectName}}"}} | {{.ProjectName}}</title>
-    <meta name="description" content="{{.description | default "Welcome to {{.ProjectName}}"}}">
+    <title>[[.Meta.title | default "{{.ProjectName}}"]] | {{.ProjectName}}</title>
+    <meta name="description" content="[[.Meta.description | default "Welcome to {{.ProjectName}}"]]">
     
     <!-- Tailwind CSS -->
     <link href="/style.css" rel="stylesheet">
@@ -50,25 +50,60 @@ var EmbeddedTemplates = map[string]string{
         <main class="flex-1">
             <div class="container mx-auto px-4 py-8">
                 <!-- Breadcrumbs (if available) -->
-                {{if .breadcrumbs}}
+                [[if .Meta.breadcrumbs]]
                 <nav class="mb-6 text-sm">
-                    <span class="text-gray-500">{{.breadcrumbs}}</span>
+                    <span class="text-gray-500">[[.Meta.breadcrumbs]]</span>
                 </nav>
-                {{end}}
+                [[end]]
                 
                 <!-- Page Title -->
-                {{if .title}}
-                <h1 class="text-4xl font-bold mb-6 text-gray-900">{{.title}}</h1>
-                {{end}}
+                <h1 class="text-4xl font-bold mb-6 text-gray-900">
+                [[.Meta.title | default "Untitled Page"]]
+                </h1>
                 
                 <!-- Page Description -->
-                {{if .description}}
-                <p class="text-xl text-gray-600 mb-8">{{.description}}</p>
-                {{end}}
+                [[if .Meta.description]]
+                <p class="text-xl text-gray-600 mb-8">[[.Meta.description]]</p>
+                [[end]]
+                
+                <!-- Page Date (if available) -->
+                [[if .Meta.date]]
+                <div class="text-sm text-gray-500 mb-4">
+                    Published: [[.Meta.date | time "January 2, 2006"]]
+                </div>
+                [[end]]
+                
+                <!-- Page Author (if available) -->
+                [[if .Meta.author]]
+                <div class="text-sm text-gray-500 mb-6">
+                    By: [[.Meta.author]]
+                </div>
+                [[end]]
+                
+                <!-- Page Category (if available) -->
+                [[if .Meta.category]]
+                <div class="text-sm text-gray-500 mb-4">
+                    Category: <span class="text-blue-600">[[.Meta.category]]</span>
+                </div>
+                [[end]]
+                
+                <!-- Page Tags (if available) -->
+                [[if .Meta.tags]]
+                <div class="mb-6">
+                    <div class="text-sm text-gray-500 mb-2">Tags:</div>
+                    [[range .Meta.tags]]
+                    <span class="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mr-2 mb-2">[[. | html]]</span>
+                    [[end]]
+                </div>
+                [[end]]
                 
                 <!-- Content -->
                 <div class="prose prose-lg max-w-none">
-                    {{.content}}
+                    [[if .Body]]
+                        [[.Body | markdown]]
+                    [[else]]
+                        <p class="text-gray-500 italic">No content available.</p>
+                    [[end]]
                 </div>
             </div>
         </main>
@@ -97,7 +132,15 @@ var EmbeddedTemplates = map[string]string{
 	"index.md": `---
 title: Welcome to {{.ProjectName}}
 description: A fast, no-nonsense static site built with Garp
-date: 2024-01-01
+date: 2024-01-01T00:00:00Z
+author: {{.ProjectName}} Team
+category: Documentation
+tags:
+  - welcome
+  - garp
+  - static-site
+  - documentation
+breadcrumbs: Home
 ---
 
 # Welcome to {{.ProjectName}}
@@ -124,6 +167,23 @@ Add new markdown files to the ` + "`site/docs/markdown/`" + ` directory:
 
 ` + "```bash" + `
 echo "# My First Post" > site/docs/markdown/first-post.md
+` + "```" + `
+
+Your markdown files can include YAML frontmatter for metadata:
+
+` + "```yaml" + `
+---
+title: My First Post
+description: This is my first blog post
+date: 2024-01-15T10:00:00Z
+author: John Doe
+category: Blog
+tags:
+  - introduction
+  - getting-started
+---
+
+# Content goes here
 ` + "```" + `
 
 ### 3. Customize Styling
@@ -306,12 +366,13 @@ localhost:8080 {
 			file_server
 		}
 		
-		# Handle markdown files with templates
+		# Handle markdown files with templates and frontmatter
 		@markdown path *.md
 		handle @markdown {
 			templates {
 				mime text/html
-				between "<!-- CONTENT START -->" "<!-- CONTENT END -->"
+				# Enable frontmatter parsing for YAML, TOML, and JSON
+				delimiters [[ ]]
 			}
 			
 			# Try to serve the markdown file
@@ -324,6 +385,8 @@ localhost:8080 {
 			try_files {path}/index.md {path}.md {path}/index.html
 			templates {
 				mime text/html
+				# Enable frontmatter parsing for directory index files
+				delimiters [[ ]]
 			}
 			file_server
 		}
@@ -367,9 +430,14 @@ localhost:8080 {
 			respond "Page not found - try visiting /docs/" 404
 		}
 		
+		@422 expression {http.error.status_code} == 422
+		handle @422 {
+			respond "Template parsing error - check your frontmatter syntax" 422
+		}
+		
 		@500 expression {http.error.status_code} >= 500
 		handle @500 {
-			respond "Internal server error" 500
+			respond "Internal server error - check server logs" 500
 		}
 	}
 }`,
@@ -610,8 +678,8 @@ end`,
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{.ProjectName}} Documentation</title>
-    <meta name="description" content="Welcome to {{.ProjectName}} - A fast, no-nonsense static site">
+    <title>[[.Meta.title | default "{{.ProjectName}} Documentation"]]</title>
+    <meta name="description" content="[[.Meta.description | default "Welcome to {{.ProjectName}} - A fast, no-nonsense static site"]]">
     
     <!-- Tailwind CSS -->
     <link href="/style.css" rel="stylesheet">
@@ -639,11 +707,23 @@ end`,
         <!-- Main Content -->
         <main class="flex-1">
             <div class="container mx-auto px-4 py-8">
+                <!-- Page Title -->
+                [[if .Meta.title]]
+                <h1 class="text-4xl font-bold mb-6 text-gray-900">[[.Meta.title]]</h1>
+                [[end]]
+                
+                <!-- Page Description -->
+                [[if .Meta.description]]
+                <p class="text-xl text-gray-600 mb-8">[[.Meta.description]]</p>
+                [[end]]
+                
                 <!-- Markdown Content -->
                 <div class="prose prose-lg max-w-none">
-                    <div style="white-space: pre-wrap; font-family: 'Georgia', serif; line-height: 1.6;">
-{{include "site/docs/markdown/index.md"}}
-                    </div>
+                    [[if .Body]]
+                        [[.Body | markdown]]
+                    [[else]]
+                        <p class="text-gray-500 italic">Welcome to {{.ProjectName}}. No content available.</p>
+                    [[end]]
                 </div>
             </div>
         </main>

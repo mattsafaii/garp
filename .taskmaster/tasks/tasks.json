@@ -169,7 +169,7 @@
         "dependencies": [
           3
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -177,7 +177,7 @@
             "description": "Implement robust YAML frontmatter parsing functionality that can extract metadata from markdown files while gracefully handling malformed or missing frontmatter",
             "dependencies": [],
             "details": "Create YAML parser that can identify and extract frontmatter delimited by '---' markers at the beginning of markdown files. Implement comprehensive error handling for malformed YAML syntax, invalid frontmatter structure, and encoding issues. Add validation for common metadata fields (title, description, date, author, tags) and support for custom fields. Include fallback mechanisms for files without frontmatter or with parsing errors.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -188,7 +188,7 @@
               "4.1"
             ],
             "details": "Process parsed YAML frontmatter data and convert it into template variables accessible in Caddy templates. Create variable mapping system that makes metadata available as {{.title}}, {{.description}}, {{.date}}, etc. Handle data type conversion (strings, dates, arrays, booleans) and provide default values for missing fields. Implement variable scoping and context management for template rendering.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -200,7 +200,7 @@
               "4.2"
             ],
             "details": "Configure Caddy template middleware to use extracted frontmatter variables in _template.html and other template files. Implement fallback handling that provides sensible defaults when frontmatter is missing, malformed, or incomplete. Add template helper functions for common operations (date formatting, tag processing, conditional rendering). Ensure seamless integration with existing Caddy template functionality and maintain backward compatibility.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           }
         ]
@@ -215,7 +215,7 @@
         "dependencies": [
           2
         ],
-        "status": "pending",
+        "status": "in-progress",
         "subtasks": [
           {
             "id": 1,
@@ -656,7 +656,7 @@
     ],
     "metadata": {
       "created": "2025-07-25T22:12:13.688Z",
-      "updated": "2025-07-26T10:01:26.198Z",
+      "updated": "2025-07-26T18:24:23.467Z",
       "description": "Tasks for master context"
     }
   }
