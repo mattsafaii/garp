@@ -83,6 +83,15 @@ func NewExternalError(message string, cause error) *AppError {
 	}
 }
 
+func NewDependencyError(message string, cause error) *AppError {
+	return &AppError{
+		Type:     ErrorTypeExternal,
+		Message:  message,
+		ExitCode: ExitUnavailable,
+		Cause:    cause,
+	}
+}
+
 // HandleError provides consistent error handling and exit
 func HandleError(err error) {
 	if err == nil {

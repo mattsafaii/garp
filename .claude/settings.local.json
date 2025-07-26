@@ -12,7 +12,10 @@
       "mcp__task-master-ai__get_tasks",
       "mcp__task-master-ai__next_task",
       "mcp__task-master-ai__set_task_status",
-      "mcp__task-master-ai__update_task"
+      "mcp__task-master-ai__update_task",
+      "mcp__task-master-ai__get_task",
+      "Bash(go test:*)",
+      "mcp__task-master-ai__update_subtask"
     ],
     "deny": []
   },
