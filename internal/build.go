@@ -117,7 +117,7 @@ func BuildCSS(options BuildOptions) (*BuildResult, error) {
 	return result, nil
 }
 
-// BuildSearch executes the search index build process (placeholder)
+// BuildSearch executes the search index build process using Pagefind
 func BuildSearch(options BuildOptions) (*BuildResult, error) {
 	result := &BuildResult{
 		SearchBuilt: true,
@@ -128,10 +128,70 @@ func BuildSearch(options BuildOptions) (*BuildResult, error) {
 		fmt.Println("🔍 Building search index...")
 	}
 
-	// TODO: Implement Pagefind search index building
-	// For now, just return success
+	// Validate Pagefind installation first
+	if err := ValidatePagefind(); err != nil {
+		result.Errors = append(result.Errors, err.Error())
+		result.Success = false
+		result.Duration = time.Since(start)
+		return result, err
+	}
+
+	// Check if build script exists
+	buildScript := "bin/build-search-index"
+	if _, err := os.Stat(buildScript); os.IsNotExist(err) {
+		errMsg := "Search index build script not found: bin/build-search-index"
+		result.Errors = append(result.Errors, errMsg)
+		result.Success = false
+		result.Duration = time.Since(start)
+		return result, NewFileSystemError(errMsg, err)
+	}
+
+	// Build command arguments
+	var args []string
 	if options.Verbose {
-		fmt.Println("⚠️  Search index building not yet implemented")
+		args = append(args, "--verbose")
+	}
+
+	// Execute build script
+	cmd := exec.Command(buildScript, args...)
+	cmd.Dir = "."
+	
+	// Execute the command
+	var err error
+	if options.Verbose {
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		err = cmd.Run()
+	} else {
+		// Capture output for non-verbose mode
+		output, cmdErr := cmd.CombinedOutput()
+		err = cmdErr
+		if err != nil && len(output) > 0 {
+			// Include output in error message for debugging
+			err = fmt.Errorf("%v\nOutput: %s", err, string(output))
+		}
+	}
+
+	if err != nil {
+		errMsg := fmt.Sprintf("Search index build failed: %v", err)
+		result.Errors = append(result.Errors, errMsg)
+		result.Success = false
+		result.Duration = time.Since(start)
+		return result, NewExternalError(errMsg, err)
+	}
+
+	// Check if output directory was created
+	outputDir := "site/_pagefind"
+	if _, err := os.Stat(outputDir); os.IsNotExist(err) {
+		errMsg := "Search index build completed but output directory not found: " + outputDir
+		result.Errors = append(result.Errors, errMsg)
+		result.Success = false
+		result.Duration = time.Since(start)
+		return result, NewFileSystemError(errMsg, err)
+	}
+
+	if options.Verbose {
+		fmt.Println("✅ Search index build completed successfully")
 	}
 
 	result.Success = true
