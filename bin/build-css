@@ -1,0 +1,179 @@
+#!/usr/bin/env bash
+
+# Build CSS script for Garp
+# Compiles input.css to site/style.css using Tailwind CLI
+
+set -euo pipefail
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# Print colored output
+print_info() {
+    echo -e "${BLUE}ℹ${NC} $1"
+}
+
+print_success() {
+    echo -e "${GREEN}✓${NC} $1"
+}
+
+print_warning() {
+    echo -e "${YELLOW}⚠${NC} $1"
+}
+
+print_error() {
+    echo -e "${RED}✗${NC} $1"
+}
+
+# Check if Tailwind CLI is available
+check_tailwind_cli() {
+    local tailwind_cmd=""
+    
+    # Try different possible commands
+    if command -v tailwindcss >/dev/null 2>&1; then
+        tailwind_cmd="tailwindcss"
+    elif command -v tailwind >/dev/null 2>&1; then
+        tailwind_cmd="tailwind"
+    elif command -v npx >/dev/null 2>&1; then
+        if npx tailwindcss --version >/dev/null 2>&1; then
+            tailwind_cmd="npx tailwindcss"
+        fi
+    fi
+    
+    if [[ -z "$tailwind_cmd" ]]; then
+        print_error "Tailwind CSS CLI not found!"
+        print_info "Please install Tailwind CSS CLI:"
+        echo ""
+        echo "  npm install -g tailwindcss"
+        echo "  # or"
+        echo "  yarn global add tailwindcss"
+        echo "  # or download standalone binary from:"
+        echo "  # https://github.com/tailwindlabs/tailwindcss/releases"
+        echo ""
+        exit 1
+    fi
+    
+    echo "$tailwind_cmd"
+}
+
+# Validate input and output paths
+validate_paths() {
+    if [[ ! -f "input.css" ]]; then
+        print_error "input.css not found in current directory"
+        print_info "Please create input.css with Tailwind directives"
+        exit 1
+    fi
+    
+    if [[ ! -d "site" ]]; then
+        print_error "site/ directory not found"
+        print_info "Please run 'garp init' to set up project structure"
+        exit 1
+    fi
+    
+    # Create site directory if it doesn't exist
+    mkdir -p site
+}
+
+# Main build function
+build_css() {
+    local tailwind_cmd="$1"
+    local input_file="input.css"
+    local output_file="site/style.css"
+    local watch_mode=false
+    
+    # Check for watch flag
+    if [[ "${1:-}" == "--watch" ]] || [[ "${2:-}" == "--watch" ]]; then
+        watch_mode=true
+    fi
+    
+    print_info "Building CSS with Tailwind..."
+    print_info "Input: $input_file"
+    print_info "Output: $output_file"
+    
+    # Build the Tailwind command
+    local cmd_args=("$tailwind_cmd" "-i" "$input_file" "-o" "$output_file")
+    
+    # Add config file if it exists
+    if [[ -f "tailwind.config.js" ]]; then
+        cmd_args+=("--config" "tailwind.config.js")
+    else
+        # Add content scanning paths directly if no config file
+        cmd_args+=("--content" "./site/**/*.{html,js,md}")
+    fi
+    
+    # Add watch flag if requested
+    if [[ "$watch_mode" == true ]]; then
+        cmd_args+=("--watch")
+        print_info "Watching for changes... (Press Ctrl+C to stop)"
+    fi
+    
+    # Execute the command
+    if "${cmd_args[@]}"; then
+        if [[ "$watch_mode" == false ]]; then
+            print_success "CSS built successfully: $output_file"
+            
+            # Show file size if possible
+            if command -v du >/dev/null 2>&1; then
+                local size
+                size=$(du -h "$output_file" 2>/dev/null | cut -f1 || echo "unknown")
+                print_info "Output size: $size"
+            fi
+        fi
+    else
+        print_error "Failed to build CSS"
+        exit 1
+    fi
+}
+
+# Show usage information
+show_usage() {
+    echo "Usage: $0 [--watch]"
+    echo ""
+    echo "Build CSS from input.css to site/style.css using Tailwind CLI"
+    echo ""
+    echo "Options:"
+    echo "  --watch    Watch for changes and rebuild automatically"
+    echo "  --help     Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  $0                 # Build CSS once"
+    echo "  $0 --watch        # Build and watch for changes"
+}
+
+# Parse command line arguments
+case "${1:-}" in
+    --help|-h)
+        show_usage
+        exit 0
+        ;;
+    --watch)
+        # Watch mode will be handled in build_css function
+        ;;
+    "")
+        # No arguments, proceed with normal build
+        ;;
+    *)
+        print_error "Unknown option: $1"
+        show_usage
+        exit 1
+        ;;
+esac
+
+# Main execution
+main() {
+    print_info "Garp CSS Build Script"
+    
+    # Validate environment
+    local tailwind_cmd
+    tailwind_cmd=$(check_tailwind_cli)
+    validate_paths
+    
+    # Build CSS
+    build_css "$tailwind_cmd" "${1:-}"
+}
+
+main "$@"
