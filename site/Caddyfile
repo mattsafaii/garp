@@ -1,0 +1,13 @@
+# Caddyfile for Garp development server
+localhost:8080
+
+root * site
+file_server
+
+# Handle markdown files
+@markdown {
+    path *.md
+}
+rewrite @markdown /docs/markdown{path}.md
+
+templates
