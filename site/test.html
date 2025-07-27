@@ -5,10 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Test Page</title>
     <link href="style.css" rel="stylesheet">
+    <link href="search-styles.css" rel="stylesheet">
 </head>
 <body class="bg-gray-50 min-h-screen">
     <div class="container-garp py-8">
         <h1 class="text-4xl font-bold text-gray-900 mb-6">Test Page</h1>
+        <div class="card mb-6">
+            <h2 class="text-2xl font-semibold mb-4">Search</h2>
+            <div id="search"></div>
+        </div>
+
         <div class="card">
             <h2 class="text-2xl font-semibold mb-4">Welcome to Garp</h2>
             <p class="text-gray-600 mb-4">This is a test page to verify that Tailwind CSS is working correctly.</p>
@@ -16,5 +22,20 @@
             <button class="btn btn-secondary">Secondary Button</button>
         </div>
     </div>
+
+    <!-- Pagefind Search -->
+    <link href="/_pagefind/pagefind-ui.css" rel="stylesheet">
+    <script src="/_pagefind/pagefind-ui.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            new PagefindUI({ 
+                element: "#search",
+                showSubResults: true,
+                showImages: false,
+                excerptLength: 30,
+                resetStyles: false
+            });
+        });
+    </script>
 </body>
 </html>

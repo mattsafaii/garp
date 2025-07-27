@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Garp Documentation</title>
     <link href="/style.css" rel="stylesheet">
+    <link href="/search-styles.css" rel="stylesheet">
 </head>
 <body class="bg-gray-50 min-h-screen">
     <div class="container-garp py-8">
@@ -70,6 +71,11 @@
                 </ul>
             </section>
 
+            <section class="mb-8">
+                <h2 class="text-3xl font-semibold mb-4">Search Documentation</h2>
+                <div id="search"></div>
+            </section>
+
             <section>
                 <h2 class="text-3xl font-semibold mb-4">Quick Start</h2>
                 <div class="bg-gray-900 text-gray-100 p-4 rounded-lg">
@@ -86,5 +92,20 @@ garp build</code></pre>
             </section>
         </main>
     </div>
+
+    <!-- Pagefind Search -->
+    <link href="/_pagefind/pagefind-ui.css" rel="stylesheet">
+    <script src="/_pagefind/pagefind-ui.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            new PagefindUI({ 
+                element: "#search",
+                showSubResults: true,
+                showImages: false,
+                excerptLength: 30,
+                resetStyles: false
+            });
+        });
+    </script>
 </body>
 </html>
