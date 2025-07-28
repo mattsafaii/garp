@@ -69,6 +69,229 @@ end
 # Custom exception for Resend API errors
 class ResendError < StandardError; end
 
+# Form validation and security utilities
+class FormValidator
+  # Email validation regex
+  EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i.freeze
+  
+  # Field length limits
+  MAX_NAME_LENGTH = 100
+  MAX_EMAIL_LENGTH = 255
+  MAX_MESSAGE_LENGTH = 5000
+  MAX_SUBJECT_LENGTH = 200
+  
+  # Required fields
+  REQUIRED_FIELDS = %w[name email message].freeze
+  
+  def self.validate_submission(data)
+    errors = []
+    warnings = []
+    
+    # Check for required fields
+    REQUIRED_FIELDS.each do |field|
+      if data[field].nil? || data[field].to_s.strip.empty?
+        errors << "#{field.capitalize} is required"
+      end
+    end
+    
+    # Validate email format if provided
+    if data['email'] && !data['email'].to_s.strip.empty?
+      unless valid_email?(data['email'])
+        errors << "Email format is invalid"
+      end
+    end
+    
+    # Validate field lengths
+    validate_length(data['name'], 'Name', MAX_NAME_LENGTH, errors)
+    validate_length(data['email'], 'Email', MAX_EMAIL_LENGTH, errors)
+    validate_length(data['message'], 'Message', MAX_MESSAGE_LENGTH, errors)
+    validate_length(data['subject'], 'Subject', MAX_SUBJECT_LENGTH, errors) if data['subject']
+    
+    # Check for suspicious content
+    check_suspicious_content(data, warnings)
+    
+    {
+      valid: errors.empty?,
+      errors: errors,
+      warnings: warnings
+    }
+  end
+  
+  def self.sanitize_input(input)
+    return nil if input.nil?
+    
+    # Convert to string and strip whitespace
+    sanitized = input.to_s.strip
+    
+    # Remove null bytes and control characters (except newlines and tabs)
+    sanitized = sanitized.gsub(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/, '')
+    
+    # Normalize Unicode
+    sanitized = sanitized.unicode_normalize(:nfc) if sanitized.respond_to?(:unicode_normalize)
+    
+    sanitized
+  end
+  
+  def self.check_honeypot(data)
+    # Check common honeypot field names
+    honeypot_fields = %w[website url homepage hp_field bot_field spam_check]
+    
+    honeypot_fields.each do |field|
+      if data[field] && !data[field].to_s.strip.empty?
+        return { trapped: true, field: field }
+      end
+    end
+    
+    { trapped: false }
+  end
+  
+  private
+  
+  def self.valid_email?(email)
+    email = sanitize_input(email)
+    return false if email.nil? || email.empty?
+    
+    # Basic format check
+    return false unless email.match?(EMAIL_REGEX)
+    
+    # Additional checks
+    return false if email.include?('..')  # Consecutive dots
+    return false if email.start_with?('.') || email.end_with?('.')
+    return false if email.count('@') != 1
+    
+    true
+  end
+  
+  def self.validate_length(value, field_name, max_length, errors)
+    return unless value
+    
+    sanitized = sanitize_input(value)
+    if sanitized && sanitized.length > max_length
+      errors << "#{field_name} is too long (maximum #{max_length} characters)"
+    end
+  end
+  
+  def self.check_suspicious_content(data, warnings)
+    # Check for excessive links
+    message = data['message'].to_s
+    link_count = message.scan(/https?:\/\//).length
+    if link_count > 3
+      warnings << "Message contains many links (#{link_count})"
+    end
+    
+    # Check for excessive capitalization
+    if message.length > 50 && (message.upcase == message)
+      warnings << "Message is mostly uppercase"
+    end
+    
+    # Check for common spam phrases
+    spam_phrases = [
+      'click here', 'limited time', 'act now', 'free money',
+      'make money fast', 'get rich quick', 'viagra', 'casino'
+    ]
+    
+    spam_phrases.each do |phrase|
+      if message.downcase.include?(phrase)
+        warnings << "Message contains potentially suspicious content"
+        break
+      end
+    end
+  end
+end
+
+# Rate limiting utility
+class RateLimiter
+  @@submissions = {}
+  @@cleanup_last_run = Time.now
+  
+  # Rate limits: max submissions per time window
+  LIMITS = {
+    per_minute: 5,
+    per_hour: 20,
+    per_day: 100
+  }.freeze
+  
+  def self.check_rate_limit(ip_address)
+    cleanup_old_entries if should_cleanup?
+    
+    current_time = Time.now
+    @@submissions[ip_address] ||= []
+    
+    # Remove old submissions outside our windows
+    @@submissions[ip_address].reject! do |timestamp|
+      current_time - timestamp > 24 * 60 * 60 # Keep only last 24 hours
+    end
+    
+    # Check each limit
+    violations = []
+    
+    # Per minute check
+    minute_ago = current_time - 60
+    recent_minute = @@submissions[ip_address].count { |t| t > minute_ago }
+    if recent_minute >= LIMITS[:per_minute]
+      violations << { window: 'minute', count: recent_minute, limit: LIMITS[:per_minute] }
+    end
+    
+    # Per hour check
+    hour_ago = current_time - (60 * 60)
+    recent_hour = @@submissions[ip_address].count { |t| t > hour_ago }
+    if recent_hour >= LIMITS[:per_hour]
+      violations << { window: 'hour', count: recent_hour, limit: LIMITS[:per_hour] }
+    end
+    
+    # Per day check
+    day_ago = current_time - (24 * 60 * 60)
+    recent_day = @@submissions[ip_address].count { |t| t > day_ago }
+    if recent_day >= LIMITS[:per_day]
+      violations << { window: 'day', count: recent_day, limit: LIMITS[:per_day] }
+    end
+    
+    {
+      allowed: violations.empty?,
+      violations: violations,
+      current_counts: {
+        minute: recent_minute,
+        hour: recent_hour,
+        day: recent_day
+      }
+    }
+  end
+  
+  def self.record_submission(ip_address)
+    @@submissions[ip_address] ||= []
+    @@submissions[ip_address] << Time.now
+  end
+  
+  def self.get_stats
+    cleanup_old_entries
+    {
+      total_ips: @@submissions.keys.length,
+      total_submissions: @@submissions.values.flatten.length,
+      last_cleanup: @@cleanup_last_run
+    }
+  end
+  
+  private
+  
+  def self.should_cleanup?
+    Time.now - @@cleanup_last_run > (15 * 60) # Every 15 minutes
+  end
+  
+  def self.cleanup_old_entries
+    current_time = Time.now
+    cutoff_time = current_time - (24 * 60 * 60) # 24 hours ago
+    
+    @@submissions.each do |ip, timestamps|
+      timestamps.reject! { |t| t < cutoff_time }
+    end
+    
+    # Remove IPs with no recent submissions
+    @@submissions.reject! { |ip, timestamps| timestamps.empty? }
+    
+    @@cleanup_last_run = current_time
+  end
+end
+
 # Email template builder
 class EmailTemplate
   def self.build_contact_form_email(form_data, submission_id)
@@ -170,6 +393,7 @@ class GarpFormServer < Sinatra::Base
     set :bind, ENV['GARP_FORM_HOST'] || '0.0.0.0'
     set :environment, ENV['GARP_ENV'] || 'development'
     set :logging, true
+    set :started_at, Time.now
     
     # Enable CORS for all routes
     use Rack::Protection, except: :json_csrf
@@ -220,9 +444,43 @@ class GarpFormServer < Sinatra::Base
       service: 'Garp Form Server',
       version: '1.0.0',
       timestamp: Time.now.iso8601,
+      email_enabled: settings.email_enabled?,
       endpoints: {
         submit: '/submit',
-        health: '/'
+        health: '/',
+        stats: '/stats'
+      },
+      validation: {
+        required_fields: FormValidator::REQUIRED_FIELDS,
+        max_lengths: {
+          name: FormValidator::MAX_NAME_LENGTH,
+          email: FormValidator::MAX_EMAIL_LENGTH,
+          message: FormValidator::MAX_MESSAGE_LENGTH,
+          subject: FormValidator::MAX_SUBJECT_LENGTH
+        }
+      },
+      rate_limits: RateLimiter::LIMITS
+    }.to_json
+  end
+
+  # Statistics endpoint for monitoring
+  get '/stats' do
+    content_type :json
+    
+    rate_stats = RateLimiter.get_stats
+    
+    {
+      status: 'ok',
+      timestamp: Time.now.iso8601,
+      rate_limiting: rate_stats,
+      validation: {
+        required_fields: FormValidator::REQUIRED_FIELDS.length,
+        honeypot_fields: %w[website url homepage hp_field bot_field spam_check].length
+      },
+      server: {
+        email_enabled: settings.email_enabled?,
+        environment: settings.environment.to_s,
+        uptime: (Time.now - settings.started_at rescue 'unknown')
       }
     }.to_json
   end
@@ -234,7 +492,98 @@ class GarpFormServer < Sinatra::Base
     begin
       # Parse request body
       request_body = request.body.read
-      data = request_body.empty? ? {} : JSON.parse(request_body)
+      raw_data = request_body.empty? ? {} : JSON.parse(request_body)
+      
+      # Sanitize all input data
+      data = {}
+      raw_data.each do |key, value|
+        data[key.to_s] = FormValidator.sanitize_input(value)
+      end
+      
+      # Check rate limiting first
+      client_ip = request.ip
+      rate_check = RateLimiter.check_rate_limit(client_ip)
+      
+      unless rate_check[:allowed]
+        violation = rate_check[:violations].first
+        error_response = {
+          status: 'error',
+          message: 'Rate limit exceeded',
+          error: "Too many submissions per #{violation[:window]}",
+          details: {
+            limit: violation[:limit],
+            current_count: violation[:count],
+            window: violation[:window]
+          },
+          retry_after: case violation[:window]
+                      when 'minute' then 60
+                      when 'hour' then 3600
+                      when 'day' then 86400
+                      else 60
+                      end,
+          timestamp: Time.now.iso8601
+        }
+        
+        settings.form_logger.warn({
+          timestamp: Time.now.iso8601,
+          ip: client_ip,
+          status: 'rate_limited',
+          violation: violation,
+          user_agent: request.env['HTTP_USER_AGENT']
+        }.to_json)
+        
+        status 429
+        return error_response.to_json
+      end
+      
+      # Check honeypot fields for spam protection
+      honeypot_check = FormValidator.check_honeypot(data)
+      if honeypot_check[:trapped]
+        # Log spam attempt but don't reveal the honeypot
+        settings.form_logger.warn({
+          timestamp: Time.now.iso8601,
+          ip: client_ip,
+          status: 'spam_detected',
+          honeypot_field: honeypot_check[:field],
+          user_agent: request.env['HTTP_USER_AGENT']
+        }.to_json)
+        
+        # Return success to avoid revealing spam detection
+        status 200
+        return {
+          status: 'success',
+          message: 'Form submission received',
+          timestamp: Time.now.iso8601,
+          id: generate_submission_id,
+          email_sent: false
+        }.to_json
+      end
+      
+      # Validate form data
+      validation_result = FormValidator.validate_submission(data)
+      unless validation_result[:valid]
+        error_response = {
+          status: 'error',
+          message: 'Validation failed',
+          errors: validation_result[:errors],
+          timestamp: Time.now.iso8601
+        }
+        
+        settings.form_logger.info({
+          timestamp: Time.now.iso8601,
+          ip: client_ip,
+          status: 'validation_failed',
+          errors: validation_result[:errors],
+          warnings: validation_result[:warnings],
+          user_agent: request.env['HTTP_USER_AGENT']
+        }.to_json)
+        
+        status 422
+        return error_response.to_json
+      end
+      
+      # Record successful submission for rate limiting
+      RateLimiter.record_submission(client_ip)
       
       # Generate submission ID
       submission_id = generate_submission_id

@@ -23,6 +23,7 @@ Examples:
   garp init my-site      Create a new project called 'my-site'
   garp serve             Start development server on localhost:8080
   garp build             Build CSS and search index
+  garp form-server       Start contact form server on port 4567
   garp deploy            Deploy to configured target`,
 	Version: version,
 	SuggestionsMinimumDistance: 2,
