@@ -1,0 +1,3 @@
+# Logfile created on 2025-07-27 21:22:27 -0700 by logger.rb/v1.7.0
+I, [2025-07-27T22:20:44.980548 #5692]  INFO -- : {"timestamp":"2025-07-27T22:20:44-07:00","ip":"127.0.0.1","user_agent":"curl/8.7.1","method":"POST","path":"/submit","params":{"name":"Test User","email":"test@example.com","message":"Hello from Garp!"},"status":"received"}
+I, [2025-07-27T22:20:44.980858 #5692]  INFO -- : {"timestamp":"2025-07-27T22:20:44-07:00","submission_id":"sub_1753680044_6654","status":"processed","message":"Form submission processed successfully"}
