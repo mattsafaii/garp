@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building a Modern Static Site Generator - Garp Blog</title>
+    <link href="/style.css" rel="stylesheet">
+    <link href="/search-styles.css" rel="stylesheet">
+    <meta name="description" content="Learn about the design decisions and technical implementation behind Garp, a modern static site generator built with Go.">
+    <meta name="author" content="Garp Team">
+    <meta name="keywords" content="static site generator, go, jamstack, performance, markdown">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container-garp py-8">
+        <nav class="mb-8">
+            <a href="/" class="text-blue-500 hover:text-blue-600">← Back to Home</a>
+        </nav>
+
+        <article class="max-w-4xl mx-auto">
+            <header class="mb-8">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">Building a Modern Static Site Generator</h1>
+                <div class="flex items-center text-gray-600 mb-4">
+                    <span>By Garp Team</span>
+                    <span class="mx-2">•</span>
+                    <span>January 15, 2024</span>
+                    <span class="mx-2">•</span>
+                    <span>8 min read</span>
+                </div>
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">static-site-generator</span>
+                    <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm">go</span>
+                    <span class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm">jamstack</span>
+                    <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">performance</span>
+                </div>
+                <p class="text-lg text-gray-600 leading-relaxed">
+                    Learn about the design decisions and technical implementation behind Garp, 
+                    a modern static site generator built with Go that prioritizes simplicity, 
+                    performance, and developer experience.
+                </p>
+            </header>
+
+            <div class="card mb-6">
+                <h2 class="text-2xl font-semibold mb-4">Search This Blog</h2>
+                <div id="search"></div>
+            </div>
+
+            <div class="markdown-content">
+                <section class="mb-8">
+                    <h2 class="text-3xl font-semibold mb-4">Why Another Static Site Generator?</h2>
+                    <p class="text-gray-600 mb-4">
+                        The static site generator landscape is crowded with excellent tools like Jekyll, Hugo, Gatsby, and Next.js. 
+                        So why build another one? The answer lies in our specific requirements and philosophy:
+                    </p>
+                    
+                    <ul class="space-y-2 mb-6">
+                        <li class="flex items-start">
+                            <span class="text-green-600 mr-2 mt-1">✓</span>
+                            <span><strong>Zero Configuration:</strong> Works out of the box with sensible defaults</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-600 mr-2 mt-1">✓</span>
+                            <span><strong>Single Binary:</strong> No runtime dependencies or complex installation</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-600 mr-2 mt-1">✓</span>
+                            <span><strong>Built-in Search:</strong> Full-text search without external services</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-600 mr-2 mt-1">✓</span>
+                            <span><strong>Modern CSS:</strong> Tailwind CSS integration with automatic optimization</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-600 mr-2 mt-1">✓</span>
+                            <span><strong>Fast Builds:</strong> Parallel processing and efficient file handling</span>
+                        </li>
+                    </ul>
+
+                    <p class="text-gray-600">
+                        We wanted a tool that could generate a complete, production-ready website from Markdown files 
+                        with absolutely no configuration required, while still being extensible for advanced use cases.
+                    </p>
+                </section>
+
+                <section class="mb-8">
+                    <h2 class="text-3xl font-semibold mb-4">Technical Architecture</h2>
+                    <p class="text-gray-600 mb-4">
+                        Garp is built with Go and leverages several key technologies to achieve its goals:
+                    </p>
+
+                    <h3 class="text-xl font-semibold mb-3">Core Components</h3>
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <div class="card">
+                            <h4 class="text-lg font-semibold mb-2">Markdown Processing</h4>
+                            <p class="text-gray-600 text-sm">
+                                Uses goldmark for CommonMark-compliant Markdown parsing with extensions 
+                                for syntax highlighting, tables, and task lists.
+                            </p>
+                        </div>
+                        
+                        <div class="card">
+                            <h4 class="text-lg font-semibold mb-2">Template Engine</h4>
+                            <p class="text-gray-600 text-sm">
+                                Go's built-in html/template package provides secure, fast template rendering 
+                                with automatic XSS protection.
+                            </p>
+                        </div>
+                        
+                        <div class="card">
+                            <h4 class="text-lg font-semibold mb-2">CSS Processing</h4>
+                            <p class="text-gray-600 text-sm">
+                                Tailwind CSS v4+ integration with automatic purging and optimization 
+                                for minimal output file sizes.
+                            </p>
+                        </div>
+                        
+                        <div class="card">
+                            <h4 class="text-lg font-semibold mb-2">Search Integration</h4>
+                            <p class="text-gray-600 text-sm">
+                                Pagefind provides client-side full-text search with fuzzy matching 
+                                and zero server requirements.
+                            </p>
+                        </div>
+                    </div>
+
+                    <h3 class="text-xl font-semibold mb-3">Build Pipeline</h3>
+                    <div class="bg-gray-900 text-gray-100 p-4 rounded-lg mb-4">
+                        <pre><code>1. Parse frontmatter and content from Markdown files
+2. Process templates with parsed data
+3. Generate HTML files with proper linking
+4. Compile Tailwind CSS with used classes only
+5. Build search index from generated content
+6. Optimize and minify assets
+7. Generate sitemap and RSS feeds</code></pre>
+                    </div>
+                </section>
+
+                <section class="mb-8">
+                    <h2 class="text-3xl font-semibold mb-4">Performance Optimizations</h2>
+                    <p class="text-gray-600 mb-4">
+                        Performance was a key consideration throughout development. Here are some of the optimizations we implemented:
+                    </p>
+
+                    <h3 class="text-xl font-semibold mb-3">Build Performance</h3>
+                    <ul class="space-y-2 mb-4">
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2 mt-1">→</span>
+                            <span><strong>Parallel Processing:</strong> Content processing and asset compilation happen concurrently</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2 mt-1">→</span>
+                            <span><strong>Incremental Builds:</strong> Only modified files are reprocessed during development</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2 mt-1">→</span>
+                            <span><strong>Template Caching:</strong> Parsed templates are cached in memory for reuse</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2 mt-1">→</span>
+                            <span><strong>File Watching:</strong> Efficient file system monitoring with debouncing</span>
+                        </li>
+                    </ul>
+
+                    <h3 class="text-xl font-semibold mb-3">Runtime Performance</h3>
+                    <ul class="space-y-2 mb-4">
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2 mt-1">→</span>
+                            <span><strong>CSS Purging:</strong> Unused Tailwind classes are automatically removed</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2 mt-1">→</span>
+                            <span><strong>Asset Optimization:</strong> Images and other assets are optimized for web delivery</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2 mt-1">→</span>
+                            <span><strong>Client-Side Search:</strong> No server requests needed for search functionality</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-500 mr-2 mt-1">→</span>
+                            <span><strong>Minimal JavaScript:</strong> Only essential JS is included in the output</span>
+                        </li>
+                    </ul>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 class="text-lg font-semibold text-blue-900 mb-2">Benchmark Results</h4>
+                        <p class="text-blue-800 text-sm">
+                            On a typical blog with 100 posts, Garp can complete a full build in under 500ms, 
+                            including CSS compilation and search index generation. Incremental builds during 
+                            development typically complete in under 50ms.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="mb-8">
+                    <h2 class="text-3xl font-semibold mb-4">Developer Experience</h2>
+                    <p class="text-gray-600 mb-4">
+                        Beyond performance, we focused heavily on creating an excellent developer experience:
+                    </p>
+
+                    <div class="grid md:grid-cols-3 gap-6 mb-6">
+                        <div class="card">
+                            <h4 class="text-lg font-semibold mb-2">🚀 Quick Start</h4>
+                            <p class="text-gray-600 text-sm">
+                                Get a fully functional site with one command: <code class="bg-gray-200 px-1 rounded">garp init</code>
+                            </p>
+                        </div>
+                        
+                        <div class="card">
+                            <h4 class="text-lg font-semibold mb-2">🔄 Live Reloading</h4>
+                            <p class="text-gray-600 text-sm">
+                                Changes to content, templates, or styles are reflected instantly in the browser
+                            </p>
+                        </div>
+                        
+                        <div class="card">
+                            <h4 class="text-lg font-semibold mb-2">📝 Rich Markdown</h4>
+                            <p class="text-gray-600 text-sm">
+                                Support for tables, task lists, syntax highlighting, and custom extensions
+                            </p>
+                        </div>
+                    </div>
+
+                    <h3 class="text-xl font-semibold mb-3">Error Handling</h3>
+                    <p class="text-gray-600 mb-4">
+                        Clear, actionable error messages help developers quickly identify and fix issues:
+                    </p>
+                    
+                    <div class="bg-gray-900 text-gray-100 p-4 rounded-lg">
+                        <pre><code>❌ Build failed: Template error in post.html:23
+   
+   → Missing variable: {{ .InvalidField }}
+   
+   Available fields:
+   - .Title
+   - .Content  
+   - .Date
+   - .Author
+   
+   💡 Tip: Check your frontmatter for typos</code></pre>
+                    </div>
+                </section>
+
+                <section class="mb-8">
+                    <h2 class="text-3xl font-semibold mb-4">Future Roadmap</h2>
+                    <p class="text-gray-600 mb-4">
+                        While Garp is already capable of producing production-ready sites, we have exciting plans for the future:
+                    </p>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-xl font-semibold mb-3">Short Term (Q1 2024)</h3>
+                            <ul class="space-y-2">
+                                <li class="flex items-start">
+                                    <span class="text-yellow-500 mr-2 mt-1">⏳</span>
+                                    <span>Plugin system for custom processors</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-yellow-500 mr-2 mt-1">⏳</span>
+                                    <span>Image optimization and responsive images</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-yellow-500 mr-2 mt-1">⏳</span>
+                                    <span>Multi-language site support</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-yellow-500 mr-2 mt-1">⏳</span>
+                                    <span>RSS and Atom feed generation</span>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-xl font-semibold mb-3">Long Term (2024)</h3>
+                            <ul class="space-y-2">
+                                <li class="flex items-start">
+                                    <span class="text-blue-500 mr-2 mt-1">🔮</span>
+                                    <span>Headless CMS integrations</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-blue-500 mr-2 mt-1">🔮</span>
+                                    <span>Edge deployment optimization</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-blue-500 mr-2 mt-1">🔮</span>
+                                    <span>Advanced analytics integration</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <span class="text-blue-500 mr-2 mt-1">🔮</span>
+                                    <span>GraphQL API for content</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <h2 class="text-3xl font-semibold mb-4">Getting Started</h2>
+                    <p class="text-gray-600 mb-4">
+                        Ready to try Garp for your next project? Getting started is simple:
+                    </p>
+                    
+                    <div class="bg-gray-900 text-gray-100 p-4 rounded-lg mb-4">
+                        <pre><code># Install Garp
+curl -L https://github.com/example/garp/releases/latest/download/garp-$(uname -s)-$(uname -m) -o garp
+chmod +x garp && sudo mv garp /usr/local/bin/
+
+# Create a new site
+garp init my-blog
+cd my-blog
+
+# Start developing
+garp serve</code></pre>
+                    </div>
+
+                    <p class="text-gray-600 mb-4">
+                        That's it! You'll have a fully functional static site with search, optimized CSS, 
+                        and a development server with live reloading.
+                    </p>
+
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <h4 class="text-lg font-semibold text-green-900 mb-2">Contributing</h4>
+                        <p class="text-green-800 text-sm">
+                            Garp is open source and we welcome contributions! Check out our 
+                            <a href="https://github.com/example/garp" class="text-green-600 hover:text-green-700 underline">GitHub repository</a> 
+                            to get involved or report issues.
+                        </p>
+                    </div>
+                </section>
+            </div>
+        </article>
+    </div>
+
+    <!-- Pagefind Search -->
+    <link href="/_pagefind/pagefind-ui.css" rel="stylesheet">
+    <script src="/_pagefind/pagefind-ui.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            new PagefindUI({ 
+                element: "#search",
+                showSubResults: true,
+                showImages: false,
+                excerptLength: 40,
+                resetStyles: false,
+                ranking: {
+                    termSimilarity: 1.0,
+                    pageLength: 0.5,
+                    termSaturation: 0.8,
+                    termFrequency: 1.2
+                }
+            });
+        });
+    </script>
+</body>
+</html>

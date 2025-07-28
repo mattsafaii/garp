@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CLI Reference - Garp Documentation</title>
+    <link href="/style.css" rel="stylesheet">
+    <link href="/search-styles.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container-garp py-8">
+        <nav class="mb-8">
+            <a href="/docs/" class="text-blue-500 hover:text-blue-600">← Back to Documentation</a>
+        </nav>
+
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">CLI Reference</h1>
+            <p class="text-lg text-gray-600">Complete reference for all Garp CLI commands and options.</p>
+        </header>
+
+        <div class="card mb-6">
+            <h2 class="text-2xl font-semibold mb-4">Search Commands</h2>
+            <div id="search"></div>
+        </div>
+
+        <main class="markdown-content">
+            <section class="mb-8">
+                <h2 class="text-3xl font-semibold mb-4">garp init</h2>
+                <p class="text-gray-600 mb-4">Initialize a new Garp project with scaffolding and configuration files.</p>
+                
+                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg mb-4">
+                    <pre><code>garp init [project-name] [flags]</code></pre>
+                </div>
+
+                <h3 class="text-xl font-semibold mb-3">Arguments</h3>
+                <ul class="mb-4 space-y-2">
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">project-name</code> - Name of the project directory to create</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold mb-3">Flags</h3>
+                <ul class="mb-4 space-y-2">
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">--force</code> - Overwrite existing directory if it exists</li>
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">--template</code> - Specify a template to use (default: basic)</li>
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">--no-git</code> - Skip Git repository initialization</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold mb-3">Examples</h3>
+                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg">
+                    <pre><code># Create a new project
+garp init my-blog
+
+# Force overwrite existing directory
+garp init my-blog --force
+
+# Use a specific template
+garp init my-blog --template=portfolio</code></pre>
+                </div>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-3xl font-semibold mb-4">garp serve</h2>
+                <p class="text-gray-600 mb-4">Start the development server with live reloading and automatic building.</p>
+                
+                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg mb-4">
+                    <pre><code>garp serve [flags]</code></pre>
+                </div>
+
+                <h3 class="text-xl font-semibold mb-3">Flags</h3>
+                <ul class="mb-4 space-y-2">
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">--port, -p</code> - Port to serve on (default: 3000)</li>
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">--host</code> - Host to bind to (default: localhost)</li>
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">--open, -o</code> - Open browser automatically</li>
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">--verbose, -v</code> - Enable verbose logging</li>
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">--no-reload</code> - Disable live reloading</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold mb-3">Examples</h3>
+                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg">
+                    <pre><code># Start server on default port
+garp serve
+
+# Start server on custom port
+garp serve --port 8080
+
+# Start server and open browser
+garp serve --open
+
+# Start with verbose logging
+garp serve --verbose</code></pre>
+                </div>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-3xl font-semibold mb-4">garp build</h2>
+                <p class="text-gray-600 mb-4">Build the site for production, generating optimized static files.</p>
+                
+                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg mb-4">
+                    <pre><code>garp build [flags]</code></pre>
+                </div>
+
+                <h3 class="text-xl font-semibold mb-3">Flags</h3>
+                <ul class="mb-4 space-y-2">
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">--css-only</code> - Build only CSS assets</li>
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">--search-only</code> - Build only search index</li>
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">--watch, -w</code> - Watch for changes and rebuild</li>
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">--verbose, -v</code> - Enable verbose output</li>
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">--clean</code> - Clean build artifacts before building</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold mb-3">Examples</h3>
+                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg">
+                    <pre><code># Build everything
+garp build
+
+# Build with verbose output
+garp build --verbose
+
+# Build only CSS
+garp build --css-only
+
+# Build and watch for changes
+garp build --watch
+
+# Clean and build
+garp build --clean</code></pre>
+                </div>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-3xl font-semibold mb-4">garp deploy</h2>
+                <p class="text-gray-600 mb-4">Deploy your site to various hosting platforms.</p>
+                
+                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg mb-4">
+                    <pre><code>garp deploy [platform] [flags]</code></pre>
+                </div>
+
+                <h3 class="text-xl font-semibold mb-3">Platforms</h3>
+                <ul class="mb-4 space-y-2">
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">netlify</code> - Deploy to Netlify</li>
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">vercel</code> - Deploy to Vercel</li>
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">s3</code> - Deploy to AWS S3</li>
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">github-pages</code> - Deploy to GitHub Pages</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold mb-3">Flags</h3>
+                <ul class="mb-4 space-y-2">
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">--config</code> - Path to deployment configuration file</li>
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">--dry-run</code> - Show what would be deployed without actually deploying</li>
+                    <li><code class="bg-gray-200 px-2 py-1 rounded">--force</code> - Force deployment even if no changes detected</li>
+                </ul>
+
+                <h3 class="text-xl font-semibold mb-3">Examples</h3>
+                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg">
+                    <pre><code># Deploy to Netlify
+garp deploy netlify
+
+# Dry run deployment
+garp deploy netlify --dry-run
+
+# Deploy with custom config
+garp deploy s3 --config deploy.yaml</code></pre>
+                </div>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-3xl font-semibold mb-4">Global Flags</h2>
+                <p class="text-gray-600 mb-4">These flags are available for all commands:</p>
+                
+                <ul class="space-y-3">
+                    <li class="flex items-start">
+                        <code class="bg-gray-200 px-2 py-1 rounded mr-3 mt-0.5">--help, -h</code>
+                        <span class="text-gray-600">Show help for command</span>
+                    </li>
+                    <li class="flex items-start">
+                        <code class="bg-gray-200 px-2 py-1 rounded mr-3 mt-0.5">--version</code>
+                        <span class="text-gray-600">Show version information</span>
+                    </li>
+                    <li class="flex items-start">
+                        <code class="bg-gray-200 px-2 py-1 rounded mr-3 mt-0.5">--config</code>
+                        <span class="text-gray-600">Path to configuration file</span>
+                    </li>
+                    <li class="flex items-start">
+                        <code class="bg-gray-200 px-2 py-1 rounded mr-3 mt-0.5">--quiet, -q</code>
+                        <span class="text-gray-600">Suppress non-error output</span>
+                    </li>
+                </ul>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-3xl font-semibold mb-4">Configuration</h2>
+                <p class="text-gray-600 mb-4">
+                    Garp can be configured using a <code class="bg-gray-200 px-2 py-1 rounded">garp.config.json</code> file in your project root:
+                </p>
+                
+                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg">
+                    <pre><code>{
+  "site": {
+    "title": "My Awesome Site",
+    "description": "A site built with Garp",
+    "baseURL": "https://example.com"
+  },
+  "build": {
+    "outputDir": "site",
+    "assetsDir": "assets"
+  },
+  "server": {
+    "port": 3000,
+    "host": "localhost",
+    "liveReload": true
+  },
+  "search": {
+    "enabled": true,
+    "indexContent": true,
+    "excludePaths": ["admin/**"]
+  }
+}</code></pre>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="text-3xl font-semibold mb-4">Environment Variables</h2>
+                <p class="text-gray-600 mb-4">
+                    These environment variables can be used to configure Garp:
+                </p>
+                
+                <ul class="space-y-3">
+                    <li class="flex items-start">
+                        <code class="bg-gray-200 px-2 py-1 rounded mr-3 mt-0.5">GARP_CONFIG</code>
+                        <span class="text-gray-600">Path to configuration file</span>
+                    </li>
+                    <li class="flex items-start">
+                        <code class="bg-gray-200 px-2 py-1 rounded mr-3 mt-0.5">GARP_PORT</code>
+                        <span class="text-gray-600">Default port for serve command</span>
+                    </li>
+                    <li class="flex items-start">
+                        <code class="bg-gray-200 px-2 py-1 rounded mr-3 mt-0.5">GARP_VERBOSE</code>
+                        <span class="text-gray-600">Enable verbose logging (true/false)</span>
+                    </li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <!-- Pagefind Search -->
+    <link href="/_pagefind/pagefind-ui.css" rel="stylesheet">
+    <script src="/_pagefind/pagefind-ui.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            new PagefindUI({ 
+                element: "#search",
+                showSubResults: true,
+                showImages: false,
+                excerptLength: 40,
+                resetStyles: false,
+                ranking: {
+                    termSimilarity: 1.0,
+                    pageLength: 0.5,
+                    termSaturation: 0.8,
+                    termFrequency: 1.2
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getting Started - Garp Documentation</title>
+    <link href="/style.css" rel="stylesheet">
+    <link href="/search-styles.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container-garp py-8">
+        <nav class="mb-8">
+            <a href="/docs/" class="text-blue-500 hover:text-blue-600">← Back to Documentation</a>
+        </nav>
+
+        <header class="mb-8">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Getting Started with Garp</h1>
+            <p class="text-lg text-gray-600">Learn how to create your first Garp site and get up and running quickly.</p>
+        </header>
+
+        <div class="card mb-6">
+            <h2 class="text-2xl font-semibold mb-4">Search Documentation</h2>
+            <div id="search"></div>
+        </div>
+
+        <main class="markdown-content">
+            <section class="mb-8">
+                <h2 class="text-3xl font-semibold mb-4">Installation</h2>
+                <p class="text-gray-600 mb-4">
+                    Garp is distributed as a single binary with no dependencies. Download the latest version for your platform:
+                </p>
+                
+                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg mb-4">
+                    <pre><code># macOS (Homebrew)
+brew install garp
+
+# Linux/macOS (curl)
+curl -L https://github.com/example/garp/releases/latest/download/garp-$(uname -s)-$(uname -m) -o garp
+chmod +x garp
+sudo mv garp /usr/local/bin/
+
+# Windows (PowerShell)
+Invoke-WebRequest -Uri "https://github.com/example/garp/releases/latest/download/garp-windows-amd64.exe" -OutFile "garp.exe"</code></pre>
+                </div>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-3xl font-semibold mb-4">Creating Your First Site</h2>
+                <p class="text-gray-600 mb-4">
+                    Initialize a new Garp project with the <code class="bg-gray-200 px-2 py-1 rounded">garp init</code> command:
+                </p>
+                
+                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg mb-4">
+                    <pre><code># Create a new site
+garp init my-awesome-site
+cd my-awesome-site
+
+# Start the development server
+garp serve
+
+# Build for production
+garp build</code></pre>
+                </div>
+                
+                <p class="text-gray-600">
+                    This creates a new directory with all the necessary files and folder structure for your Garp site.
+                </p>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-3xl font-semibold mb-4">Project Structure</h2>
+                <p class="text-gray-600 mb-4">
+                    A typical Garp project has the following structure:
+                </p>
+                
+                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg mb-4">
+                    <pre><code>my-awesome-site/
+├── site/                    # Built HTML files (auto-generated)
+├── content/                 # Your markdown content
+│   ├── index.md            # Homepage content
+│   └── posts/              # Blog posts or pages
+├── templates/              # HTML templates
+│   ├── _template.html      # Base template
+│   └── post.html          # Post template
+├── input.css              # Tailwind CSS input file
+├── tailwind.config.js     # Tailwind configuration
+└── bin/                   # Build scripts
+    ├── build-css          # CSS compilation
+    └── build-search-index # Search indexing</code></pre>
+                </div>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-3xl font-semibold mb-4">Writing Content</h2>
+                <p class="text-gray-600 mb-4">
+                    Garp uses Markdown files with YAML frontmatter for content. Here's an example:
+                </p>
+                
+                <div class="bg-gray-900 text-gray-100 p-4 rounded-lg mb-4">
+                    <pre><code>---
+title: "My First Post"
+date: "2024-01-15"
+author: "Jane Doe"
+tags: ["getting-started", "tutorial"]
+description: "Learn how to create your first post with Garp"
+---
+
+# Welcome to My First Post
+
+This is the content of my first post written in **Markdown**.
+
+## Features
+
+- Easy to write
+- Supports code blocks
+- Automatic HTML generation
+- Full-text search integration
+
+```javascript
+// Code example
+function greet(name) {
+    return `Hello, ${name}!`;
+}
+```</code></pre>
+                </div>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-3xl font-semibold mb-4">Development Workflow</h2>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="card">
+                        <h3 class="text-xl font-semibold mb-3">1. Write Content</h3>
+                        <p class="text-gray-600">Create Markdown files in the <code class="bg-gray-200 px-2 py-1 rounded">content/</code> directory with YAML frontmatter.</p>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 class="text-xl font-semibold mb-3">2. Customize Styling</h3>
+                        <p class="text-gray-600">Edit <code class="bg-gray-200 px-2 py-1 rounded">input.css</code> and <code class="bg-gray-200 px-2 py-1 rounded">tailwind.config.js</code> to customize your site's appearance.</p>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 class="text-xl font-semibold mb-3">3. Preview Changes</h3>
+                        <p class="text-gray-600">Use <code class="bg-gray-200 px-2 py-1 rounded">garp serve</code> to preview your site locally with live reloading.</p>
+                    </div>
+                    
+                    <div class="card">
+                        <h3 class="text-xl font-semibold mb-3">4. Build & Deploy</h3>
+                        <p class="text-gray-600">Run <code class="bg-gray-200 px-2 py-1 rounded">garp build</code> to generate static files for deployment.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-8">
+                <h2 class="text-3xl font-semibold mb-4">Next Steps</h2>
+                <ul class="space-y-3">
+                    <li class="flex items-start">
+                        <span class="text-blue-500 mr-2 mt-1">→</span>
+                        <div>
+                            <a href="/docs/user-guide" class="text-blue-500 hover:text-blue-600 font-medium">User Guide</a>
+                            <p class="text-gray-600 text-sm">Comprehensive guide covering all Garp features</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-blue-500 mr-2 mt-1">→</span>
+                        <div>
+                            <a href="/docs/cli-reference" class="text-blue-500 hover:text-blue-600 font-medium">CLI Reference</a>
+                            <p class="text-gray-600 text-sm">Complete reference for all CLI commands</p>
+                        </div>
+                    </li>
+                    <li class="flex items-start">
+                        <span class="text-blue-500 mr-2 mt-1">→</span>
+                        <div>
+                            <a href="/docs/examples" class="text-blue-500 hover:text-blue-600 font-medium">Examples</a>
+                            <p class="text-gray-600 text-sm">Example projects and templates</p>
+                        </div>
+                    </li>
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <!-- Pagefind Search -->
+    <link href="/_pagefind/pagefind-ui.css" rel="stylesheet">
+    <script src="/_pagefind/pagefind-ui.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            new PagefindUI({ 
+                element: "#search",
+                showSubResults: true,
+                showImages: false,
+                excerptLength: 40,
+                resetStyles: false,
+                ranking: {
+                    termSimilarity: 1.0,
+                    pageLength: 0.5,
+                    termSaturation: 0.8,
+                    termFrequency: 1.2
+                }
+            });
+        });
+    </script>
+</body>
+</html>

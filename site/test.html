@@ -32,8 +32,14 @@
                 element: "#search",
                 showSubResults: true,
                 showImages: false,
-                excerptLength: 30,
-                resetStyles: false
+                excerptLength: 40,
+                resetStyles: false,
+                ranking: {
+                    termSimilarity: 1.0,
+                    pageLength: 0.5,
+                    termSaturation: 0.8,
+                    termFrequency: 1.2
+                }
             });
         });
     </script>
