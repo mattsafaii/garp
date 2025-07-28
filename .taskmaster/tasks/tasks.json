@@ -472,10 +472,8 @@
         "details": "Implement `garp deploy` command with multiple deployment strategies: Git-based deployment (push to remote), rsync to server, static hosting integration. Support configuration via .env or command flags for deployment targets. Include pre-deployment build step (run garp build automatically). Add deployment validation and rollback options. Support common hosting platforms (Netlify, Vercel, custom servers).",
         "testStrategy": "Test Git deployment workflow, test rsync deployment, test pre-deployment build execution, test deployment validation and error handling",
         "priority": "low",
-        "dependencies": [
-          7
-        ],
-        "status": "pending",
+        "dependencies": [],
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -483,7 +481,7 @@
             "description": "Create Git deployment functionality that handles pushing to remote repositories and managing Git-based deployment workflows",
             "dependencies": [],
             "details": "Implement Git deployment strategy that supports pushing to remote repositories (GitHub, GitLab, custom Git servers). Handle Git authentication (SSH keys, tokens). Support branch-specific deployments and tag-based releases. Include Git hooks integration for automated deployments. Add validation for Git repository state and clean working directory checks.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -492,7 +490,7 @@
             "description": "Create rsync-based deployment functionality for direct server file synchronization and custom server deployment workflows",
             "dependencies": [],
             "details": "Implement rsync deployment strategy for direct file synchronization to servers. Support SSH-based rsync with key authentication. Handle file exclusions and inclusion patterns. Add support for custom deployment scripts on target servers. Include bandwidth throttling and progress reporting for large deployments.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -501,7 +499,7 @@
             "description": "Implement integrations with static hosting platforms like Netlify and Vercel for automated deployments",
             "dependencies": [],
             "details": "Create integrations for popular static hosting platforms (Netlify, Vercel, GitHub Pages). Implement API-based deployments using platform-specific SDKs or REST APIs. Handle authentication tokens and deployment configurations. Support custom build commands and environment variables for each platform. Add deployment status monitoring and URL generation.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -514,7 +512,7 @@
               "10.3"
             ],
             "details": "Implement pre-deployment build automation that automatically runs 'garp build' before deployment. Add validation checks for required files, broken links, and build artifacts. Include content validation (markdown syntax, image references). Support custom validation scripts and hooks. Provide detailed error reporting and build failure handling with rollback capabilities.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           },
           {
@@ -525,7 +523,7 @@
               "10.4"
             ],
             "details": "Implement deployment rollback mechanisms that can revert to previous successful deployments. Create deployment history tracking and version management. Support configuration management via .env files and command-line flags. Add deployment target management (staging, production environments). Include deployment verification and health checks with automatic rollback on failure.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": ""
           }
         ]
@@ -656,7 +654,7 @@
     ],
     "metadata": {
       "created": "2025-07-25T22:12:13.688Z",
-      "updated": "2025-07-28T21:57:38.688Z",
+      "updated": "2025-07-28T22:30:46.818Z",
       "description": "Tasks for master context"
     }
   }

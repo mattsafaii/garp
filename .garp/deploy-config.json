@@ -1,0 +1,16 @@
+{
+  "production": {
+    "name": "production",
+    "strategy": "cloudflare",
+    "config": {
+      "raw": "project-id=prod-account"
+    }
+  },
+  "staging": {
+    "name": "staging",
+    "strategy": "netlify",
+    "config": {
+      "raw": "site-id=staging-site"
+    }
+  }
+}

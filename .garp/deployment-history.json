@@ -1,0 +1,32 @@
+[
+  {
+    "id": "deploy_1753741772",
+    "timestamp": "2025-07-28T15:29:32.920235-07:00",
+    "strategy": "netlify",
+    "target": "netlify",
+    "success": true,
+    "duration": 6708,
+    "git_branch": "master",
+    "build_info": {
+      "build_executed": true
+    },
+    "messages": [
+      "Would deploy to Netlify site mysite"
+    ]
+  },
+  {
+    "id": "deploy_1753741790",
+    "timestamp": "2025-07-28T15:29:50.200275-07:00",
+    "strategy": "cloudflare",
+    "target": "cloudflare",
+    "success": true,
+    "duration": 25042,
+    "git_branch": "master",
+    "build_info": {
+      "build_executed": true
+    },
+    "messages": [
+      "Would deploy to Cloudflare Pages project myproject"
+    ]
+  }
+]
