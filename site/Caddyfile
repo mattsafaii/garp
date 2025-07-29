@@ -4,10 +4,32 @@ localhost:8080
 root * site
 file_server
 
-# Handle markdown files
+# Handle blog markdown files
+@blog {
+    path /blog/*
+}
+handle @blog {
+    rewrite * /blog/markdown{path}.md
+    templates /blog/_template.html
+}
+
+# Handle docs markdown files
+@docs {
+    path /docs/*
+}
+handle @docs {
+    rewrite * /docs/markdown{path}.md
+    templates /docs/_template.html
+}
+
+# Handle other markdown files
 @markdown {
     path *.md
 }
-rewrite @markdown /docs/markdown{path}.md
+handle @markdown {
+    rewrite * /docs/markdown{path}.md
+    templates /docs/_template.html
+}
 
+# Handle other templates
 templates
