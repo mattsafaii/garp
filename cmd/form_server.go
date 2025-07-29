@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"garp-cli/internal"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -54,12 +55,25 @@ func startFormServer() error {
 
 	// Check if form-server.rb exists
 	if _, err := os.Stat("form-server.rb"); os.IsNotExist(err) {
-		return fmt.Errorf("form-server.rb not found in current directory\n\nMake sure you're running this command from the project root where form-server.rb is located")
+		return internal.NewFileSystemErrorWithContext(
+			"form-server.rb not found in current directory",
+			"Make sure you're running this command from the project root directory",
+			err,
+		)
 	}
 
 	// Check if Ruby is available
 	if _, err := exec.LookPath("ruby"); err != nil {
-		return fmt.Errorf("ruby not found in PATH\n\nPlease install Ruby to use the form server:\n  • macOS: brew install ruby\n  • Ubuntu: sudo apt install ruby\n  • Windows: https://rubyinstaller.org/")
+		return internal.NewDependencyErrorWithSuggestions(
+			"Ruby not found in PATH",
+			err,
+			[]string{
+				"macOS: brew install ruby",
+				"Ubuntu: sudo apt install ruby", 
+				"Windows: Download from https://rubyinstaller.org/",
+				"Verify installation with: ruby --version",
+			},
+		)
 	}
 
 	fmt.Printf("🚀 Starting Garp Form Server...\n")
@@ -78,7 +92,7 @@ func startFormServer() error {
 
 	// Start the server
 	if err := rubyCmd.Start(); err != nil {
-		return fmt.Errorf("failed to start form server: %v", err)
+		return internal.NewExternalError("Failed to start form server", err)
 	}
 
 	// Set up signal handling for graceful shutdown
@@ -103,7 +117,7 @@ func startFormServer() error {
 		if err.Error() == "signal: killed" {
 			return nil
 		}
-		return fmt.Errorf("form server error: %v", err)
+		return internal.NewExternalError("Form server encountered an error", err)
 	}
 
 	return nil
