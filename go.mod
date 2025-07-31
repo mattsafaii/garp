@@ -1,4 +1,4 @@
-module garp
+module github.com/mattsafaii/garp
 
 go 1.24.5
 

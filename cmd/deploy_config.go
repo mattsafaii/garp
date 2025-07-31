@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"garp/internal/deploy"
+	"github.com/mattsafaii/garp/internal/deploy"
 
 	"github.com/spf13/cobra"
 )

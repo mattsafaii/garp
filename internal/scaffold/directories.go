@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"garp/internal"
+	"github.com/mattsafaii/garp/internal"
 )
 
 // ProjectStructure defines the required directory structure for a Garp project

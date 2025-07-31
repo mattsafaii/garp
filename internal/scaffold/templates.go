@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"garp/internal"
+	"github.com/mattsafaii/garp/internal"
 )
 
 // TemplateData contains data for template rendering

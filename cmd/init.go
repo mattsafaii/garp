@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"garp/internal"
-	"garp/internal/scaffold"
+	"github.com/mattsafaii/garp/internal"
+	"github.com/mattsafaii/garp/internal/scaffold"
 
 	"github.com/spf13/cobra"
 )

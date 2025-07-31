@@ -2,7 +2,7 @@ package deploy
 
 import (
 	"fmt"
-	"garp/internal"
+	"github.com/mattsafaii/garp/internal"
 	"strings"
 )
 

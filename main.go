@@ -1,7 +1,7 @@
 package main
 
 import (
-	"garp/cmd"
+	"github.com/mattsafaii/garp/cmd"
 )
 
 func main() {

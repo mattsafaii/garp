@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	"garp/internal"
-	"garp/internal/server"
+	"github.com/mattsafaii/garp/internal"
+	"github.com/mattsafaii/garp/internal/server"
 
 	"github.com/spf13/cobra"
 )

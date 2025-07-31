@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"garp/internal"
+	"github.com/mattsafaii/garp/internal"
 	"os"
 	"os/exec"
 	"os/signal"

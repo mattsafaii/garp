@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"garp/internal"
+	"github.com/mattsafaii/garp/internal"
 )
 
 // CaddyServer manages the Caddy server instance
