@@ -11,28 +11,28 @@ import (
 
 // TailwindCLIInfo contains information about Tailwind CLI installation
 type TailwindCLIInfo struct {
-	IsInstalled   bool
-	Version       string
+	IsInstalled    bool
+	Version        string
 	ExecutablePath string
 }
 
 // DetectTailwindCLI attempts to find and verify Tailwind CLI installation
 func DetectTailwindCLI() (*TailwindCLIInfo, error) {
 	info := &TailwindCLIInfo{}
-	
+
 	// Try different command names based on platform and installation method
 	possibleCommands := []string{
 		"tailwindcss",     // Standalone binary
 		"tailwind",        // Alternative name
 		"npx tailwindcss", // NPX execution
 	}
-	
+
 	for _, cmd := range possibleCommands {
 		if checkTailwindCommand(cmd, info) {
 			return info, nil
 		}
 	}
-	
+
 	// Check common installation paths
 	commonPaths := getTailwindCommonPaths()
 	for _, path := range commonPaths {
@@ -40,7 +40,7 @@ func DetectTailwindCLI() (*TailwindCLIInfo, error) {
 			return info, nil
 		}
 	}
-	
+
 	return info, nil
 }
 
@@ -48,18 +48,18 @@ func DetectTailwindCLI() (*TailwindCLIInfo, error) {
 func checkTailwindCommand(cmd string, info *TailwindCLIInfo) bool {
 	parts := strings.Fields(cmd)
 	var execCmd *exec.Cmd
-	
+
 	if len(parts) > 1 {
 		execCmd = exec.Command(parts[0], append(parts[1:], "--version")...)
 	} else {
 		execCmd = exec.Command(parts[0], "--version")
 	}
-	
+
 	output, err := execCmd.Output()
 	if err != nil {
 		return false
 	}
-	
+
 	version := strings.TrimSpace(string(output))
 	if version != "" {
 		info.IsInstalled = true
@@ -67,7 +67,7 @@ func checkTailwindCommand(cmd string, info *TailwindCLIInfo) bool {
 		info.ExecutablePath = cmd
 		return true
 	}
-	
+
 	return false
 }
 
@@ -77,13 +77,13 @@ func checkTailwindPath(path string, info *TailwindCLIInfo) bool {
 	if err != nil {
 		return false
 	}
-	
+
 	cmd := exec.Command(path, "--version")
 	output, err := cmd.Output()
 	if err != nil {
 		return false
 	}
-	
+
 	version := strings.TrimSpace(string(output))
 	if version != "" {
 		info.IsInstalled = true
@@ -91,14 +91,14 @@ func checkTailwindPath(path string, info *TailwindCLIInfo) bool {
 		info.ExecutablePath = path
 		return true
 	}
-	
+
 	return false
 }
 
 // getTailwindCommonPaths returns platform-specific common installation paths
 func getTailwindCommonPaths() []string {
 	var paths []string
-	
+
 	switch runtime.GOOS {
 	case "windows":
 		// Windows paths
@@ -126,16 +126,16 @@ func getTailwindCommonPaths() []string {
 			filepath.Join(homeDir, ".npm-global", "bin", "tailwindcss"),
 		)
 	}
-	
+
 	return paths
 }
 
 // GetTailwindInstallationInstructions returns platform-specific installation instructions
 func GetTailwindInstallationInstructions() string {
 	var instructions strings.Builder
-	
+
 	instructions.WriteString("Tailwind CSS CLI not found. Please install it using one of the following methods:\n\n")
-	
+
 	switch runtime.GOOS {
 	case "windows":
 		instructions.WriteString("For Windows:\n")
@@ -148,7 +148,7 @@ func GetTailwindInstallationInstructions() string {
 		instructions.WriteString("   Download: tailwindcss-windows-x64.exe\n")
 		instructions.WriteString("   Rename to: tailwindcss.exe\n")
 		instructions.WriteString("   Add to your PATH\n\n")
-		
+
 	case "darwin":
 		instructions.WriteString("For macOS:\n")
 		instructions.WriteString("1. Using npm (recommended):\n")
@@ -162,7 +162,7 @@ func GetTailwindInstallationInstructions() string {
 		instructions.WriteString("   Download: tailwindcss-macos-x64 (Intel) or tailwindcss-macos-arm64 (Apple Silicon)\n")
 		instructions.WriteString("   chmod +x tailwindcss-macos-*\n")
 		instructions.WriteString("   mv tailwindcss-macos-* /usr/local/bin/tailwindcss\n\n")
-		
+
 	case "linux":
 		instructions.WriteString("For Linux:\n")
 		instructions.WriteString("1. Using npm (recommended):\n")
@@ -174,7 +174,7 @@ func GetTailwindInstallationInstructions() string {
 		instructions.WriteString("   Download: tailwindcss-linux-x64 or tailwindcss-linux-arm64\n")
 		instructions.WriteString("   chmod +x tailwindcss-linux-*\n")
 		instructions.WriteString("   sudo mv tailwindcss-linux-* /usr/local/bin/tailwindcss\n\n")
-		
+
 	default:
 		instructions.WriteString("1. Using npm (recommended):\n")
 		instructions.WriteString("   npm install -g tailwindcss\n\n")
@@ -182,9 +182,9 @@ func GetTailwindInstallationInstructions() string {
 		instructions.WriteString("   yarn global add tailwindcss\n\n")
 		instructions.WriteString("3. Visit https://github.com/tailwindlabs/tailwindcss/releases for standalone binaries\n\n")
 	}
-	
+
 	instructions.WriteString("After installation, restart your terminal and try the build command again.")
-	
+
 	return instructions.String()
 }
 
@@ -194,11 +194,11 @@ func ValidateTailwindCLI() error {
 	if err != nil {
 		return NewDependencyError("failed to check for Tailwind CLI", err)
 	}
-	
+
 	if !info.IsInstalled {
 		instructions := GetTailwindInstallationInstructions()
 		return NewDependencyError(fmt.Sprintf("Tailwind CSS CLI is required but not found.\n\n%s", instructions), nil)
 	}
-	
+
 	return nil
 }

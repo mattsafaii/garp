@@ -1,4 +1,4 @@
-module garp-cli
+module garp
 
 go 1.24.5
 

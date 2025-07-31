@@ -20,29 +20,29 @@ type PagefindInfo struct {
 // DetectPagefind attempts to find and verify Pagefind installation
 func DetectPagefind() (*PagefindInfo, error) {
 	info := &PagefindInfo{}
-	
+
 	// Try different command names based on installation method
 	possibleCommands := []string{
-		"pagefind",         // Direct binary or cargo install
+		"pagefind",          // Direct binary or cargo install
 		"pagefind_extended", // Extended binary
 	}
-	
+
 	for _, cmd := range possibleCommands {
 		if checkPagefindCommand(cmd, info) {
 			return info, nil
 		}
 	}
-	
+
 	// Check for NPX availability (fallback method)
 	if checkNpxPagefind(info) {
 		return info, nil
 	}
-	
+
 	// Check for Python module availability
 	if checkPythonPagefind(info) {
 		return info, nil
 	}
-	
+
 	// Check common installation paths
 	commonPaths := getPagefindCommonPaths()
 	for _, path := range commonPaths {
@@ -50,7 +50,7 @@ func DetectPagefind() (*PagefindInfo, error) {
 			return info, nil
 		}
 	}
-	
+
 	return info, nil
 }
 
@@ -61,7 +61,7 @@ func checkPagefindCommand(cmd string, info *PagefindInfo) bool {
 	if err != nil {
 		return false
 	}
-	
+
 	version := strings.TrimSpace(string(output))
 	if version != "" {
 		info.IsInstalled = true
@@ -70,7 +70,7 @@ func checkPagefindCommand(cmd string, info *PagefindInfo) bool {
 		info.IsExtended = strings.Contains(cmd, "extended")
 		return true
 	}
-	
+
 	return false
 }
 
@@ -80,14 +80,14 @@ func checkNpxPagefind(info *PagefindInfo) bool {
 	if _, err := exec.LookPath("npx"); err != nil {
 		return false
 	}
-	
+
 	// Test npx pagefind --version
 	cmd := exec.Command("npx", "pagefind", "--version")
 	output, err := cmd.Output()
 	if err != nil {
 		return false
 	}
-	
+
 	version := strings.TrimSpace(string(output))
 	if version != "" {
 		info.IsInstalled = true
@@ -96,7 +96,7 @@ func checkNpxPagefind(info *PagefindInfo) bool {
 		info.IsExtended = true // NPX uses extended by default
 		return true
 	}
-	
+
 	return false
 }
 
@@ -106,14 +106,14 @@ func checkPythonPagefind(info *PagefindInfo) bool {
 	if _, err := exec.LookPath("python3"); err != nil {
 		return false
 	}
-	
+
 	// Test python3 -m pagefind --version
 	cmd := exec.Command("python3", "-m", "pagefind", "--version")
 	output, err := cmd.Output()
 	if err != nil {
 		return false
 	}
-	
+
 	version := strings.TrimSpace(string(output))
 	if version != "" {
 		info.IsInstalled = true
@@ -122,7 +122,7 @@ func checkPythonPagefind(info *PagefindInfo) bool {
 		info.IsExtended = true // Python package uses extended by default
 		return true
 	}
-	
+
 	return false
 }
 
@@ -132,13 +132,13 @@ func checkPagefindPath(path string, info *PagefindInfo) bool {
 	if err != nil {
 		return false
 	}
-	
+
 	cmd := exec.Command(path, "--version")
 	output, err := cmd.Output()
 	if err != nil {
 		return false
 	}
-	
+
 	version := strings.TrimSpace(string(output))
 	if version != "" {
 		info.IsInstalled = true
@@ -147,14 +147,14 @@ func checkPagefindPath(path string, info *PagefindInfo) bool {
 		info.IsExtended = strings.Contains(filepath.Base(path), "extended")
 		return true
 	}
-	
+
 	return false
 }
 
 // getPagefindCommonPaths returns platform-specific common installation paths
 func getPagefindCommonPaths() []string {
 	var paths []string
-	
+
 	switch runtime.GOOS {
 	case "windows":
 		// Windows paths
@@ -193,16 +193,16 @@ func getPagefindCommonPaths() []string {
 			filepath.Join(homeDir, ".cargo", "bin", "pagefind_extended"),
 		)
 	}
-	
+
 	return paths
 }
 
 // GetPagefindInstallationInstructions returns platform-specific installation instructions
 func GetPagefindInstallationInstructions() string {
 	var instructions strings.Builder
-	
+
 	instructions.WriteString("Pagefind not found. Please install it using one of the following methods:\n\n")
-	
+
 	switch runtime.GOOS {
 	case "windows":
 		instructions.WriteString("For Windows:\n")
@@ -217,7 +217,7 @@ func GetPagefindInstallationInstructions() string {
 		instructions.WriteString("   Download: pagefind-windows-x64.exe\n")
 		instructions.WriteString("   Rename to: pagefind.exe\n")
 		instructions.WriteString("   Add to your PATH\n\n")
-		
+
 	case "darwin":
 		instructions.WriteString("For macOS:\n")
 		instructions.WriteString("1. Using NPX (recommended - no installation needed):\n")
@@ -235,7 +235,7 @@ func GetPagefindInstallationInstructions() string {
 		instructions.WriteString("   Download: pagefind-macos-x64 (Intel) or pagefind-macos-arm64 (Apple Silicon)\n")
 		instructions.WriteString("   chmod +x pagefind-macos-*\n")
 		instructions.WriteString("   mv pagefind-macos-* /usr/local/bin/pagefind\n\n")
-		
+
 	case "linux":
 		instructions.WriteString("For Linux:\n")
 		instructions.WriteString("1. Using NPX (recommended - no installation needed):\n")
@@ -251,7 +251,7 @@ func GetPagefindInstallationInstructions() string {
 		instructions.WriteString("   Download: pagefind-linux-x64 or pagefind-linux-arm64\n")
 		instructions.WriteString("   chmod +x pagefind-linux-*\n")
 		instructions.WriteString("   sudo mv pagefind-linux-* /usr/local/bin/pagefind\n\n")
-		
+
 	default:
 		instructions.WriteString("1. Using NPX (recommended - no installation needed):\n")
 		instructions.WriteString("   npx pagefind --site site\n\n")
@@ -261,10 +261,10 @@ func GetPagefindInstallationInstructions() string {
 		instructions.WriteString("   pip install 'pagefind[extended]'\n\n")
 		instructions.WriteString("4. Visit https://github.com/CloudCannon/pagefind/releases for standalone binaries\n\n")
 	}
-	
+
 	instructions.WriteString("For more installation options, visit: https://pagefind.app/docs/installation/\n")
 	instructions.WriteString("After installation, restart your terminal and try the build command again.")
-	
+
 	return instructions.String()
 }
 
@@ -274,11 +274,11 @@ func ValidatePagefind() error {
 	if err != nil {
 		return NewDependencyError("failed to check for Pagefind", err)
 	}
-	
+
 	if !info.IsInstalled {
 		instructions := GetPagefindInstallationInstructions()
 		return NewDependencyError(fmt.Sprintf("Pagefind is required but not found.\n\n%s", instructions), nil)
 	}
-	
+
 	return nil
 }

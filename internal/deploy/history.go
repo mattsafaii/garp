@@ -17,42 +17,42 @@ type DeploymentHistory struct {
 
 // DeploymentRecord represents a single deployment
 type DeploymentRecord struct {
-	ID          string                 `json:"id"`
-	Timestamp   time.Time              `json:"timestamp"`
-	Strategy    string                 `json:"strategy"`
-	Target      string                 `json:"target,omitempty"`
-	Success     bool                   `json:"success"`
-	Duration    time.Duration          `json:"duration"`
-	URL         string                 `json:"url,omitempty"`
-	GitCommit   string                 `json:"git_commit,omitempty"`
-	GitBranch   string                 `json:"git_branch,omitempty"`
-	BuildInfo   map[string]interface{} `json:"build_info,omitempty"`
-	Errors      []string               `json:"errors,omitempty"`
-	Messages    []string               `json:"messages,omitempty"`
+	ID        string                 `json:"id"`
+	Timestamp time.Time              `json:"timestamp"`
+	Strategy  string                 `json:"strategy"`
+	Target    string                 `json:"target,omitempty"`
+	Success   bool                   `json:"success"`
+	Duration  time.Duration          `json:"duration"`
+	URL       string                 `json:"url,omitempty"`
+	GitCommit string                 `json:"git_commit,omitempty"`
+	GitBranch string                 `json:"git_branch,omitempty"`
+	BuildInfo map[string]interface{} `json:"build_info,omitempty"`
+	Errors    []string               `json:"errors,omitempty"`
+	Messages  []string               `json:"messages,omitempty"`
 }
 
 // NewDeploymentHistory creates or loads deployment history
 func NewDeploymentHistory() (*DeploymentHistory, error) {
 	historyDir := ".garp"
 	historyFile := filepath.Join(historyDir, "deployment-history.json")
-	
+
 	// Create .garp directory if it doesn't exist
 	if err := os.MkdirAll(historyDir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create history directory: %v", err)
 	}
-	
+
 	history := &DeploymentHistory{
 		filePath: historyFile,
 		records:  []DeploymentRecord{},
 	}
-	
+
 	// Load existing history if file exists
 	if _, err := os.Stat(historyFile); err == nil {
 		if err := history.load(); err != nil {
 			return nil, fmt.Errorf("failed to load deployment history: %v", err)
 		}
 	}
-	
+
 	return history, nil
 }
 
@@ -69,7 +69,7 @@ func (h *DeploymentHistory) AddRecord(result *DeploymentResult, config Deploymen
 		Errors:    result.Errors,
 		Messages:  result.Messages,
 	}
-	
+
 	// Add Git information if available
 	if gitCommit, err := getCurrentGitCommit(); err == nil {
 		record.GitCommit = gitCommit
@@ -77,19 +77,19 @@ func (h *DeploymentHistory) AddRecord(result *DeploymentResult, config Deploymen
 	if gitBranch, err := getCurrentBranch(); err == nil {
 		record.GitBranch = gitBranch
 	}
-	
+
 	// Add build information
 	record.BuildInfo = map[string]interface{}{
 		"build_executed": result.BuildExecuted,
 	}
-	
+
 	h.records = append(h.records, record)
-	
+
 	// Keep only last 50 deployments
 	if len(h.records) > 50 {
 		h.records = h.records[len(h.records)-50:]
 	}
-	
+
 	return h.save()
 }
 
@@ -99,13 +99,13 @@ func (h *DeploymentHistory) GetLatestDeployment() (*DeploymentRecord, error) {
 	sort.Slice(h.records, func(i, j int) bool {
 		return h.records[i].Timestamp.After(h.records[j].Timestamp)
 	})
-	
+
 	for _, record := range h.records {
 		if record.Success {
 			return &record, nil
 		}
 	}
-	
+
 	return nil, fmt.Errorf("no successful deployments found")
 }
 
@@ -115,11 +115,11 @@ func (h *DeploymentHistory) GetRecentDeployments(limit int) []DeploymentRecord {
 	sort.Slice(h.records, func(i, j int) bool {
 		return h.records[i].Timestamp.After(h.records[j].Timestamp)
 	})
-	
+
 	if limit > len(h.records) {
 		limit = len(h.records)
 	}
-	
+
 	return h.records[:limit]
 }
 
@@ -139,7 +139,7 @@ func (h *DeploymentHistory) load() error {
 	if err != nil {
 		return err
 	}
-	
+
 	return json.Unmarshal(data, &h.records)
 }
 
@@ -149,7 +149,7 @@ func (h *DeploymentHistory) save() error {
 	if err != nil {
 		return err
 	}
-	
+
 	return os.WriteFile(h.filePath, data, 0644)
 }
 
@@ -184,24 +184,24 @@ type ConfigManager struct {
 func NewConfigManager() (*ConfigManager, error) {
 	configDir := ".garp"
 	configFile := filepath.Join(configDir, "deploy-config.json")
-	
+
 	// Create .garp directory if it doesn't exist
 	if err := os.MkdirAll(configDir, 0755); err != nil {
 		return nil, fmt.Errorf("failed to create config directory: %v", err)
 	}
-	
+
 	manager := &ConfigManager{
 		configPath: configFile,
 		configs:    make(map[string]EnvironmentConfig),
 	}
-	
+
 	// Load existing config if file exists
 	if _, err := os.Stat(configFile); err == nil {
 		if err := manager.load(); err != nil {
 			return nil, fmt.Errorf("failed to load deployment config: %v", err)
 		}
 	}
-	
+
 	return manager, nil
 }
 
@@ -242,7 +242,7 @@ func (cm *ConfigManager) load() error {
 	if err != nil {
 		return err
 	}
-	
+
 	return json.Unmarshal(data, &cm.configs)
 }
 
@@ -251,6 +251,6 @@ func (cm *ConfigManager) save() error {
 	if err != nil {
 		return err
 	}
-	
+
 	return os.WriteFile(cm.configPath, data, 0644)
 }

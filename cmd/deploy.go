@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"garp-cli/internal/deploy"
+	"garp/internal/deploy"
 
 	"github.com/spf13/cobra"
 )
@@ -36,7 +36,7 @@ var (
 
 func runDeploy() error {
 	manager := deploy.NewManager()
-	
+
 	// Determine deployment strategy
 	strategy := deploy.GitStrategy // Default to git
 	if deployTarget != "" {
@@ -46,7 +46,7 @@ func runDeploy() error {
 			return fmt.Errorf("invalid deployment target: %v", err)
 		}
 	}
-	
+
 	// Create deployment configuration
 	config := deploy.DeploymentConfig{
 		Strategy:         strategy,
@@ -65,16 +65,16 @@ func runDeploy() error {
 		ProjectID:        projectID,
 		SiteID:           siteID,
 	}
-	
+
 	// Validate configuration
 	if err := manager.Validate(config); err != nil {
 		return fmt.Errorf("deployment validation failed: %v", err)
 	}
-	
+
 	if deployVerbose {
 		fmt.Printf("🚀 Starting deployment using %s strategy\n", strategy.String())
 	}
-	
+
 	// Execute deployment
 	result, err := manager.Deploy(config)
 	if err != nil {
@@ -85,7 +85,7 @@ func runDeploy() error {
 		}
 		return err
 	}
-	
+
 	// Print results
 	if result.Success {
 		fmt.Printf("✅ Deployment completed successfully in %v\n", result.Duration)
@@ -104,31 +104,31 @@ func runDeploy() error {
 			fmt.Printf("  Error: %s\n", errMsg)
 		}
 	}
-	
+
 	return nil
 }
 
 func init() {
-	deployCmd.Flags().StringVar(&deployTarget, "target", "", "Deployment target (git, rsync, netlify, cloudflare)")
+	deployCmd.Flags().StringVar(&deployTarget, "target", "", "Deployment target (git, rsync)")
 	deployCmd.Flags().BoolVar(&dryRun, "dry-run", false, "Show what would be deployed without actually deploying")
 	deployCmd.Flags().BoolVar(&buildFirst, "build", true, "Run build before deployment")
 	deployCmd.Flags().BoolVarP(&deployVerbose, "verbose", "v", false, "Show detailed deployment output")
 	deployCmd.Flags().BoolVar(&skipValidation, "skip-validation", false, "Skip connection validation (for testing)")
 	deployCmd.Flags().BoolVar(&skipContentCheck, "skip-content-check", false, "Skip content validation")
-	
+
 	// Git-specific flags
 	deployCmd.Flags().StringVar(&gitRemote, "git-remote", "origin", "Git remote for deployment")
 	deployCmd.Flags().StringVar(&gitBranch, "git-branch", "", "Git branch for deployment (defaults to current branch)")
-	
+
 	// Rsync-specific flags
 	deployCmd.Flags().StringVar(&rsyncHost, "rsync-host", "", "Rsync target host")
 	deployCmd.Flags().StringVar(&rsyncUser, "rsync-user", "", "Rsync user")
 	deployCmd.Flags().StringVar(&rsyncPath, "rsync-path", "", "Rsync target path")
-	
+
 	// Static hosting flags
 	deployCmd.Flags().StringVar(&apiKey, "api-key", "", "API key for static hosting platform")
 	deployCmd.Flags().StringVar(&projectID, "project-id", "", "Project ID for static hosting platform")
 	deployCmd.Flags().StringVar(&siteID, "site-id", "", "Site ID for static hosting platform")
-	
+
 	rootCmd.AddCommand(deployCmd)
 }

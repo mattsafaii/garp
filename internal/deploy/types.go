@@ -8,8 +8,6 @@ type DeploymentStrategy int
 const (
 	GitStrategy DeploymentStrategy = iota
 	RsyncStrategy
-	NetlifyStrategy
-	CloudflareStrategy
 )
 
 func (s DeploymentStrategy) String() string {
@@ -18,10 +16,6 @@ func (s DeploymentStrategy) String() string {
 		return "git"
 	case RsyncStrategy:
 		return "rsync"
-	case NetlifyStrategy:
-		return "netlify"
-	case CloudflareStrategy:
-		return "cloudflare"
 	default:
 		return "unknown"
 	}
@@ -29,24 +23,24 @@ func (s DeploymentStrategy) String() string {
 
 // DeploymentConfig holds configuration for deployment
 type DeploymentConfig struct {
-	Strategy    DeploymentStrategy
-	Target      string
-	DryRun      bool
-	Verbose     bool
-	BuildFirst  bool
-	SkipValidation    bool
-	SkipContentCheck  bool
-	
+	Strategy         DeploymentStrategy
+	Target           string
+	DryRun           bool
+	Verbose          bool
+	BuildFirst       bool
+	SkipValidation   bool
+	SkipContentCheck bool
+
 	// Git-specific config
 	GitRemote string
 	GitBranch string
-	
+
 	// Rsync-specific config
 	RsyncHost     string
 	RsyncUser     string
 	RsyncPath     string
 	RsyncExcludes []string
-	
+
 	// Static hosting config
 	APIKey    string
 	ProjectID string

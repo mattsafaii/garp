@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"garp-cli/internal"
+	"garp/internal"
 
 	"github.com/spf13/cobra"
 )
@@ -14,7 +14,7 @@ var buildCmd = &cobra.Command{
 and generates the search index with Pagefind.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// Log build start
-		internal.LogInfo("Starting build process", 
+		internal.LogInfo("Starting build process",
 			"css_only", fmt.Sprintf("%t", cssOnly),
 			"search_only", fmt.Sprintf("%t", searchOnly),
 			"watch", fmt.Sprintf("%t", watch))
@@ -37,10 +37,10 @@ and generates the search index with Pagefind.`,
 		// Execute build
 		result, err := internal.BuildAll(options)
 		if err != nil {
-			internal.LogErrorWithError("Build failed", err, 
+			internal.LogErrorWithError("Build failed", err,
 				"css_built", fmt.Sprintf("%t", result != nil && result.CSSBuilt),
 				"search_built", fmt.Sprintf("%t", result != nil && result.SearchBuilt))
-			
+
 			if result != nil && len(result.Errors) > 0 {
 				for _, errMsg := range result.Errors {
 					fmt.Printf("Error: %s\n", errMsg)
@@ -50,7 +50,7 @@ and generates the search index with Pagefind.`,
 		}
 
 		// Log successful build
-		internal.LogInfo("Build completed successfully", 
+		internal.LogInfo("Build completed successfully",
 			"duration", result.Duration.String(),
 			"css_built", fmt.Sprintf("%t", result.CSSBuilt),
 			"search_built", fmt.Sprintf("%t", result.SearchBuilt))

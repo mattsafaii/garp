@@ -8,7 +8,7 @@ import (
 	"syscall"
 	"time"
 
-	"garp-cli/internal"
+	"garp/internal"
 )
 
 // CaddyServer manages the Caddy server instance
@@ -51,7 +51,7 @@ func (cs *CaddyServer) Start() error {
 	// Start Caddy server
 	fmt.Printf("Starting Caddy server on %s:%d\n", cs.Host, cs.Port)
 	fmt.Printf("Using configuration: %s\n", cs.ConfigFile)
-	
+
 	cs.Process = exec.Command("caddy", "run", "--adapter", "caddyfile", "--config", cs.ConfigFile)
 	cs.Process.Stdout = os.Stdout
 	cs.Process.Stderr = os.Stderr

@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"garp-cli/internal"
+	"garp/internal"
 
 	"github.com/spf13/cobra"
 )
@@ -25,7 +25,7 @@ This command checks:
 		// Check dependencies
 		fmt.Println("📦 Checking dependencies:")
 		dependencies := internal.ValidateAllDependencies()
-		
+
 		allDepsOK := true
 		for dep, err := range dependencies {
 			if err != nil {
@@ -35,7 +35,7 @@ This command checks:
 				fmt.Printf("  ✅ %s: Available\n", dep)
 			}
 		}
-		
+
 		if !allDepsOK {
 			fmt.Println()
 			fmt.Println("⚠️  Some optional dependencies are missing.")
@@ -47,7 +47,7 @@ This command checks:
 		// Check comprehensive project configuration
 		fmt.Println("📁 Checking project configuration:")
 		configErrors := internal.ValidateProjectConfiguration()
-		
+
 		if len(configErrors) == 0 {
 			fmt.Println("  ✅ Project configuration is valid")
 		} else {
@@ -56,18 +56,18 @@ This command checks:
 				fmt.Printf("     %d. %s\n", i+1, err.Error())
 			}
 		}
-		
+
 		// Additional project health checks
 		fmt.Println()
 		fmt.Println("🔧 Checking project health:")
-		
+
 		// Check writable directories
-		if err := internal.ValidateWritableDirectory("site"); err != nil {
-			fmt.Printf("  ❌ site/ directory: %s\n", err.Error())
+		if err := internal.ValidateWritableDirectory("public"); err != nil {
+			fmt.Printf("  ❌ public/ directory: %s\n", err.Error())
 		} else {
-			fmt.Println("  ✅ site/ directory: Writable")
+			fmt.Println("  ✅ public/ directory: Writable")
 		}
-		
+
 		if err := internal.ValidateWritableDirectory("bin"); err != nil {
 			fmt.Printf("  ⚠️  bin/ directory: %s\n", err.Error())
 		} else {
@@ -76,7 +76,7 @@ This command checks:
 
 		fmt.Println()
 		fmt.Println("✨ Diagnostics complete!")
-		
+
 		return nil
 	},
 }

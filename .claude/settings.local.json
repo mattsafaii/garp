@@ -1,7 +1,6 @@
 {
   "permissions": {
     "allow": [
-      "Bash(task-master:*)",
       "Bash(export:*)",
       "Bash(go build:*)",
       "Bash(./garp init --help)",
@@ -9,20 +8,19 @@
       "Bash(./garp:*)",
       "Bash(../garp serve)",
       "Bash(find:*)",
-      "mcp__task-master-ai__get_tasks",
-      "mcp__task-master-ai__next_task",
-      "mcp__task-master-ai__set_task_status",
-      "mcp__task-master-ai__update_task",
-      "mcp__task-master-ai__get_task",
       "Bash(go test:*)",
-      "mcp__task-master-ai__update_subtask"
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "mcp__fetch__fetch"
     ],
     "deny": []
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
-    "task-master-ai",
+    "filesystem",
     "sequential-thinking",
     "context7",
+    "airtable",
     "playwright",
     "fetch"
   ],

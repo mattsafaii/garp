@@ -27,27 +27,27 @@ func (g *GitDeployer) Validate(config DeploymentConfig) error {
 	if _, err := exec.LookPath("git"); err != nil {
 		return fmt.Errorf("git command not found: %v", err)
 	}
-	
+
 	// Check if we're in a git repository
 	if !isGitRepository() {
 		return fmt.Errorf("not in a git repository")
 	}
-	
+
 	// Check for uncommitted changes
 	if hasUncommittedChanges() {
 		return fmt.Errorf("uncommitted changes detected - commit or stash changes before deploying")
 	}
-	
+
 	// Check if remote exists
 	remote := config.GitRemote
 	if remote == "" {
 		remote = "origin"
 	}
-	
+
 	if !gitRemoteExists(remote) {
 		return fmt.Errorf("git remote '%s' does not exist", remote)
 	}
-	
+
 	return nil
 }
 
@@ -57,23 +57,23 @@ func (g *GitDeployer) Deploy(config DeploymentConfig) (*DeploymentResult, error)
 		Strategy: GitStrategy,
 	}
 	start := time.Now()
-	
+
 	if config.Verbose {
 		fmt.Printf("🚀 Starting Git deployment to remote '%s'\n", config.GitRemote)
 	}
-	
+
 	// Validate first
 	if err := g.Validate(config); err != nil {
 		result.Errors = append(result.Errors, err.Error())
 		result.Duration = time.Since(start)
 		return result, err
 	}
-	
+
 	remote := config.GitRemote
 	if remote == "" {
 		remote = "origin"
 	}
-	
+
 	branch := config.GitBranch
 	if branch == "" {
 		var err error
@@ -85,24 +85,24 @@ func (g *GitDeployer) Deploy(config DeploymentConfig) (*DeploymentResult, error)
 			return result, fmt.Errorf(errMsg)
 		}
 	}
-	
+
 	if config.DryRun {
 		result.Messages = append(result.Messages, fmt.Sprintf("Would push to %s/%s", remote, branch))
 		result.Success = true
 		result.Duration = time.Since(start)
 		return result, nil
 	}
-	
+
 	// Execute git push
 	cmd := exec.Command("git", "push", remote, branch)
 	cmd.Dir = "."
-	
+
 	if config.Verbose {
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		fmt.Printf("Executing: git push %s %s\n", remote, branch)
 	}
-	
+
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		errMsg := fmt.Sprintf("git push failed: %v\nOutput: %s", err, string(output))
@@ -110,15 +110,15 @@ func (g *GitDeployer) Deploy(config DeploymentConfig) (*DeploymentResult, error)
 		result.Duration = time.Since(start)
 		return result, fmt.Errorf(errMsg)
 	}
-	
+
 	result.Messages = append(result.Messages, fmt.Sprintf("Successfully pushed to %s/%s", remote, branch))
 	result.Success = true
 	result.Duration = time.Since(start)
-	
+
 	if config.Verbose {
 		fmt.Printf("✅ Git deployment completed in %v\n", result.Duration)
 	}
-	
+
 	return result, nil
 }
 

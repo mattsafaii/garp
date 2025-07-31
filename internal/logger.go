@@ -146,7 +146,7 @@ func (l *Logger) shouldLog(level LogLevel) bool {
 // formatLogEntry creates a formatted log entry
 func (l *Logger) formatLogEntry(level LogLevel, message string, fields ...string) string {
 	timestamp := time.Now().Format("2006-01-02 15:04:05")
-	
+
 	// Create field pairs
 	var fieldPairs []string
 	for i := 0; i < len(fields)-1; i += 2 {
@@ -154,12 +154,12 @@ func (l *Logger) formatLogEntry(level LogLevel, message string, fields ...string
 		value := fields[i+1]
 		fieldPairs = append(fieldPairs, fmt.Sprintf("%s=%s", key, value))
 	}
-	
+
 	entry := fmt.Sprintf("[%s] %s %s", timestamp, level.String(), message)
 	if len(fieldPairs) > 0 {
 		entry += " " + strings.Join(fieldPairs, " ")
 	}
-	
+
 	return entry
 }
 
@@ -179,7 +179,7 @@ func (l *Logger) writeToConsole(level LogLevel, message string, fields ...string
 
 	timestamp := time.Now().Format("15:04:05")
 	levelStr := level.ColorString()
-	
+
 	// Create field pairs for console
 	var fieldPairs []string
 	for i := 0; i < len(fields)-1; i += 2 {
@@ -187,22 +187,22 @@ func (l *Logger) writeToConsole(level LogLevel, message string, fields ...string
 		value := fields[i+1]
 		fieldPairs = append(fieldPairs, colorize(ColorGray, fmt.Sprintf("%s=%s", key, value)))
 	}
-	
-	entry := fmt.Sprintf("%s %s %s", 
-		colorize(ColorGray, fmt.Sprintf("[%s]", timestamp)), 
-		levelStr, 
+
+	entry := fmt.Sprintf("%s %s %s",
+		colorize(ColorGray, fmt.Sprintf("[%s]", timestamp)),
+		levelStr,
 		message)
-	
+
 	if len(fieldPairs) > 0 {
 		entry += " " + strings.Join(fieldPairs, " ")
 	}
-	
+
 	// Write to stderr for errors and warnings, stdout for info and debug
 	var output io.Writer = os.Stdout
 	if level <= LogLevelWarn {
 		output = os.Stderr
 	}
-	
+
 	fmt.Fprintln(output, entry)
 }
 

@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"garp-cli/internal"
+	"garp/internal"
 )
 
 // TemplateData contains data for template rendering
@@ -24,7 +24,7 @@ var EmbeddedTemplates = map[string]string{
     <meta name="description" content="[[.Meta.description | default "Welcome to {{.ProjectName}}"]]">
     
     <!-- Tailwind CSS -->
-    <link href="/style.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico">
@@ -40,7 +40,8 @@ var EmbeddedTemplates = map[string]string{
                     </h1>
                     <nav class="hidden md:flex space-x-6">
                         <a href="/" class="text-gray-600 hover:text-blue-600">Home</a>
-                        <a href="/docs/" class="text-gray-600 hover:text-blue-600">Docs</a>
+                        <a href="/about" class="text-gray-600 hover:text-blue-600">About</a>
+                        <a href="/contact" class="text-gray-600 hover:text-blue-600">Contact</a>
                     </nav>
                 </div>
             </div>
@@ -58,7 +59,7 @@ var EmbeddedTemplates = map[string]string{
                 
                 <!-- Page Title -->
                 <h1 class="text-4xl font-bold mb-6 text-gray-900">
-                [[.Meta.title | default "Untitled Page"]]
+                [[.Meta.title | default "Welcome"]]
                 </h1>
                 
                 <!-- Page Description -->
@@ -118,223 +119,258 @@ var EmbeddedTemplates = map[string]string{
         </footer>
     </div>
 
-    <!-- Search Integration (Pagefind) -->
+    <!-- Optional Search Integration (Pagefind) -->
     <div id="search"></div>
-    <script src="/_pagefind/pagefind-ui.js" type="text/javascript"></script>
+    <script src="/_pagefind/pagefind-ui.js" type="text/javascript" onerror="console.log('Search not available')"></script>
     <script>
         window.addEventListener('DOMContentLoaded', (event) => {
-            new PagefindUI({ element: "#search", showSubResults: true });
+            if (typeof PagefindUI !== 'undefined') {
+                new PagefindUI({ element: "#search", showSubResults: true });
+            }
         });
     </script>
 </body>
 </html>`,
 
-	"index.md": `---
-title: Welcome to {{.ProjectName}}
-description: A fast, no-nonsense static site built with Garp
-date: 2024-01-01T00:00:00Z
-author: {{.ProjectName}} Team
-category: Documentation
-tags:
-  - welcome
-  - garp
-  - static-site
-  - documentation
-breadcrumbs: Home
----
+	"index.html": `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to {{.ProjectName}}</title>
+    <meta name="description" content="A fast, modern static site built with Garp">
+    <link href="/css/style.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+</head>
+<body class="bg-white text-gray-900 font-sans leading-relaxed">
+    <div class="min-h-screen flex flex-col">
+        <header class="bg-gray-50 border-b border-gray-200">
+            <div class="container mx-auto px-4 py-6">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-gray-900">
+                        <a href="/" class="hover:text-blue-600">{{.ProjectName}}</a>
+                    </h1>
+                    <nav class="hidden md:flex space-x-6">
+                        <a href="/" class="text-gray-600 hover:text-blue-600">Home</a>
+                        <a href="/about.html" class="text-gray-600 hover:text-blue-600">About</a>
+                        <a href="/contact.html" class="text-gray-600 hover:text-blue-600">Contact</a>
+                    </nav>
+                </div>
+            </div>
+        </header>
 
-# Welcome to {{.ProjectName}}
+        <main class="flex-1">
+            <div class="container mx-auto px-4 py-8">
+                <h1 class="text-4xl font-bold mb-6 text-gray-900">Welcome to {{.ProjectName}}</h1>
+                <p class="text-xl text-gray-600 mb-8">A fast, modern static site built with Garp</p>
+                
+                <div class="prose prose-lg max-w-none">
+                    <p>This is your new Garp-powered static site! Garp is a lightweight static site framework that provides a simple, fast way to build and deploy any kind of website.</p>
+                    
+                    <h2>Getting Started</h2>
+                    
+                    <p>Your site is now ready for development. Here's what you can do:</p>
+                    
+                    <h3>1. Start the Development Server</h3>
+                    <p>Run the development server to see your changes in real-time:</p>
+                    <pre><code>garp serve</code></pre>
+                    <p>Your site will be available at <a href="http://localhost:8080">http://localhost:8080</a>.</p>
+                    
+                    <h3>2. Create Content</h3>
+                    <p>Add new HTML files to the <code>public/</code> directory:</p>
+                    <pre><code># Create a new page
+echo "&lt;h1&gt;About Us&lt;/h1&gt;&lt;p&gt;Welcome to our site!&lt;/p&gt;" &gt; public/about.html
 
-This is your new Garp-powered static site! Garp is a lightweight static site framework that provides a simple, fast, production-ready way to ship content-driven websites.
-
-## Getting Started
-
-Your site is now ready for development. Here's what you can do:
-
-### 1. Start the Development Server
-
-Run the development server to see your changes in real-time:
-
-` + "```bash" + `
-garp serve
-` + "```" + `
-
-Your site will be available at [http://localhost:8080](http://localhost:8080).
-
-### 2. Create Content
-
-Add new markdown files to the ` + "`site/docs/markdown/`" + ` directory:
-
-` + "```bash" + `
-echo "# My First Post" > site/docs/markdown/first-post.md
-` + "```" + `
-
-Your markdown files can include YAML frontmatter for metadata:
-
-` + "```yaml" + `
----
-title: My First Post
-description: This is my first blog post
-date: 2024-01-15T10:00:00Z
-author: John Doe
-category: Blog
-tags:
-  - introduction
-  - getting-started
----
-
-# Content goes here
-` + "```" + `
-
-### 3. Customize Styling
-
-Edit ` + "`input.css`" + ` to customize your Tailwind CSS styling, then rebuild:
-
-` + "```bash" + `
-garp build --css-only
-` + "```" + `
-
-### 4. Add Search (Optional)
-
-Build the search index to enable full-text search:
-
-` + "```bash" + `
-garp build --search-only
-` + "```" + `
-
-## Features
-
-- **📝 Markdown Rendering**: Write content in Markdown with YAML frontmatter
-- **🎨 Tailwind CSS**: Utility-first CSS framework integration
-- **🔍 Full-Text Search**: Client-side search powered by Pagefind
-- **📧 Contact Forms**: Optional form handling with Sinatra + Resend
-- **⚡ Fast**: Server-side rendering with Caddy, no JavaScript frameworks
-
-## Project Structure
-
-` + "```" + `
-{{.ProjectName}}/
-├── site/
-│   ├── docs/
-│   │   ├── _template.html     # Global layout template
-│   │   └── markdown/          # Your markdown content
-│   │       └── index.md       # This file
-│   ├── style.css              # Generated CSS (do not edit)
-│   └── Caddyfile              # Server configuration
-├── input.css                  # Tailwind source
+# Or create a markdown file (optional)
+echo "# My Blog Post" &gt; public/blog-post.md</code></pre>
+                    
+                    <h3>3. Customize Styling</h3>
+                    <p>Edit <code>public/css/input.css</code> to customize your Tailwind CSS styling, then rebuild:</p>
+                    <pre><code>garp build --css-only</code></pre>
+                    
+                    <h3>4. Add Search (Optional)</h3>
+                    <p>Build the search index to enable full-text search:</p>
+                    <pre><code>garp build --search-only</code></pre>
+                    
+                    <h2>Features</h2>
+                    <ul>
+                        <li><strong>📝 HTML & Markdown</strong>: Write content in HTML or optionally use Markdown</li>
+                        <li><strong>🎨 Tailwind CSS v4</strong>: Modern utility-first CSS framework</li>
+                        <li><strong>🔍 Full-Text Search</strong>: Optional client-side search powered by Pagefind</li>
+                        <li><strong>📧 Contact Forms</strong>: Optional form handling with Ruby + Resend</li>
+                        <li><strong>⚡ Fast</strong>: Server-side rendering with Caddy, minimal JavaScript</li>
+                        <li><strong>🚀 Easy Deploy</strong>: Deploy anywhere with simple file serving</li>
+                    </ul>
+                    
+                    <h2>Project Structure</h2>
+                    <pre><code>{{.ProjectName}}/
+├── public/                    # Your website content
+│   ├── index.html             # This file (homepage)
+│   ├── css/
+│   │   ├── input.css          # Tailwind CSS source
+│   │   └── style.css          # Generated CSS (do not edit)
+│   ├── js/                    # JavaScript files
+│   ├── images/                # Image assets
+│   └── assets/                # Other assets
 ├── bin/
 │   ├── build-css              # CSS build script
 │   └── build-search-index     # Search build script
-└── .env.example               # Environment variables template
-` + "```" + `
+└── .env.example               # Environment variables template</code></pre>
+                    
+                    <h2>Use Cases</h2>
+                    <p>Garp is perfect for:</p>
+                    <ul>
+                        <li><strong>Personal websites</strong> and portfolios</li>
+                        <li><strong>Business websites</strong> and landing pages</li>
+                        <li><strong>Blogs</strong> and content sites</li>
+                        <li><strong>Documentation</strong> sites</li>
+                        <li><strong>Marketing pages</strong> and campaigns</li>
+                        <li><strong>Any static website</strong> that needs to be fast and simple</li>
+                    </ul>
+                    
+                    <h2>Next Steps</h2>
+                    <ol>
+                        <li>Add your content as HTML files to the <code>public/</code> directory</li>
+                        <li>Modify <code>public/css/input.css</code> for custom styling</li>
+                        <li>Add images to <code>public/images/</code> and other assets to <code>public/assets/</code></li>
+                        <li>Build and deploy your site with <code>garp deploy</code></li>
+                    </ol>
+                    
+                    <p><strong>Happy building! 🚀</strong></p>
+                </div>
+            </div>
+        </main>
 
-## Next Steps
+        <footer class="bg-gray-50 border-t border-gray-200 mt-16">
+            <div class="container mx-auto px-4 py-8">
+                <div class="text-center text-gray-600">
+                    <p>&copy; 2024 {{.ProjectName}}. Built with <a href="https://github.com/yourusername/garp" class="text-blue-600 hover:underline">Garp</a>.</p>
+                </div>
+            </div>
+        </footer>
+    </div>
 
-1. Customize the ` + "`_template.html`" + ` file to match your branding
-2. Add your content to the ` + "`site/docs/markdown/`" + ` directory  
-3. Modify ` + "`input.css`" + ` for custom styling
-4. Build and deploy your site with ` + "`garp deploy`" + `
+    <!-- Optional Search Integration (Pagefind) -->
+    <div id="search"></div>
+    <script src="/_pagefind/pagefind-ui.js" type="text/javascript" onerror="console.log('Search not available')"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', (event) => {
+            if (typeof PagefindUI !== 'undefined') {
+                new PagefindUI({ element: "#search", showSubResults: true });
+            }
+        });
+    </script>
+</body>
+</html>`,
 
-Happy building! 🚀`,
+	"input.css": `@import "tailwindcss";
 
-	"input.css": `@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind v4 Configuration */
+@theme {
+  /* Custom fonts */
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --font-mono: 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', monospace;
 
-/* Custom styles for your project */
+  /* Custom spacing for container */
+  --container-6xl: 72rem;
+}
+
+/* Custom {{.ProjectName}} styles */
 @layer base {
-    html {
-        scroll-behavior: smooth;
-    }
-    
-    body {
-        font-feature-settings: "liga", "kern";
-    }
+  html {
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply text-gray-900 leading-relaxed;
+    font-feature-settings: "liga", "kern";
+  }
 }
 
 @layer components {
-    /* Prose styling for markdown content */
-    .prose {
-        @apply text-gray-700 leading-relaxed;
-    }
-    
-    .prose h1 {
-        @apply text-3xl font-bold text-gray-900 mb-6 mt-8;
-    }
-    
-    .prose h2 {
-        @apply text-2xl font-semibold text-gray-900 mb-4 mt-8;
-    }
-    
-    .prose h3 {
-        @apply text-xl font-semibold text-gray-900 mb-3 mt-6;
-    }
-    
-    .prose h4 {
-        @apply text-lg font-semibold text-gray-900 mb-2 mt-4;
-    }
-    
-    .prose p {
-        @apply mb-4;
-    }
-    
-    .prose a {
-        @apply text-blue-600 hover:text-blue-800 hover:underline;
-    }
-    
-    .prose ul, .prose ol {
-        @apply mb-4 ml-6;
-    }
-    
-    .prose li {
-        @apply mb-1;
-    }
-    
-    .prose blockquote {
-        @apply border-l-4 border-blue-200 pl-4 py-2 my-4 bg-blue-50 text-gray-700 italic;
-    }
-    
-    .prose code {
-        @apply bg-gray-100 px-1 py-0.5 rounded text-sm font-mono text-gray-800;
-    }
-    
-    .prose pre {
-        @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4;
-    }
-    
-    .prose pre code {
-        @apply bg-transparent p-0 text-gray-100;
-    }
-    
-    .prose table {
-        @apply w-full border-collapse border border-gray-300 my-4;
-    }
-    
-    .prose th, .prose td {
-        @apply border border-gray-300 px-4 py-2 text-left;
-    }
-    
-    .prose th {
-        @apply bg-gray-50 font-semibold;
-    }
+  /* Prose styling for markdown content */
+  .prose {
+    @apply text-gray-700 leading-relaxed max-w-none;
+  }
+  
+  .prose h1 {
+    @apply text-3xl font-bold text-gray-900 mb-6 mt-8;
+  }
+  
+  .prose h2 {
+    @apply text-2xl font-semibold text-gray-900 mb-4 mt-8;
+  }
+  
+  .prose h3 {
+    @apply text-xl font-semibold text-gray-900 mb-3 mt-6;
+  }
+  
+  .prose h4 {
+    @apply text-lg font-semibold text-gray-900 mb-2 mt-4;
+  }
+  
+  .prose p {
+    @apply mb-4;
+  }
+  
+  .prose a {
+    @apply text-blue-600 hover:text-blue-800 hover:underline;
+  }
+  
+  .prose ul, .prose ol {
+    @apply mb-4 ml-6;
+  }
+  
+  .prose li {
+    @apply mb-1;
+  }
+  
+  .prose blockquote {
+    @apply border-l-4 border-blue-200 pl-4 py-2 my-4 bg-blue-50 text-gray-700 italic;
+  }
+  
+  .prose code {
+    @apply bg-gray-100 px-1 py-0.5 rounded text-sm font-mono text-gray-800;
+  }
+  
+  .prose pre {
+    @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-4;
+  }
+  
+  .prose pre code {
+    @apply bg-transparent p-0 text-gray-100;
+  }
+  
+  .prose table {
+    @apply w-full border-collapse border border-gray-300 my-4;
+  }
+  
+  .prose th, .prose td {
+    @apply border border-gray-300 px-4 py-2 text-left;
+  }
+  
+  .prose th {
+    @apply bg-gray-50 font-semibold;
+  }
 }
 
 @layer utilities {
-    /* Custom utility classes */
-    .container {
-        @apply max-w-4xl;
-    }
-    
-    /* Search widget styling */
+  /* Custom utility classes */
+  .container {
+    @apply max-w-4xl;
+  }
+  
+  /* Search widget styling */
+  #search {
+    @apply fixed top-4 right-4 z-50;
+  }
+  
+  @media (max-width: 768px) {
     #search {
-        @apply fixed top-4 right-4 z-50;
+      @apply relative top-0 right-0 mt-4;
     }
-    
-    @media (max-width: 768px) {
-        #search {
-            @apply relative top-0 right-0 mt-4;
-        }
-    }
+  }
 }`,
 
 	"Caddyfile": `# Garp Development Server Configuration
@@ -347,64 +383,39 @@ Happy building! 🚀`,
 }
 
 localhost:8080 {
-	# Serve static files from the current directory
-	root * .
+	# Serve static files from the public directory
+	root * public
 	
-	# Handle root redirect
-	redir / /docs/
-	
-	# Handle markdown files with template processing
-	@docs path /docs /docs/*
-	handle @docs {
-		# Rewrite /docs to /site/docs for file serving
-		rewrite /docs /site/docs/
-		rewrite /docs/* /site/docs{path}
-		
-		# Try to serve static files first (CSS, JS, images)
-		@static path *.css *.js *.png *.jpg *.jpeg *.gif *.svg *.ico *.woff *.woff2
-		handle @static {
-			file_server
-		}
-		
-		# Handle markdown files with templates and frontmatter
-		@markdown path *.md
-		handle @markdown {
-			templates {
-				mime text/html
-				# Enable frontmatter parsing for YAML, TOML, and JSON
-				delimiters [[ ]]
-			}
-			
-			# Try to serve the markdown file
-			try_files {path} {path}/index.md {path}.md
-			file_server
-		}
-		
-		# Handle directory requests (look for index.md)
-		handle {
-			try_files {path}/index.md {path}.md {path}/index.html
-			templates {
-				mime text/html
-				# Enable frontmatter parsing for directory index files
-				delimiters [[ ]]
-			}
-			file_server
-		}
-	}
-	
-	# Serve other static files (from site/ directory for CSS, etc.)
-	handle /style.css {
-		rewrite * /site/style.css
+	# Try to serve static files first from asset directories
+	@static path /css/* /js/* /images/* /assets/* *.png *.jpg *.jpeg *.gif *.svg *.ico *.woff *.woff2 *.pdf
+	handle @static {
 		file_server
 	}
 	
-	handle /_pagefind/* {
-		rewrite * /site{path}
+	# Handle markdown files with template processing (optional)
+	@markdown path *.md
+	handle @markdown {
+		templates {
+			mime text/html
+			# Enable frontmatter parsing for YAML, TOML, and JSON
+			delimiters [[ ]]
+		}
+		
+		# Try to serve the markdown file
+		try_files {path} {path}/index.md {path}.md
 		file_server
 	}
 	
-	# Default file server for any other requests
-	file_server
+	# Handle directory requests (look for index files)
+	handle {
+		try_files {path}/index.html {path}/index.md {path}.html
+		templates {
+			mime text/html
+			# Enable frontmatter parsing for directory index files
+			delimiters [[ ]]
+		}
+		file_server
+	}
 	
 	# Enable compression for better performance
 	encode gzip
@@ -427,7 +438,7 @@ localhost:8080 {
 	handle_errors {
 		@404 expression {http.error.status_code} == 404
 		handle @404 {
-			respond "Page not found - try visiting /docs/" 404
+			respond "Page not found" 404
 		}
 		
 		@422 expression {http.error.status_code} == 422
@@ -449,7 +460,7 @@ localhost:8080 {
 PROJECT_NAME={{.ProjectName}}
 ENVIRONMENT=development
 
-# Contact Form Settings (Optional - for Sinatra form server)
+# Contact Form Settings (Optional - for Ruby form server)
 # Get your API key from https://resend.com
 RESEND_API_KEY=your_resend_api_key_here
 FORM_TO_EMAIL=contact@yoursite.com
@@ -464,9 +475,9 @@ DEV_SERVER_PORT=8080
 DEV_SERVER_HOST=localhost
 
 # Build Settings
-CSS_INPUT_FILE=input.css
-CSS_OUTPUT_FILE=site/style.css
-SEARCH_OUTPUT_DIR=site/_pagefind
+CSS_INPUT_FILE=public/css/input.css
+CSS_OUTPUT_FILE=public/css/style.css
+SEARCH_OUTPUT_DIR=public/_pagefind
 
 # Deployment Settings (Optional)
 DEPLOY_TARGET=
@@ -483,11 +494,11 @@ DEPLOY_USER=
 # These files are generated by Garp and should not be committed
 
 # Generated CSS
-site/style.css
-site/style.css.map
+public/css/style.css
+public/css/style.css.map
 
 # Generated search index
-site/_pagefind/
+public/_pagefind/
 _pagefind/
 
 # Environment variables
@@ -539,7 +550,7 @@ Gemfile.lock`,
 
 	"build-css": `#!/bin/bash
 # Garp CSS Build Script
-# Compiles Tailwind CSS from input.css to site/style.css
+# Compiles Tailwind CSS from input.css to public/style.css
 
 set -e
 
@@ -549,38 +560,38 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo -e "${YELLOW}Building CSS with Tailwind...${NC}"
+echo -e "${YELLOW}Building CSS with Tailwind v4...${NC}"
 
 # Check if Tailwind CLI is installed
 if ! command -v tailwindcss &> /dev/null; then
     echo -e "${RED}Error: Tailwind CSS CLI not found${NC}"
-    echo "Please install Tailwind CSS CLI:"
-    echo "  npm install -g @tailwindcss/cli"
+    echo "Please install Tailwind CSS v4 CLI:"
+    echo "  npm install -g @tailwindcss/cli@next"
     echo "  # OR"
     echo "  Download from: https://github.com/tailwindlabs/tailwindcss/releases"
     exit 1
 fi
 
 # Check if input file exists
-if [ ! -f "input.css" ]; then
-    echo -e "${RED}Error: input.css not found${NC}"
+if [ ! -f "public/css/input.css" ]; then
+    echo -e "${RED}Error: public/css/input.css not found${NC}"
     echo "Please ensure you're in the project root directory"
     exit 1
 fi
 
 # Create output directory if it doesn't exist
-mkdir -p site
+mkdir -p public/css
 
 # Build CSS
-echo "Compiling input.css → site/style.css"
-tailwindcss -i input.css -o site/style.css --content "site/**/*.{html,md}" "$@"
+echo "Compiling public/css/input.css → public/css/style.css"
+tailwindcss -i public/css/input.css -o public/css/style.css --content "public/**/*.{html,md}" "$@"
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓ CSS build completed successfully${NC}"
     
     # Show file size
-    if [ -f "site/style.css" ]; then
-        SIZE=$(du -h site/style.css | cut -f1)
+    if [ -f "public/css/style.css" ]; then
+        SIZE=$(du -h public/css/style.css | cut -f1)
         echo "Output size: $SIZE"
     fi
 else
@@ -612,23 +623,23 @@ if ! command -v pagefind &> /dev/null; then
     exit 1
 fi
 
-# Check if site directory exists
-if [ ! -d "site" ]; then
-    echo -e "${RED}Error: site/ directory not found${NC}"
+# Check if public directory exists
+if [ ! -d "public" ]; then
+    echo -e "${RED}Error: public/ directory not found${NC}"
     echo "Please ensure you're in the project root directory"
     exit 1
 fi
 
 # Build search index
-echo "Indexing site/ directory..."
-pagefind --site site --output-path site/_pagefind "$@"
+echo "Indexing public/ directory..."
+pagefind --site public --output-path public/_pagefind "$@"
 
 if [ $? -eq 0 ]; then
     echo -e "${GREEN}✓ Search index build completed successfully${NC}"
     
     # Show index info
-    if [ -d "site/_pagefind" ]; then
-        FILES=$(find site/_pagefind -name "*.js" -o -name "*.json" | wc -l)
+    if [ -d "public/_pagefind" ]; then
+        FILES=$(find public/_pagefind -name "*.js" -o -name "*.json" | wc -l)
         echo "Generated $FILES index files"
     fi
 else
@@ -646,17 +657,11 @@ ruby "~> 3.0"
 # Web framework for form handling
 gem "sinatra", "~> 3.0"
 
-# Email delivery service
-gem "resend", "~> 0.7"
-
 # Environment variable management
 gem "dotenv", "~> 2.8"
 
 # JSON handling
 gem "json", "~> 2.6"
-
-# HTTP client for external APIs
-gem "httparty", "~> 0.21"
 
 # Development dependencies
 group :development do
@@ -673,81 +678,780 @@ group :test do
   gem "rack-test", "~> 2.1"
 end`,
 
-	"index.html": `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>[[.Meta.title | default "{{.ProjectName}} Documentation"]]</title>
-    <meta name="description" content="[[.Meta.description | default "Welcome to {{.ProjectName}} - A fast, no-nonsense static site"]]">
+	"form-server.rb": `#!/usr/bin/env ruby
+
+require 'sinatra'
+require 'json'
+require 'logger'
+require 'time'
+require 'net/http'
+require 'uri'
+require 'dotenv/load'
+
+# Resend API Client for email delivery
+class ResendClient
+  RESEND_API_URL = 'https://api.resend.com/emails'.freeze
+  
+  def initialize(api_key)
+    @api_key = api_key
+    raise ArgumentError, "Resend API key is required" if @api_key.nil? || @api_key.empty?
+  end
+  
+  def send_email(to:, from:, subject:, html: nil, text: nil, reply_to: nil)
+    raise ArgumentError, "Either html or text content is required" if html.nil? && text.nil?
     
-    <!-- Tailwind CSS -->
-    <link href="/style.css" rel="stylesheet">
+    payload = {
+      to: [to],
+      from: from,
+      subject: subject
+    }
     
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
-</head>
-<body class="bg-white text-gray-900 font-sans leading-relaxed">
-    <div class="min-h-screen flex flex-col">
-        <!-- Header -->
-        <header class="bg-gray-50 border-b border-gray-200">
-            <div class="container mx-auto px-4 py-6">
-                <div class="flex justify-between items-center">
-                    <h1 class="text-2xl font-bold text-gray-900">
-                        <a href="/" class="hover:text-blue-600">{{.ProjectName}}</a>
-                    </h1>
-                    <nav class="hidden md:flex space-x-6">
-                        <a href="/" class="text-gray-600 hover:text-blue-600">Home</a>
-                        <a href="/docs/" class="text-gray-600 hover:text-blue-600">Docs</a>
-                    </nav>
-                </div>
-            </div>
-        </header>
+    payload[:html] = html if html
+    payload[:text] = text if text
+    payload[:reply_to] = [reply_to] if reply_to
+    
+    uri = URI(RESEND_API_URL)
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    
+    request = Net::HTTP::Post.new(uri)
+    request['Authorization'] = "Bearer #{@api_key}"
+    request['Content-Type'] = 'application/json'
+    request.body = payload.to_json
+    
+    response = http.request(request)
+    
+    case response.code.to_i
+    when 200, 201
+      JSON.parse(response.body)
+    when 400
+      error_data = JSON.parse(response.body) rescue { 'message' => 'Bad request' }
+      raise ResendError, "Bad request: #{error_data['message']}"
+    when 401
+      raise ResendError, "Unauthorized: Invalid API key"
+    when 422
+      error_data = JSON.parse(response.body) rescue { 'message' => 'Validation error' }
+      raise ResendError, "Validation error: #{error_data['message']}"
+    when 429
+      raise ResendError, "Rate limit exceeded"
+    else
+      raise ResendError, "HTTP #{response.code}: #{response.body}"
+    end
+  rescue Net::ReadTimeout, Net::OpenTimeout, Timeout::Error
+    raise ResendError, "Request timeout - please try again"
+  rescue Net::SocketError, Errno::ECONNREFUSED
+    raise ResendError, "Network error - unable to connect to Resend API"
+  rescue JSON::ParserError => e
+    raise ResendError, "Invalid JSON response from Resend API: #{e.message}"
+  end
+end
 
-        <!-- Main Content -->
-        <main class="flex-1">
-            <div class="container mx-auto px-4 py-8">
-                <!-- Page Title -->
-                [[if .Meta.title]]
-                <h1 class="text-4xl font-bold mb-6 text-gray-900">[[.Meta.title]]</h1>
-                [[end]]
-                
-                <!-- Page Description -->
-                [[if .Meta.description]]
-                <p class="text-xl text-gray-600 mb-8">[[.Meta.description]]</p>
-                [[end]]
-                
-                <!-- Markdown Content -->
-                <div class="prose prose-lg max-w-none">
-                    [[if .Body]]
-                        [[.Body | markdown]]
-                    [[else]]
-                        <p class="text-gray-500 italic">Welcome to {{.ProjectName}}. No content available.</p>
-                    [[end]]
-                </div>
-            </div>
-        </main>
+# Custom exception for Resend API errors
+class ResendError < StandardError; end
 
-        <!-- Footer -->
-        <footer class="bg-gray-50 border-t border-gray-200 mt-16">
-            <div class="container mx-auto px-4 py-8">
-                <div class="text-center text-gray-600">
-                    <p>&copy; 2024 {{.ProjectName}}. Built with <a href="https://github.com/yourusername/garp" class="text-blue-600 hover:underline">Garp</a>.</p>
-                </div>
-            </div>
-        </footer>
-    </div>
+# Form validation and security utilities
+class FormValidator
+  # Email validation regex
+  EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z\d\-]+)*\.[a-z]+\z/i.freeze
+  
+  # Field length limits
+  MAX_NAME_LENGTH = 100
+  MAX_EMAIL_LENGTH = 255
+  MAX_MESSAGE_LENGTH = 5000
+  MAX_SUBJECT_LENGTH = 200
+  
+  # Required fields
+  REQUIRED_FIELDS = %w[name email message].freeze
+  
+  def self.validate_submission(data)
+    errors = []
+    warnings = []
+    
+    # Check for required fields
+    REQUIRED_FIELDS.each do |field|
+      if data[field].nil? || data[field].to_s.strip.empty?
+        errors << "#{field.capitalize} is required"
+      end
+    end
+    
+    # Validate email format if provided
+    if data['email'] && !data['email'].to_s.strip.empty?
+      unless valid_email?(data['email'])
+        errors << "Email format is invalid"
+      end
+    end
+    
+    # Validate field lengths
+    validate_length(data['name'], 'Name', MAX_NAME_LENGTH, errors)
+    validate_length(data['email'], 'Email', MAX_EMAIL_LENGTH, errors)
+    validate_length(data['message'], 'Message', MAX_MESSAGE_LENGTH, errors)
+    validate_length(data['subject'], 'Subject', MAX_SUBJECT_LENGTH, errors) if data['subject']
+    
+    # Check for suspicious content
+    check_suspicious_content(data, warnings)
+    
+    {
+      valid: errors.empty?,
+      errors: errors,
+      warnings: warnings
+    }
+  end
+  
+  def self.sanitize_input(input)
+    return nil if input.nil?
+    
+    # Convert to string and strip whitespace
+    sanitized = input.to_s.strip
+    
+    # Remove null bytes and control characters (except newlines and tabs)
+    sanitized = sanitized.gsub(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/, '')
+    
+    # Normalize Unicode
+    sanitized = sanitized.unicode_normalize(:nfc) if sanitized.respond_to?(:unicode_normalize)
+    
+    sanitized
+  end
+  
+  def self.check_honeypot(data)
+    # Check common honeypot field names
+    honeypot_fields = %w[website url homepage hp_field bot_field spam_check]
+    
+    honeypot_fields.each do |field|
+      if data[field] && !data[field].to_s.strip.empty?
+        return { trapped: true, field: field }
+      end
+    end
+    
+    { trapped: false }
+  end
+  
+  private
+  
+  def self.valid_email?(email)
+    email = sanitize_input(email)
+    return false if email.nil? || email.empty?
+    
+    # Basic format check
+    return false unless email.match?(EMAIL_REGEX)
+    
+    # Additional checks
+    return false if email.include?('..')  # Consecutive dots
+    return false if email.start_with?('.') || email.end_with?('.')
+    return false if email.count('@') != 1
+    
+    true
+  end
+  
+  def self.validate_length(value, field_name, max_length, errors)
+    return unless value
+    
+    sanitized = sanitize_input(value)
+    if sanitized && sanitized.length > max_length
+      errors << "#{field_name} is too long (maximum #{max_length} characters)"
+    end
+  end
+  
+  def self.check_suspicious_content(data, warnings)
+    # Check for excessive links
+    message = data['message'].to_s
+    link_count = message.scan(/https?:\/\//).length
+    if link_count > 3
+      warnings << "Message contains many links (#{link_count})"
+    end
+    
+    # Check for excessive capitalization
+    if message.length > 50 && (message.upcase == message)
+      warnings << "Message is mostly uppercase"
+    end
+    
+    # Check for common spam phrases
+    spam_phrases = [
+      'click here', 'limited time', 'act now', 'free money',
+      'make money fast', 'get rich quick', 'viagra', 'casino'
+    ]
+    
+    spam_phrases.each do |phrase|
+      if message.downcase.include?(phrase)
+        warnings << "Message contains potentially suspicious content"
+        break
+      end
+    end
+  end
+end
 
-    <!-- Search Integration (Pagefind) -->
-    <div id="search"></div>
-    <script src="/_pagefind/pagefind-ui.js" type="text/javascript"></script>
-    <script>
-        window.addEventListener('DOMContentLoaded', (event) => {
-            new PagefindUI({ element: "#search", showSubResults: true });
-        });
-    </script>
-</body>
-</html>`,
+# Rate limiting utility
+class RateLimiter
+  @@submissions = {}
+  @@cleanup_last_run = Time.now
+  
+  # Rate limits: max submissions per time window
+  LIMITS = {
+    per_minute: 5,
+    per_hour: 20,
+    per_day: 100
+  }.freeze
+  
+  def self.check_rate_limit(ip_address)
+    cleanup_old_entries if should_cleanup?
+    
+    current_time = Time.now
+    @@submissions[ip_address] ||= []
+    
+    # Remove old submissions outside our windows
+    @@submissions[ip_address].reject! do |timestamp|
+      current_time - timestamp > 24 * 60 * 60 # Keep only last 24 hours
+    end
+    
+    # Check each limit
+    violations = []
+    
+    # Per minute check
+    minute_ago = current_time - 60
+    recent_minute = @@submissions[ip_address].count { |t| t > minute_ago }
+    if recent_minute >= LIMITS[:per_minute]
+      violations << { window: 'minute', count: recent_minute, limit: LIMITS[:per_minute] }
+    end
+    
+    # Per hour check
+    hour_ago = current_time - (60 * 60)
+    recent_hour = @@submissions[ip_address].count { |t| t > hour_ago }
+    if recent_hour >= LIMITS[:per_hour]
+      violations << { window: 'hour', count: recent_hour, limit: LIMITS[:per_hour] }
+    end
+    
+    # Per day check
+    day_ago = current_time - (24 * 60 * 60)
+    recent_day = @@submissions[ip_address].count { |t| t > day_ago }
+    if recent_day >= LIMITS[:per_day]
+      violations << { window: 'day', count: recent_day, limit: LIMITS[:per_day] }
+    end
+    
+    {
+      allowed: violations.empty?,
+      violations: violations,
+      current_counts: {
+        minute: recent_minute,
+        hour: recent_hour,
+        day: recent_day
+      }
+    }
+  end
+  
+  def self.record_submission(ip_address)
+    @@submissions[ip_address] ||= []
+    @@submissions[ip_address] << Time.now
+  end
+  
+  def self.get_stats
+    cleanup_old_entries
+    {
+      total_ips: @@submissions.keys.length,
+      total_submissions: @@submissions.values.flatten.length,
+      last_cleanup: @@cleanup_last_run
+    }
+  end
+  
+  private
+  
+  def self.should_cleanup?
+    Time.now - @@cleanup_last_run > (15 * 60) # Every 15 minutes
+  end
+  
+  def self.cleanup_old_entries
+    current_time = Time.now
+    cutoff_time = current_time - (24 * 60 * 60) # 24 hours ago
+    
+    @@submissions.each do |ip, timestamps|
+      timestamps.reject! { |t| t < cutoff_time }
+    end
+    
+    # Remove IPs with no recent submissions
+    @@submissions.reject! { |ip, timestamps| timestamps.empty? }
+    
+    @@cleanup_last_run = current_time
+  end
+end
+
+# Email template builder
+class EmailTemplate
+  def self.build_contact_form_email(form_data, submission_id)
+    name = form_data['name'] || 'Anonymous'
+    email = form_data['email'] || 'No email provided'
+    message = form_data['message'] || 'No message provided'
+    timestamp = Time.now.strftime('%B %d, %Y at %I:%M %p %Z')
+    
+    # HTML template
+    html_content = <<~HTML
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Contact Form Submission</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+          .header { background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+          .content { background: white; padding: 20px; border: 1px solid #e9ecef; border-radius: 8px; }
+          .field { margin-bottom: 15px; }
+          .label { font-weight: 600; color: #495057; display: block; margin-bottom: 5px; }
+          .value { background: #f8f9fa; padding: 10px; border-radius: 4px; border-left: 3px solid #007bff; }
+          .message-content { white-space: pre-wrap; }
+          .footer { margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; font-size: 14px; color: #6c757d; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1 style="margin: 0; color: #007bff;">📧 New Contact Form Submission</h1>
+          <p style="margin: 5px 0 0 0; color: #6c757d;">Received on #{timestamp}</p>
+        </div>
+        
+        <div class="content">
+          <div class="field">
+            <span class="label">👤 Name:</span>
+            <div class="value">#{html_escape(name)}</div>
+          </div>
+          
+          <div class="field">
+            <span class="label">📧 Email:</span>
+            <div class="value">#{html_escape(email)}</div>
+          </div>
+          
+          <div class="field">
+            <span class="label">💬 Message:</span>
+            <div class="value message-content">#{html_escape(message)}</div>
+          </div>
+        </div>
+        
+        <div class="footer">
+          <p><strong>Submission ID:</strong> #{submission_id}</p>
+          <p><strong>Source:</strong> {{.ProjectName}} Contact Form</p>
+        </div>
+      </body>
+      </html>
+    HTML
+    
+    # Plain text template
+    text_content = <<~TEXT
+      NEW CONTACT FORM SUBMISSION
+      
+      Received on: #{timestamp}
+      Submission ID: #{submission_id}
+      
+      Name: #{name}
+      Email: #{email}
+      
+      Message:
+      #{message}
+      
+      ---
+      This message was sent via the {{.ProjectName}} contact form.
+    TEXT
+    
+    {
+      html: html_content.strip,
+      text: text_content.strip
+    }
+  end
+  
+  private
+  
+  def self.html_escape(str)
+    str.to_s
+       .gsub('&', '&amp;')
+       .gsub('<', '&lt;')
+       .gsub('>', '&gt;')
+       .gsub('"', '&quot;')
+       .gsub("'", '&#39;')
+  end
+end
+
+# Sinatra Application for {{.ProjectName}} Contact Form Handling
+class GarpFormServer < Sinatra::Base
+  # Configuration
+  configure do
+    set :port, ENV['GARP_FORM_PORT'] || 4567
+    set :bind, ENV['GARP_FORM_HOST'] || '0.0.0.0'
+    set :environment, ENV['GARP_ENV'] || 'development'
+    set :logging, true
+    set :started_at, Time.now
+    
+    # Enable CORS for all routes
+    use Rack::Protection, except: :json_csrf
+    
+    # Set up logging
+    log_file = File.join(Dir.pwd, 'form-submissions.log')
+    logger = Logger.new(log_file, 'daily')
+    logger.level = Logger::INFO
+    set :form_logger, logger
+    
+    # Initialize Resend client if API key is provided
+    if ENV['RESEND_API_KEY'] && !ENV['RESEND_API_KEY'].include?('your_resend_api_key_here')
+      begin
+        set :resend_client, ResendClient.new(ENV['RESEND_API_KEY'])
+        set :email_enabled, true
+        puts "📧 Email delivery enabled via Resend API"
+      rescue ArgumentError => e
+        puts "⚠️  Email delivery disabled: #{e.message}"
+        set :email_enabled, false
+      end
+    else
+      puts "⚠️  Email delivery disabled: RESEND_API_KEY not configured"
+      set :email_enabled, false
+    end
+    
+    puts "🚀 {{.ProjectName}} Form Server starting..."
+    puts "📧 Form endpoint: http://#{settings.bind}:#{settings.port}/submit"
+    puts "📝 Logging to: #{log_file}"
+  end
+
+  # CORS Headers for all requests
+  before do
+    headers 'Access-Control-Allow-Origin' => '*',
+            'Access-Control-Allow-Methods' => ['GET', 'POST', 'OPTIONS'],
+            'Access-Control-Allow-Headers' => 'Content-Type, Accept, X-Requested-With'
+    
+    # Handle preflight requests
+    if request.request_method == 'OPTIONS'
+      halt 200
+    end
+  end
+
+  # Health check endpoint
+  get '/' do
+    content_type :json
+    {
+      status: 'healthy',
+      service: '{{.ProjectName}} Form Server',
+      version: '1.0.0',
+      timestamp: Time.now.iso8601,
+      email_enabled: settings.email_enabled?,
+      endpoints: {
+        submit: '/submit',
+        health: '/',
+        stats: '/stats'
+      },
+      validation: {
+        required_fields: FormValidator::REQUIRED_FIELDS,
+        max_lengths: {
+          name: FormValidator::MAX_NAME_LENGTH,
+          email: FormValidator::MAX_EMAIL_LENGTH,
+          message: FormValidator::MAX_MESSAGE_LENGTH,
+          subject: FormValidator::MAX_SUBJECT_LENGTH
+        }
+      },
+      rate_limits: RateLimiter::LIMITS
+    }.to_json
+  end
+
+  # Statistics endpoint for monitoring
+  get '/stats' do
+    content_type :json
+    
+    rate_stats = RateLimiter.get_stats
+    
+    {
+      status: 'ok',
+      timestamp: Time.now.iso8601,
+      rate_limiting: rate_stats,
+      validation: {
+        required_fields: FormValidator::REQUIRED_FIELDS.length,
+        honeypot_fields: %w[website url homepage hp_field bot_field spam_check].length
+      },
+      server: {
+        email_enabled: settings.email_enabled?,
+        environment: settings.environment.to_s,
+        uptime: (Time.now - settings.started_at rescue 'unknown')
+      }
+    }.to_json
+  end
+
+  # Form submission endpoint
+  post '/submit' do
+    content_type :json
+    
+    begin
+      # Parse request body
+      request_body = request.body.read
+      raw_data = request_body.empty? ? {} : JSON.parse(request_body)
+      
+      # Sanitize all input data
+      data = {}
+      raw_data.each do |key, value|
+        data[key.to_s] = FormValidator.sanitize_input(value)
+      end
+      
+      # Check rate limiting first
+      client_ip = request.ip
+      rate_check = RateLimiter.check_rate_limit(client_ip)
+      
+      unless rate_check[:allowed]
+        violation = rate_check[:violations].first
+        error_response = {
+          status: 'error',
+          message: 'Rate limit exceeded',
+          error: "Too many submissions per #{violation[:window]}",
+          details: {
+            limit: violation[:limit],
+            current_count: violation[:count],
+            window: violation[:window]
+          },
+          retry_after: case violation[:window]
+                      when 'minute' then 60
+                      when 'hour' then 3600
+                      when 'day' then 86400
+                      else 60
+                      end,
+          timestamp: Time.now.iso8601
+        }
+        
+        settings.form_logger.warn({
+          timestamp: Time.now.iso8601,
+          ip: client_ip,
+          status: 'rate_limited',
+          violation: violation,
+          user_agent: request.env['HTTP_USER_AGENT']
+        }.to_json)
+        
+        status 429
+        return error_response.to_json
+      end
+      
+      # Check honeypot fields for spam protection
+      honeypot_check = FormValidator.check_honeypot(data)
+      if honeypot_check[:trapped]
+        # Log spam attempt but don't reveal the honeypot
+        settings.form_logger.warn({
+          timestamp: Time.now.iso8601,
+          ip: client_ip,
+          status: 'spam_detected',
+          honeypot_field: honeypot_check[:field],
+          user_agent: request.env['HTTP_USER_AGENT']
+        }.to_json)
+        
+        # Return success to avoid revealing spam detection
+        status 200
+        return {
+          status: 'success',
+          message: 'Form submission received',
+          timestamp: Time.now.iso8601,
+          id: generate_submission_id,
+          email_sent: false
+        }.to_json
+      end
+      
+      # Validate form data
+      validation_result = FormValidator.validate_submission(data)
+      unless validation_result[:valid]
+        error_response = {
+          status: 'error',
+          message: 'Validation failed',
+          errors: validation_result[:errors],
+          timestamp: Time.now.iso8601
+        }
+        
+        settings.form_logger.info({
+          timestamp: Time.now.iso8601,
+          ip: client_ip,
+          status: 'validation_failed',
+          errors: validation_result[:errors],
+          warnings: validation_result[:warnings],
+          user_agent: request.env['HTTP_USER_AGENT']
+        }.to_json)
+        
+        status 422
+        return error_response.to_json
+      end
+      
+      # Record successful submission for rate limiting
+      RateLimiter.record_submission(client_ip)
+      
+      # Generate submission ID
+      submission_id = generate_submission_id
+      
+      # Log the submission attempt
+      settings.form_logger.info({
+        timestamp: Time.now.iso8601,
+        submission_id: submission_id,
+        ip: request.ip,
+        user_agent: request.env['HTTP_USER_AGENT'],
+        method: request.request_method,
+        path: request.path_info,
+        params: data.select { |k, v| !k.to_s.include?('password') }, # Don't log sensitive data
+        status: 'received'
+      }.to_json)
+      
+      # Initialize response
+      response_data = {
+        status: 'success',
+        message: 'Form submission received',
+        timestamp: Time.now.iso8601,
+        id: submission_id,
+        email_sent: false
+      }
+      
+      # Send email if enabled
+      if settings.email_enabled?
+        begin
+          # Build email content
+          email_template = EmailTemplate.build_contact_form_email(data, submission_id)
+          
+          # Prepare email parameters
+          subject_prefix = ENV['EMAIL_SUBJECT_PREFIX'] || '[{{.ProjectName}} Contact Form]'
+          subject = "#{subject_prefix} New submission from #{data['name'] || 'Anonymous'}"
+          
+          from_email = ENV['RESEND_FROM_EMAIL'] || 'contact@yoursite.com'
+          to_email = ENV['RESEND_TO_EMAIL'] || 'recipient@yoursite.com'
+          reply_to = ENV['EMAIL_REPLY_TO']
+          
+          # Send email via Resend
+          email_result = settings.resend_client.send_email(
+            to: to_email,
+            from: from_email,
+            subject: subject,
+            html: email_template[:html],
+            text: email_template[:text],
+            reply_to: reply_to
+          )
+          
+          response_data[:email_sent] = true
+          response_data[:email_id] = email_result['id'] if email_result['id']
+          
+          # Log successful email delivery
+          settings.form_logger.info({
+            timestamp: Time.now.iso8601,
+            submission_id: submission_id,
+            email_id: email_result['id'],
+            status: 'email_sent',
+            message: 'Email sent successfully via Resend'
+          }.to_json)
+          
+        rescue ResendError => e
+          # Log email failure but don't fail the request
+          settings.form_logger.error({
+            timestamp: Time.now.iso8601,
+            submission_id: submission_id,
+            status: 'email_failed',
+            error: e.message
+          }.to_json)
+          
+          response_data[:email_error] = e.message
+          
+        rescue StandardError => e
+          # Log unexpected email errors
+          settings.form_logger.error({
+            timestamp: Time.now.iso8601,
+            submission_id: submission_id,
+            status: 'email_error',
+            error: e.message,
+            backtrace: e.backtrace.first(3)
+          }.to_json)
+          
+          response_data[:email_error] = 'Email delivery failed due to unexpected error'
+        end
+      else
+        response_data[:message] = 'Form submission received (email delivery disabled)'
+      end
+      
+      # Log successful processing
+      settings.form_logger.info({
+        timestamp: Time.now.iso8601,
+        submission_id: submission_id,
+        status: 'processed',
+        email_sent: response_data[:email_sent],
+        message: 'Form submission processed successfully'
+      }.to_json)
+      
+      status 200
+      response_data.to_json
+      
+    rescue JSON::ParserError => e
+      error_response = {
+        status: 'error',
+        message: 'Invalid JSON in request body',
+        error: e.message,
+        timestamp: Time.now.iso8601
+      }
+      
+      settings.form_logger.error({
+        timestamp: Time.now.iso8601,
+        error: 'JSON parse error',
+        message: e.message,
+        status: 'failed'
+      }.to_json)
+      
+      status 400
+      error_response.to_json
+      
+    rescue StandardError => e
+      error_response = {
+        status: 'error',
+        message: 'Internal server error',
+        timestamp: Time.now.iso8601
+      }
+      
+      settings.form_logger.error({
+        timestamp: Time.now.iso8601,
+        error: 'Internal server error',
+        message: e.message,
+        backtrace: e.backtrace.first(5),
+        status: 'failed'
+      }.to_json)
+      
+      status 500
+      error_response.to_json
+    end
+  end
+
+  # Handle unsupported methods
+  ['GET', 'PUT', 'DELETE', 'PATCH'].each do |method|
+    send(method.downcase, '/submit') do
+      content_type :json
+      status 405
+      {
+        status: 'error',
+        message: "Method #{method} not allowed for /submit endpoint",
+        allowed_methods: ['POST'],
+        timestamp: Time.now.iso8601
+      }.to_json
+    end
+  end
+
+  # 404 handler
+  not_found do
+    content_type :json
+    {
+      status: 'error',
+      message: 'Endpoint not found',
+      available_endpoints: {
+        'GET /' => 'Health check and service information',
+        'POST /submit' => 'Form submission endpoint'
+      },
+      timestamp: Time.now.iso8601
+    }.to_json
+  end
+
+  # Error handler
+  error do
+    content_type :json
+    {
+      status: 'error',
+      message: 'An unexpected error occurred',
+      timestamp: Time.now.iso8601
+    }.to_json
+  end
+
+  private
+
+  # Generate a unique submission ID
+  def generate_submission_id
+    "sub_#{Time.now.to_i}_#{rand(1000..9999)}"
+  end
+end
+
+# Start the server if this file is run directly
+if __FILE__ == $0
+  GarpFormServer.run!
+end`,
 }
 
 // CreateTemplateFiles generates all template files using embedded templates
@@ -757,10 +1461,9 @@ func (ps *ProjectStructure) CreateTemplateFiles() error {
 	}
 
 	files := map[string]string{
-		filepath.Join(ps.ProjectName, "site", "docs", "_template.html"):      EmbeddedTemplates["_template.html"],
-		filepath.Join(ps.ProjectName, "site", "docs", "markdown", "index.md"): EmbeddedTemplates["index.md"],
-		filepath.Join(ps.ProjectName, "site", "docs", "index.html"):           EmbeddedTemplates["index.html"],
-		filepath.Join(ps.ProjectName, "input.css"):                            EmbeddedTemplates["input.css"],
+		filepath.Join(ps.ProjectName, "public", "_template.html"):   EmbeddedTemplates["_template.html"],
+		filepath.Join(ps.ProjectName, "public", "index.html"):       EmbeddedTemplates["index.html"],
+		filepath.Join(ps.ProjectName, "public", "css", "input.css"): EmbeddedTemplates["input.css"],
 	}
 
 	for filePath, template := range files {
@@ -779,10 +1482,9 @@ func (ps *ProjectStructure) CreateConfigurationFiles() error {
 	}
 
 	configFiles := map[string]string{
-		filepath.Join(ps.ProjectName, "site", "Caddyfile"):       EmbeddedTemplates["Caddyfile"],
-		filepath.Join(ps.ProjectName, ".env.example"):            EmbeddedTemplates[".env.example"],
-		filepath.Join(ps.ProjectName, ".gitignore"):              EmbeddedTemplates[".gitignore"],
-		filepath.Join(ps.ProjectName, "Gemfile"):                 EmbeddedTemplates["Gemfile"],
+		filepath.Join(ps.ProjectName, "Caddyfile"):    EmbeddedTemplates["Caddyfile"],
+		filepath.Join(ps.ProjectName, ".env.example"): EmbeddedTemplates[".env.example"],
+		filepath.Join(ps.ProjectName, ".gitignore"):   EmbeddedTemplates[".gitignore"],
 	}
 
 	for filePath, template := range configFiles {
@@ -886,4 +1588,29 @@ func replaceFirst(s, old, new string) string {
 		}
 	}
 	return s
+}
+
+// CreateFormServerFiles generates form server files when forms are enabled
+func (ps *ProjectStructure) CreateFormServerFiles() error {
+	if !ps.EnableForms {
+		return nil
+	}
+
+	templateData := TemplateData{
+		ProjectName: ps.ProjectName,
+	}
+
+	formFiles := map[string]string{
+		filepath.Join(ps.ProjectName, "form-server.rb"): EmbeddedTemplates["form-server.rb"],
+		filepath.Join(ps.ProjectName, "Gemfile"):        EmbeddedTemplates["Gemfile"],
+	}
+
+	for filePath, template := range formFiles {
+		if err := ps.createTemplateFile(filePath, template, templateData); err != nil {
+			return err
+		}
+	}
+
+	fmt.Printf("✓ Form server files created for %s\n", ps.ProjectName)
+	return nil
 }

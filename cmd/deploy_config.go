@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"garp-cli/internal/deploy"
+	"garp/internal/deploy"
 
 	"github.com/spf13/cobra"
 )
@@ -51,12 +51,12 @@ var (
 
 func runSetConfig(cmd *cobra.Command, args []string) error {
 	envName := args[0]
-	
+
 	configManager, err := deploy.NewConfigManager()
 	if err != nil {
 		return fmt.Errorf("failed to initialize config manager: %v", err)
 	}
-	
+
 	// Parse config values into map
 	configMap := make(map[string]string)
 	for _, val := range configValues {
@@ -67,41 +67,41 @@ func runSetConfig(cmd *cobra.Command, args []string) error {
 			configMap["raw"] = val // Simplified for demo
 		}
 	}
-	
+
 	config := deploy.EnvironmentConfig{
 		Strategy: configStrategy,
 		Config:   configMap,
 	}
-	
+
 	err = configManager.SetEnvironment(envName, config)
 	if err != nil {
 		return fmt.Errorf("failed to save config: %v", err)
 	}
-	
+
 	fmt.Printf("✅ Configuration saved for environment '%s'\n", envName)
 	return nil
 }
 
 func runGetConfig(cmd *cobra.Command, args []string) error {
 	envName := args[0]
-	
+
 	configManager, err := deploy.NewConfigManager()
 	if err != nil {
 		return fmt.Errorf("failed to initialize config manager: %v", err)
 	}
-	
+
 	config, err := configManager.GetEnvironment(envName)
 	if err != nil {
 		return fmt.Errorf("failed to get config: %v", err)
 	}
-	
+
 	fmt.Printf("Environment: %s\n", config.Name)
 	fmt.Printf("Strategy: %s\n", config.Strategy)
 	fmt.Println("Configuration:")
 	for key, value := range config.Config {
 		fmt.Printf("  %s: %s\n", key, value)
 	}
-	
+
 	return nil
 }
 
@@ -110,14 +110,14 @@ func runListConfig(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("failed to initialize config manager: %v", err)
 	}
-	
+
 	environments := configManager.ListEnvironments()
-	
+
 	if len(environments) == 0 {
 		fmt.Println("No deployment configurations found.")
 		return nil
 	}
-	
+
 	fmt.Println("Configured environments:")
 	for _, env := range environments {
 		config, err := configManager.GetEnvironment(env)
@@ -127,38 +127,38 @@ func runListConfig(cmd *cobra.Command, args []string) error {
 		}
 		fmt.Printf("  %s (%s)\n", env, config.Strategy)
 	}
-	
+
 	return nil
 }
 
 func runRemoveConfig(cmd *cobra.Command, args []string) error {
 	envName := args[0]
-	
+
 	configManager, err := deploy.NewConfigManager()
 	if err != nil {
 		return fmt.Errorf("failed to initialize config manager: %v", err)
 	}
-	
+
 	err = configManager.RemoveEnvironment(envName)
 	if err != nil {
 		return fmt.Errorf("failed to remove config: %v", err)
 	}
-	
+
 	fmt.Printf("✅ Configuration removed for environment '%s'\n", envName)
 	return nil
 }
 
 func init() {
 	// Add flags for set command
-	setConfigCmd.Flags().StringVar(&configStrategy, "strategy", "", "Deployment strategy (git, rsync, netlify, cloudflare)")
+	setConfigCmd.Flags().StringVar(&configStrategy, "strategy", "", "Deployment strategy (git, rsync)")
 	setConfigCmd.Flags().StringArrayVar(&configValues, "config", []string{}, "Configuration values (can be specified multiple times)")
 	setConfigCmd.MarkFlagRequired("strategy")
-	
+
 	// Add subcommands
 	deployConfigCmd.AddCommand(setConfigCmd)
 	deployConfigCmd.AddCommand(getConfigCmd)
 	deployConfigCmd.AddCommand(listConfigCmd)
 	deployConfigCmd.AddCommand(removeConfigCmd)
-	
+
 	rootCmd.AddCommand(deployConfigCmd)
 }

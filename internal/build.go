@@ -67,7 +67,7 @@ func BuildCSS(options BuildOptions) (*BuildResult, error) {
 	// Execute build script
 	cmd := exec.Command(buildScript, args...)
 	cmd.Dir = "."
-	
+
 	// Capture output for verbose mode
 	if options.Verbose {
 		cmd.Stdout = os.Stdout
@@ -155,7 +155,7 @@ func BuildSearch(options BuildOptions) (*BuildResult, error) {
 	// Execute build script
 	cmd := exec.Command(buildScript, args...)
 	cmd.Dir = "."
-	
+
 	// Execute the command
 	var err error
 	if options.Verbose {
@@ -275,7 +275,7 @@ func WatchFiles(options BuildOptions) error {
 	watchOptions := options
 	watchOptions.Watch = true
 	watchOptions.Verbose = true // Always show output in watch mode
-	
+
 	_, err := BuildCSS(watchOptions)
 	return err
 }
@@ -283,23 +283,22 @@ func WatchFiles(options BuildOptions) error {
 // GetBuildInfo returns information about the current project's build setup
 func GetBuildInfo() map[string]interface{} {
 	info := make(map[string]interface{})
-	
+
 	// Check for required files
 	files := map[string]bool{
-		"input.css":           false,
-		"tailwind.config.js":  false,
-		"bin/build-css":       false,
-		"site/":               false,
+		"input.css":     false,
+		"bin/build-css": false,
+		"public/":       false,
 	}
-	
+
 	for file := range files {
 		if _, err := os.Stat(file); err == nil {
 			files[file] = true
 		}
 	}
-	
+
 	info["files"] = files
-	
+
 	// Check Tailwind CLI availability
 	tailwindInfo, _ := DetectTailwindCLI()
 	info["tailwind"] = map[string]interface{}{
@@ -307,20 +306,20 @@ func GetBuildInfo() map[string]interface{} {
 		"version":   tailwindInfo.Version,
 		"path":      tailwindInfo.ExecutablePath,
 	}
-	
+
 	// Check for output files
 	outputs := map[string]bool{
 		"site/style.css": false,
 	}
-	
+
 	for file := range outputs {
 		if stat, err := os.Stat(file); err == nil && !stat.IsDir() {
 			outputs[file] = true
 		}
 	}
-	
+
 	info["outputs"] = outputs
-	
+
 	return info
 }
 
@@ -330,18 +329,18 @@ func CleanBuildArtifacts() error {
 		"site/style.css",
 		"site/_pagefind/",
 	}
-	
+
 	var errors []string
-	
+
 	for _, file := range filesToClean {
 		if err := os.RemoveAll(file); err != nil {
 			errors = append(errors, fmt.Sprintf("Failed to remove %s: %v", file, err))
 		}
 	}
-	
+
 	if len(errors) > 0 {
 		return NewFileSystemError("Clean failed: "+strings.Join(errors, "; "), nil)
 	}
-	
+
 	return nil
 }

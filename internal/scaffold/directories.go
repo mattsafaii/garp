@@ -5,22 +5,26 @@ import (
 	"os"
 	"path/filepath"
 
-	"garp-cli/internal"
+	"garp/internal"
 )
 
 // ProjectStructure defines the required directory structure for a Garp project
 type ProjectStructure struct {
-	ProjectName string
-	BasePath    string
+	ProjectName    string
+	BasePath       string
+	EnableForms    bool
+	EnableSearch   bool
 }
 
 // CreateDirectories creates the complete directory structure for a new Garp project
 func (ps *ProjectStructure) CreateDirectories() error {
 	directories := []string{
 		ps.ProjectName,
-		filepath.Join(ps.ProjectName, "site"),
-		filepath.Join(ps.ProjectName, "site", "docs"),
-		filepath.Join(ps.ProjectName, "site", "docs", "markdown"),
+		filepath.Join(ps.ProjectName, "public"),
+		filepath.Join(ps.ProjectName, "public", "css"),
+		filepath.Join(ps.ProjectName, "public", "js"),
+		filepath.Join(ps.ProjectName, "public", "images"),
+		filepath.Join(ps.ProjectName, "public", "assets"),
 		filepath.Join(ps.ProjectName, "bin"),
 	}
 
@@ -84,9 +88,11 @@ func (ps *ProjectStructure) ValidateProjectPath() error {
 func (ps *ProjectStructure) GetProjectStructure() []string {
 	return []string{
 		ps.ProjectName + "/",
-		ps.ProjectName + "/site/",
-		ps.ProjectName + "/site/docs/",
-		ps.ProjectName + "/site/docs/markdown/",
+		ps.ProjectName + "/public/",
+		ps.ProjectName + "/public/css/",
+		ps.ProjectName + "/public/js/",
+		ps.ProjectName + "/public/images/",
+		ps.ProjectName + "/public/assets/",
 		ps.ProjectName + "/bin/",
 	}
 }
@@ -94,7 +100,9 @@ func (ps *ProjectStructure) GetProjectStructure() []string {
 // NewProjectStructure creates a new ProjectStructure instance
 func NewProjectStructure(projectName string) *ProjectStructure {
 	return &ProjectStructure{
-		ProjectName: projectName,
-		BasePath:    ".",
+		ProjectName:    projectName,
+		BasePath:       ".",
+		EnableForms:    false,
+		EnableSearch:   true,
 	}
 }

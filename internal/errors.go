@@ -209,7 +209,7 @@ func HandleError(err error) {
 	if len(appErr.Suggestions) > 0 {
 		logFields = append(logFields, "suggestions", fmt.Sprintf("%d_provided", len(appErr.Suggestions)))
 	}
-	
+
 	if appErr.Cause != nil {
 		LogErrorWithError(appErr.Message, appErr.Cause, logFields...)
 	} else {
@@ -220,19 +220,19 @@ func HandleError(err error) {
 	errorIcon := colorize(ColorRed, "❌")
 	errorLabel := colorize(ColorRed+ColorBold, "Error:")
 	fmt.Fprintf(os.Stderr, "%s %s %s\n", errorIcon, errorLabel, appErr.Message)
-	
+
 	// Print cause if available and different from main message
 	if appErr.Cause != nil && appErr.Cause.Error() != appErr.Message {
 		causeText := colorize(ColorGray, fmt.Sprintf("   Cause: %v", appErr.Cause))
 		fmt.Fprintf(os.Stderr, "%s\n", causeText)
 	}
-	
+
 	// Print context if provided
 	if appErr.Context != "" {
 		contextText := colorize(ColorBlue, fmt.Sprintf("   Context: %s", appErr.Context))
 		fmt.Fprintf(os.Stderr, "%s\n", contextText)
 	}
-	
+
 	// Print suggestions if available
 	if len(appErr.Suggestions) > 0 {
 		suggestionIcon := colorize(ColorYellow, "💡")
@@ -255,7 +255,7 @@ func HandleError(err error) {
 			}
 		}
 	}
-	
+
 	// Add help hint for validation errors
 	if appErr.Type == ErrorTypeValidation {
 		helpHint := colorize(ColorCyan, "\n💭 Run 'garp [command] --help' for usage information")

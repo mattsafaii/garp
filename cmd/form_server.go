@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"garp-cli/internal"
+	"garp/internal"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -53,11 +53,11 @@ func startFormServer() error {
 		os.Setenv("GARP_FORM_HOST", formHost)
 	}
 
-	// Check if form-server.rb exists
+	// Check if form-server.rb exists in current directory
 	if _, err := os.Stat("form-server.rb"); os.IsNotExist(err) {
 		return internal.NewFileSystemErrorWithContext(
 			"form-server.rb not found in current directory",
-			"Make sure you're running this command from the project root directory",
+			"Make sure you're running this command from a Garp project root directory that has forms enabled",
 			err,
 		)
 	}
@@ -69,7 +69,7 @@ func startFormServer() error {
 			err,
 			[]string{
 				"macOS: brew install ruby",
-				"Ubuntu: sudo apt install ruby", 
+				"Ubuntu: sudo apt install ruby",
 				"Windows: Download from https://rubyinstaller.org/",
 				"Verify installation with: ruby --version",
 			},
@@ -103,7 +103,7 @@ func startFormServer() error {
 	go func() {
 		<-sigChan
 		fmt.Printf("\n🛑 Shutting down form server...\n")
-		
+
 		// Kill the Ruby process
 		if rubyCmd.Process != nil {
 			rubyCmd.Process.Kill()

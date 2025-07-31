@@ -185,16 +185,15 @@ func ValidateGarpProject() error {
 	// Check for essential Garp project files and directories
 	requiredFiles := []string{
 		"input.css",
-		"tailwind.config.js",
 	}
-	
+
 	requiredDirs := []string{
-		"site",
+		"public",
 		"bin",
 	}
-	
+
 	requiredProjectFiles := []string{
-		"site/Caddyfile",
+		"Caddyfile",
 	}
 
 	missing := []string{}
@@ -212,7 +211,7 @@ func ValidateGarpProject() error {
 			missing = append(missing, dir+"/")
 		}
 	}
-	
+
 	// Check required files within the project
 	for _, file := range requiredProjectFiles {
 		if _, err := os.Stat(file); os.IsNotExist(err) {
@@ -225,7 +224,7 @@ func ValidateGarpProject() error {
 			"Run 'garp init' to create a new Garp project",
 			"Make sure you're in the project root directory",
 		}
-		
+
 		if len(missing) < len(requiredFiles)+len(requiredDirs)+len(requiredProjectFiles) {
 			suggestions = append(suggestions, "Some files exist - this might be a corrupted project")
 		}
@@ -234,6 +233,11 @@ func ValidateGarpProject() error {
 			fmt.Sprintf("not a valid Garp project (missing: %s)", strings.Join(missing, ", ")),
 			suggestions,
 		)
+	}
+
+	// Check for Tailwind configuration (v3 config file or v4 CSS-based config)
+	if err := ValidateTailwindConfiguration(); err != nil {
+		return err
 	}
 
 	return nil
@@ -336,8 +340,8 @@ func ValidateAllDependencies() map[string]error {
 
 // ValidateCaddyfile checks if the Caddyfile is valid and properly configured
 func ValidateCaddyfile() error {
-	caddyfilePath := "site/Caddyfile"
-	
+	caddyfilePath := "Caddyfile"
+
 	// Check if file exists
 	if _, err := os.Stat(caddyfilePath); os.IsNotExist(err) {
 		return NewConfigurationErrorWithSuggestions(
@@ -348,28 +352,28 @@ func ValidateCaddyfile() error {
 			},
 		)
 	}
-	
+
 	// Basic content validation
 	content, err := os.ReadFile(caddyfilePath)
 	if err != nil {
 		return NewFileSystemError("cannot read Caddyfile", err)
 	}
-	
+
 	contentStr := string(content)
-	
+
 	// Check for basic required directives
 	requiredPatterns := []string{
-		"root", // Should have root directive
+		"root",        // Should have root directive
 		"file_server", // Should serve files
 	}
-	
+
 	missing := []string{}
 	for _, pattern := range requiredPatterns {
 		if !strings.Contains(contentStr, pattern) {
 			missing = append(missing, pattern)
 		}
 	}
-	
+
 	if len(missing) > 0 {
 		return NewConfigurationErrorWithSuggestions(
 			fmt.Sprintf("Caddyfile missing required directives: %s", strings.Join(missing, ", ")),
@@ -380,59 +384,73 @@ func ValidateCaddyfile() error {
 			},
 		)
 	}
-	
+
 	return nil
 }
 
-// ValidateTailwindConfig checks if the Tailwind configuration is valid
-func ValidateTailwindConfig() error {
-	configPath := "tailwind.config.js"
-	
-	// Check if file exists
-	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+// ValidateTailwindConfiguration checks if Tailwind CSS v4 is properly configured
+func ValidateTailwindConfiguration() error {
+	// Reject v3 config files if they exist
+	if _, err := os.Stat("tailwind.config.js"); err == nil {
 		return NewConfigurationErrorWithSuggestions(
-			"tailwind.config.js not found",
+			"tailwind.config.js found - Garp only supports Tailwind CSS v4",
 			[]string{
-				"Run 'garp init' to create a new project with Tailwind config",
-				"Create a tailwind.config.js file in the project root",
+				"Remove tailwind.config.js file",
+				"Configuration should be in input.css using @theme directive",
+				"Refer to Tailwind CSS v4 documentation for migration",
 			},
 		)
 	}
-	
-	// Basic content validation
-	content, err := os.ReadFile(configPath)
+	if _, err := os.Stat("tailwind.config.ts"); err == nil {
+		return NewConfigurationErrorWithSuggestions(
+			"tailwind.config.ts found - Garp only supports Tailwind CSS v4",
+			[]string{
+				"Remove tailwind.config.ts file",
+				"Configuration should be in input.css using @theme directive",
+				"Refer to Tailwind CSS v4 documentation for migration",
+			},
+		)
+	}
+
+	// Validate v4 CSS-based configuration
+	return ValidateTailwindConfigV4()
+}
+
+// ValidateTailwindConfig checks if Tailwind CSS v4 configuration is valid
+func ValidateTailwindConfig() error {
+	return ValidateTailwindConfiguration()
+}
+
+// ValidateTailwindConfigV4 checks if Tailwind v4 CSS-based configuration is valid
+func ValidateTailwindConfigV4() error {
+	inputPath := "input.css"
+
+	// Read input.css to check for v4 configuration
+	content, err := os.ReadFile(inputPath)
 	if err != nil {
-		return NewFileSystemError("cannot read tailwind.config.js", err)
+		return NewFileSystemError("cannot read input.css", err)
 	}
-	
+
 	contentStr := string(content)
-	
-	// Check for basic required sections
-	requiredPatterns := []string{
-		"content:", // Should specify content files
-		"theme:", // Should have theme configuration
+
+	// Check for v4 import
+	if !strings.Contains(contentStr, `@import "tailwindcss"`) {
+		return NewConfigurationErrorWithSuggestions(
+			"input.css missing Tailwind CSS v4 import",
+			[]string{
+				`Add '@import "tailwindcss";' to the top of input.css`,
+				"Refer to Tailwind CSS v4 documentation",
+			},
+		)
 	}
-	
-	for _, pattern := range requiredPatterns {
-		if !strings.Contains(contentStr, pattern) {
-			return NewConfigurationErrorWithSuggestions(
-				fmt.Sprintf("tailwind.config.js missing required section: %s", pattern),
-				[]string{
-					"Check the Tailwind configuration syntax",
-					"Run 'garp init' to regenerate a proper config",
-					"Refer to Tailwind CSS documentation",
-				},
-			)
-		}
-	}
-	
+
 	return nil
 }
 
 // ValidateInputCSS checks if the input CSS file is valid
 func ValidateInputCSS() error {
 	inputPath := "input.css"
-	
+
 	// Check if file exists
 	if _, err := os.Stat(inputPath); os.IsNotExist(err) {
 		return NewConfigurationErrorWithSuggestions(
@@ -443,34 +461,34 @@ func ValidateInputCSS() error {
 			},
 		)
 	}
-	
+
 	// Basic content validation
 	content, err := os.ReadFile(inputPath)
 	if err != nil {
 		return NewFileSystemError("cannot read input.css", err)
 	}
-	
+
 	contentStr := string(content)
-	
+
 	// Check for Tailwind directives (either individual @tailwind directives or @import)
-	hasImport := strings.Contains(contentStr, "@import \"tailwindcss\"") || 
-				 strings.Contains(contentStr, "@import 'tailwindcss'")
-	
+	hasImport := strings.Contains(contentStr, "@import \"tailwindcss\"") ||
+		strings.Contains(contentStr, "@import 'tailwindcss'")
+
 	if !hasImport {
 		// Check for individual directives
 		tailwindDirectives := []string{
 			"@tailwind base",
-			"@tailwind components", 
+			"@tailwind components",
 			"@tailwind utilities",
 		}
-		
+
 		missing := []string{}
 		for _, directive := range tailwindDirectives {
 			if !strings.Contains(contentStr, directive) {
 				missing = append(missing, directive)
 			}
 		}
-		
+
 		if len(missing) > 0 {
 			return NewConfigurationErrorWithSuggestions(
 				fmt.Sprintf("input.css missing Tailwind setup - neither @import nor individual directives found"),
@@ -483,7 +501,7 @@ func ValidateInputCSS() error {
 			)
 		}
 	}
-	
+
 	return nil
 }
 
@@ -493,10 +511,10 @@ func ValidateBuildScripts() error {
 		"bin/build-css",
 		"bin/build-search-index",
 	}
-	
+
 	missing := []string{}
 	notExecutable := []string{}
-	
+
 	for _, script := range scripts {
 		stat, err := os.Stat(script)
 		if os.IsNotExist(err) {
@@ -506,13 +524,13 @@ func ValidateBuildScripts() error {
 		if err != nil {
 			return NewFileSystemError(fmt.Sprintf("cannot access %s", script), err)
 		}
-		
+
 		// Check if executable
 		if stat.Mode()&0111 == 0 {
 			notExecutable = append(notExecutable, script)
 		}
 	}
-	
+
 	if len(missing) > 0 {
 		return NewConfigurationErrorWithSuggestions(
 			fmt.Sprintf("missing build scripts: %s", strings.Join(missing, ", ")),
@@ -522,9 +540,9 @@ func ValidateBuildScripts() error {
 			},
 		)
 	}
-	
+
 	if len(notExecutable) > 0 {
-		return NewConfigurationErrorWithSuggestions(  
+		return NewConfigurationErrorWithSuggestions(
 			fmt.Sprintf("build scripts not executable: %s", strings.Join(notExecutable, ", ")),
 			[]string{
 				"Run 'chmod +x bin/*' to make scripts executable",
@@ -532,14 +550,14 @@ func ValidateBuildScripts() error {
 			},
 		)
 	}
-	
+
 	return nil
 }
 
 // ValidateProjectConfiguration runs comprehensive configuration validation
 func ValidateProjectConfiguration() []error {
 	var errors []error
-	
+
 	validations := []func() error{
 		ValidateGarpProject,
 		ValidateCaddyfile,
@@ -547,12 +565,12 @@ func ValidateProjectConfiguration() []error {
 		ValidateInputCSS,
 		ValidateBuildScripts,
 	}
-	
+
 	for _, validation := range validations {
 		if err := validation(); err != nil {
 			errors = append(errors, err)
 		}
 	}
-	
+
 	return errors
 }
