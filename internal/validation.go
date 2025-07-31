@@ -182,62 +182,16 @@ func ValidateFile(path string) error {
 
 // ValidateGarpProject checks if the current directory is a valid Garp project
 func ValidateGarpProject() error {
-	// Check for essential Garp project files and directories
-	requiredFiles := []string{
-		"input.css",
-	}
-
-	requiredDirs := []string{
-		"public",
-		"bin",
-	}
-
-	requiredProjectFiles := []string{
-		"Caddyfile",
-	}
-
-	missing := []string{}
-
-	// Check required files in project root
-	for _, file := range requiredFiles {
-		if _, err := os.Stat(file); os.IsNotExist(err) {
-			missing = append(missing, file)
-		}
-	}
-
-	// Check required directories
-	for _, dir := range requiredDirs {
-		if stat, err := os.Stat(dir); os.IsNotExist(err) || !stat.IsDir() {
-			missing = append(missing, dir+"/")
-		}
-	}
-
-	// Check required files within the project
-	for _, file := range requiredProjectFiles {
-		if _, err := os.Stat(file); os.IsNotExist(err) {
-			missing = append(missing, file)
-		}
-	}
-
-	if len(missing) > 0 {
-		suggestions := []string{
-			"Run 'garp init' to create a new Garp project",
-			"Make sure you're in the project root directory",
-		}
-
-		if len(missing) < len(requiredFiles)+len(requiredDirs)+len(requiredProjectFiles) {
-			suggestions = append(suggestions, "Some files exist - this might be a corrupted project")
-		}
-
+	// Minimal validation - just check if Caddyfile exists for serve command
+	if _, err := os.Stat("Caddyfile"); os.IsNotExist(err) {
 		return NewConfigurationErrorWithSuggestions(
-			fmt.Sprintf("not a valid Garp project (missing: %s)", strings.Join(missing, ", ")),
-			suggestions,
+			"Caddyfile not found",
+			[]string{
+				"Run 'garp init' to create a new Garp project",
+				"Create a Caddyfile for Caddy server configuration",
+				"Make sure you're in the project root directory",
+			},
 		)
-	}
-
-	// Check for Tailwind configuration (v3 config file or v4 CSS-based config)
-	if err := ValidateTailwindConfiguration(); err != nil {
-		return err
 	}
 
 	return nil
@@ -423,12 +377,12 @@ func ValidateTailwindConfig() error {
 
 // ValidateTailwindConfigV4 checks if Tailwind v4 CSS-based configuration is valid
 func ValidateTailwindConfigV4() error {
-	inputPath := "input.css"
+	inputPath := "public/css/input.css"
 
 	// Read input.css to check for v4 configuration
 	content, err := os.ReadFile(inputPath)
 	if err != nil {
-		return NewFileSystemError("cannot read input.css", err)
+		return NewFileSystemError("cannot read public/css/input.css", err)
 	}
 
 	contentStr := string(content)
@@ -438,7 +392,7 @@ func ValidateTailwindConfigV4() error {
 		return NewConfigurationErrorWithSuggestions(
 			"input.css missing Tailwind CSS v4 import",
 			[]string{
-				`Add '@import "tailwindcss";' to the top of input.css`,
+				`Add '@import "tailwindcss";' to the top of public/css/input.css`,
 				"Refer to Tailwind CSS v4 documentation",
 			},
 		)
@@ -449,7 +403,7 @@ func ValidateTailwindConfigV4() error {
 
 // ValidateInputCSS checks if the input CSS file is valid
 func ValidateInputCSS() error {
-	inputPath := "input.css"
+	inputPath := "public/css/input.css"
 
 	// Check if file exists
 	if _, err := os.Stat(inputPath); os.IsNotExist(err) {
@@ -457,7 +411,7 @@ func ValidateInputCSS() error {
 			"input.css not found",
 			[]string{
 				"Run 'garp init' to create a new project with input.css",
-				"Create an input.css file in the project root",
+				"Create an input.css file in public/css/",
 			},
 		)
 	}
@@ -465,7 +419,7 @@ func ValidateInputCSS() error {
 	// Basic content validation
 	content, err := os.ReadFile(inputPath)
 	if err != nil {
-		return NewFileSystemError("cannot read input.css", err)
+		return NewFileSystemError("cannot read public/css/input.css", err)
 	}
 
 	contentStr := string(content)
@@ -493,7 +447,7 @@ func ValidateInputCSS() error {
 			return NewConfigurationErrorWithSuggestions(
 				fmt.Sprintf("input.css missing Tailwind setup - neither @import nor individual directives found"),
 				[]string{
-					"Add '@import \"tailwindcss\";' to the top of input.css",
+					"Add '@import \"tailwindcss\";' to the top of public/css/input.css",
 					"Or add individual directives: @tailwind base; @tailwind components; @tailwind utilities;",
 					"Run 'garp init' to regenerate a proper input.css",
 					"Refer to Tailwind CSS documentation for setup",
