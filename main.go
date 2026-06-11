@@ -18,7 +18,7 @@ func main() {
 	case "build":
 		run(cmdBuild(os.Args[2:]))
 	case "serve":
-		// TODO: build, serve, and watch
+		run(cmdServe(os.Args[2:]))
 	case "-h", "--help", "help":
 		usage()
 	default:
