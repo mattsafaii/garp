@@ -14,7 +14,7 @@ func main() {
 
 	switch os.Args[1] {
 	case "new":
-		// TODO: scaffold a project
+		run(cmdNew(os.Args[2:]))
 	case "build":
 		// TODO: build the site
 	case "serve":
@@ -25,6 +25,13 @@ func main() {
 		fmt.Fprintf(os.Stderr, "garp: unknown command %q\n\n", os.Args[1])
 		usage()
 		os.Exit(2)
+	}
+}
+
+func run(err error) {
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "garp: %v\n", err)
+		os.Exit(1)
 	}
 }
 
