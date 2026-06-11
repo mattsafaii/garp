@@ -16,7 +16,7 @@ func main() {
 	case "new":
 		run(cmdNew(os.Args[2:]))
 	case "build":
-		// TODO: build the site
+		run(cmdBuild(os.Args[2:]))
 	case "serve":
 		// TODO: build, serve, and watch
 	case "-h", "--help", "help":
