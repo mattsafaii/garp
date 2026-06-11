@@ -1,0 +1,11 @@
+# Build output
+site/
+
+# Compiled binary
+/garp
+
+# Local session config
+.basecamp/
+
+# macOS
+.DS_Store
