@@ -75,5 +75,6 @@ func parseFrontmatter(src []byte) (map[string]any, string, error) {
 	if front == nil {
 		front = map[string]any{}
 	}
+	normalizeDates(front)
 	return front, body, nil
 }

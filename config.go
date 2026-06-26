@@ -30,6 +30,7 @@ func loadConfig(path string) (*Config, error) {
 	if raw == nil {
 		raw = map[string]any{}
 	}
+	normalizeDates(raw)
 
 	cfg := &Config{
 		OutputDir: "site",

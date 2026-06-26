@@ -29,6 +29,7 @@ Garp is a fast, minimal static site generator written in Go. It compiles to a si
   - **One per `tags:` entry** (string or list in the cascade) — a page with `tags: [featured]` joins `collections.featured`.
   - Entries carry `url`, `title`, `date`, and full `data`. Sorted newest-first by `date`; undated entries follow, ordered by source path. A page reached two ways (its directory plus a tag) is deduped within each collection.
 - **Templates:** Pongo2, using `extends`/`block`/`include`. Layouts live in `layouts/`, reusable fragments in `components/`. Both `extends "x.html"` and `include "x.html"` resolve by bare name against `layouts/` then `components/` (no path prefixes). A page's rendered HTML reaches its layout as `{{ content }}` — emit it with `{{ content | safe }}`. Page Markdown bodies are run through Pongo2 *before* goldmark, so `{{ site.* }}` and cascade variables work inside content too.
+- **Dates:** a YAML date in frontmatter or data (`date: 2026-05-22`) is wrapped so a bare `{{ date }}` renders as an ISO date (`2026-05-22`), not Go's raw `time.Time` string. Format it with the `date` filter and a Go reference layout: `{{ post.date | date:"January 2, 2006" }}` → `May 22, 2026`; `{{ post.date | date }}` with no argument falls back to ISO. (`time` is an alias for the same filter.) Collections still sort by the underlying date value.
 
 ## No-gos (do not build these)
 

@@ -40,7 +40,7 @@ func loadGlobalData(dataDir string) (map[string]any, error) {
 		if err := yaml.Unmarshal(b, &v); err != nil {
 			return nil, fmt.Errorf("data/%s: %w", name, err)
 		}
-		global[strings.TrimSuffix(name, ext)] = v
+		global[strings.TrimSuffix(name, ext)] = normalizeDates(v)
 	}
 	return global, nil
 }
@@ -65,6 +65,7 @@ func loadDirData(contentDir string) (map[string]map[string]any, error) {
 		if err := yaml.Unmarshal(b, &v); err != nil {
 			return fmt.Errorf("%s: %w", path, err)
 		}
+		normalizeDates(v)
 		rel, err := filepath.Rel(contentDir, filepath.Dir(path))
 		if err != nil {
 			return err

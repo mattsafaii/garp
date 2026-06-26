@@ -28,7 +28,7 @@ func buildFixture(t *testing.T) string {
 title: Blog
 layout: base.html
 ---
-{% for post in collections.blog %}* [{{ post.title }}]({{ post.url }})
+{% for post in collections.blog %}* [{{ post.title }}]({{ post.url }}) {{ post.date }} / {{ post.date | date:"Jan 2, 2006" }}
 {% endfor %}`)
 	writeFile(t, root, "content/blog/first.md", "---\ntitle: First Post\ndate: 2026-01-05\n---\nfirst\n")
 	writeFile(t, root, "content/blog/second.md", "---\ntitle: Second Post\ndate: 2026-02-10\n---\nsecond\n")
@@ -88,6 +88,10 @@ func TestBuildSite(t *testing.T) {
 	}
 	if !strings.Contains(blogIndex, "/blog/first") {
 		t.Errorf("collection urls missing:\n%s", blogIndex)
+	}
+	// dates render clean by default (ISO) and via the date filter
+	if !strings.Contains(blogIndex, "2026-02-10 / Feb 10, 2026") {
+		t.Errorf("date formatting wrong (want clean default + filter):\n%s", blogIndex)
 	}
 
 	// static passthrough

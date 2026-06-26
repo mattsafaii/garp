@@ -85,7 +85,10 @@ func tagList(data map[string]any) []string {
 }
 
 func pageDate(data map[string]any) time.Time {
-	if t, ok := data["date"].(time.Time); ok {
+	switch t := data["date"].(type) {
+	case Date:
+		return t.Time
+	case time.Time:
 		return t
 	}
 	return time.Time{}
