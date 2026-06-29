@@ -43,11 +43,12 @@ Point your host at `site/` and you're live.
 ```
 mysite/
 ├── config.yaml     # site_name, base_url, output_dir + any custom keys
+├── DESIGN.md       # design tokens (front matter) + rationale (prose)
 ├── content/        # the ONLY directory that becomes pages
 ├── layouts/        # page templates (extends / block)
 ├── components/     # reusable fragments (include)
 ├── data/           # global data files
-├── static/         # copied to the output verbatim
+├── static/         # copied to the output verbatim (incl. the seed app.css)
 └── site/           # generated output (gitignored)
 ```
 
