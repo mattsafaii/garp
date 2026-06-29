@@ -20,7 +20,7 @@ func writeFile(t *testing.T, dir, rel, content string) {
 func TestLoadGlobalData(t *testing.T) {
 	dir := t.TempDir()
 	writeFile(t, dir, "nav.yaml", "- Home\n- About\n")
-	writeFile(t, dir, "company.json", `{"name": "Zonebrite"}`)
+	writeFile(t, dir, "company.json", `{"name": "Acme"}`)
 	writeFile(t, dir, "readme.txt", "ignored")
 
 	global, err := loadGlobalData(dir)
@@ -32,7 +32,7 @@ func TestLoadGlobalData(t *testing.T) {
 		t.Errorf("nav = %v", global["nav"])
 	}
 	company, ok := global["company"].(map[string]any)
-	if !ok || company["name"] != "Zonebrite" {
+	if !ok || company["name"] != "Acme" {
 		t.Errorf("company = %v", global["company"])
 	}
 	if _, ok := global["readme"]; ok {

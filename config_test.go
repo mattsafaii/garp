@@ -17,8 +17,8 @@ func writeConfig(t *testing.T, content string) string {
 
 func TestLoadConfig(t *testing.T) {
 	cfg, err := loadConfig(writeConfig(t, `
-site_name: Zonebrite
-base_url: https://zonebrite.com
+site_name: Acme
+base_url: https://example.com
 output_dir: dist
 phone: "555-1234"
 nav:
@@ -28,10 +28,10 @@ nav:
 	if err != nil {
 		t.Fatal(err)
 	}
-	if cfg.SiteName != "Zonebrite" {
+	if cfg.SiteName != "Acme" {
 		t.Errorf("SiteName = %q", cfg.SiteName)
 	}
-	if cfg.BaseURL != "https://zonebrite.com" {
+	if cfg.BaseURL != "https://example.com" {
 		t.Errorf("BaseURL = %q", cfg.BaseURL)
 	}
 	if cfg.OutputDir != "dist" {
@@ -40,7 +40,7 @@ nav:
 	if cfg.Site["phone"] != "555-1234" {
 		t.Errorf("Site[phone] = %v", cfg.Site["phone"])
 	}
-	if cfg.Site["site_name"] != "Zonebrite" {
+	if cfg.Site["site_name"] != "Acme" {
 		t.Errorf("known keys should also appear under site.*, got %v", cfg.Site["site_name"])
 	}
 	nav, ok := cfg.Site["nav"].([]any)
