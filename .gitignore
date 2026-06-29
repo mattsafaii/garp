@@ -6,6 +6,7 @@ site/
 
 # Local session config
 .basecamp/
+solo.yml
 
 # macOS
 .DS_Store
