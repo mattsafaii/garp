@@ -1,6 +1,6 @@
 # Garp
 
-Garp is a fast, minimal static site generator written in Go. It compiles to a single dependency-free binary and exists to fill one gap: **Nunjucks-style templating in a single binary, with no Node toolchain.** Hugo is a single binary but its Go templating is miserable; 11ty has the templating and data model but needs Node/npm. Garp gives you Pongo2 (Jinja2/Nunjucks-familiar) templates and an 11ty-like data cascade and collections, emitting plain static files that deploy to any host. It's built to craft client marketing sites for Safaii Studio and Zonebrite.
+Garp is a fast, minimal static site generator written in Go. It compiles to a single dependency-free binary and exists to fill one gap: **Nunjucks-style templating in a single binary, with no Node toolchain.** Hugo is a single binary but its Go templating is miserable; 11ty has the templating and data model but needs Node/npm. Garp gives you Pongo2 (Jinja2/Nunjucks-familiar) templates and an 11ty-like data cascade and collections, emitting plain static files that deploy to any host. It's built to craft client marketing sites for Safaii Studio.
 
 ## Stack
 
