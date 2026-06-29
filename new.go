@@ -17,7 +17,7 @@ const scaffoldLayout = `<!DOCTYPE html>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% if title %}{{ title }} — {% endif %}{{ site.site_name }}</title>
-  <link rel="stylesheet" href="/app.css">
+  <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   {% block content %}{{ content | safe }}{% endblock %}
@@ -36,7 +36,7 @@ This page is ` + "`content/index.md`" + `, rendered through ` + "`layouts/base.h
 Edit it, run ` + "`garp serve`" + `, and refresh.
 `
 
-// scaffoldStyles is the seed stylesheet copied to static/app.css. Vanilla CSS,
+// scaffoldStyles is the seed stylesheet copied to static/style.css. Vanilla CSS,
 // Safaii conventions: @layer config/reset/elements/components, oklch tokens as
 // custom properties, rem everywhere (px only for border/outline width), fluid
 // type via clamp() with cqi, and enhancements gated behind user preferences.
@@ -165,7 +165,7 @@ const scaffoldStyles = `@layer config, reset, elements, components;
 const scaffoldDesignMD = `---
 name: My Site
 version: 1.0.0
-description: Seed design system for a Garp site. Tokens map one-to-one to CSS custom properties in static/app.css.
+description: Seed design system for a Garp site. Tokens map one-to-one to CSS custom properties in static/style.css.
 colors:
   ink: oklch(20% 0.01 250)
   paper: oklch(98% 0.005 95)
@@ -217,7 +217,7 @@ components:
 
 This is the seed design system for a Garp site. The front matter above is the
 single source of truth for design tokens; every token maps one-to-one to a CSS
-custom property in static/app.css (colors.ink to --color-ink, spacing.md to
+custom property in static/style.css (colors.ink to --color-ink, spacing.md to
 --space-md, rounded.lg to --radius-lg). Edit tokens here and mirror the change
 in the stylesheet, or run npx design.md to lint and diff.
 
@@ -303,7 +303,7 @@ func cmdNew(args []string) error {
 		"config.yaml":       scaffoldConfig,
 		"layouts/base.html": scaffoldLayout,
 		"content/index.md":  scaffoldIndex,
-		"static/app.css":    scaffoldStyles,
+		"static/style.css":  scaffoldStyles,
 		"DESIGN.md":         scaffoldDesignMD,
 	}
 	for name, content := range files {

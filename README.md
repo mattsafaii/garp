@@ -48,7 +48,7 @@ mysite/
 ├── layouts/        # page templates (extends / block)
 ├── components/     # reusable fragments (include)
 ├── data/           # global data files
-├── static/         # copied to the output verbatim (incl. the seed app.css)
+├── static/         # copied to the output verbatim (incl. the seed style.css)
 └── site/           # generated output (gitignored)
 ```
 
