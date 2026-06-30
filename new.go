@@ -36,122 +36,176 @@ This page is ` + "`content/index.md`" + `, rendered through ` + "`layouts/base.h
 Edit it, run ` + "`garp serve`" + `, and refresh.
 `
 
-// scaffoldStyles is the seed stylesheet copied to static/style.css. Vanilla CSS
-// derived from the safaii-css starter (the canonical source of truth): @layer
-// config/reset/elements/components, oklch tokens as custom properties, the
-// --gutter/--stack/--measure spacing tokens (other sizes via calc()), a single
-// --radius, fluid type via clamp() with cqi, and enhancements gated behind user
-// preferences. The stylesheet is the design spec; keep it in sync with the
-// safaii-css references/starter.css.
-const scaffoldStyles = `@layer config, reset, elements, components;
+// scaffoldStyles is the seed stylesheet copied to static/style.css. It is a
+// verbatim copy of the safaii-css starter (the canonical source of truth):
+// ~/.claude/skills/safaii-css/references/starter.css. Do not hand-edit this
+// const — when the conventions move, refresh it from starter.css so `garp new`
+// keeps emitting exactly the canonical starter.
+const scaffoldStyles = `/* Starter stylesheet — extracted from mattsafaii.com (src/css/style.css).
+   Copy as the project's single stylesheet. Fill in the palette, keep the bones. */
+
+/* ── Layers ──────────────────────────────────────────────── */
+
+@layer config, reset, elements, components;
 
 @layer config {
-  :root {
-    --gutter: clamp(1ch, 2.5vmax, 3ch); /* inline spacing */
-    --stack: clamp(1.25ex, 2.5vmax, 1.75ex); /* block spacing */
-    --measure: 64ch; /* line length */
-    --radius: 0.25rem; /* one rem token, not literal px */
+	:root {
+		color-scheme: light;
+		font-size: clamp(95%, 85% + 0.5dvi, 115%);
+		--gutter: clamp(1ch, 2.5vmax, 3ch); /* inline spacing */
+		--stack: clamp(1.25ex, 2.5vmax, 1.75ex); /* block spacing */
+		--measure: 64ch;
+		--radius: 0.25rem; /* corner radius — one rem token, not literal px */
+		/* Project palette — always oklch */
+		--color-bg: oklch(98% 0 0);
+		--color-text: oklch(20% 0 0);
+		--color-accent: oklch(45% 0.15 25);
+		accent-color: var(--color-accent);
+	}
 
-    --color-bg: oklch(98% 0.005 95);
-    --color-text: oklch(20% 0.01 250);
-    --color-accent: oklch(55% 0.18 25);
-    --color-border: oklch(85% 0.01 250);
-
-    --font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
-    --font-sans: system-ui, sans-serif;
-  }
+	@view-transition {
+		navigation: auto;
+	}
 }
 
 @layer reset {
-  *,
-  *::before,
-  *::after { box-sizing: border-box; }
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+		margin: 0;
+		padding: 0;
+		font-kerning: normal;
+	}
 
-  * { margin: 0; }
+	input,
+	button,
+	textarea,
+	select {
+		font: inherit;
+	}
 
-  img,
-  picture,
-  svg { display: block; max-width: 100%; }
-
-  a { color: inherit; }
+	@media (forced-colors: active) {
+		:where(button) {
+			border: 1px solid;
+		}
+	}
 }
 
 @layer elements {
-  body {
-    container-type: inline-size;
-    max-inline-size: var(--measure);
-    margin-inline: auto;
-    padding-block: calc(var(--stack) * 3);
-    padding-inline: var(--gutter);
-    background: var(--color-bg);
-    color: var(--color-text);
-    font-family: var(--font-serif);
-    font-size: 1rem;
-    line-height: 1.6;
-  }
+	@media (prefers-reduced-motion: no-preference) {
+		:root {
+			scroll-behavior: smooth;
+		}
+	}
 
-  h1,
-  h2,
-  h3 {
-    margin-block: calc(var(--stack) * 2) var(--stack);
-    font-family: var(--font-sans);
-    line-height: 1.1;
-  }
+	body {
+		-webkit-font-smoothing: antialiased;
+		font: 1rem / 1.35 Georgia, serif; /* project type goes here */
+		color: var(--color-text);
+		background-color: var(--color-bg);
+		display: grid;
+		grid-template-columns:
+			[bleed-start] minmax(var(--gutter), 1fr)
+			[content-start] minmax(0, var(--measure))
+			[content-end] minmax(var(--gutter), 1fr)
+			[bleed-end];
+		align-items: start;
+		padding-block: 8vh calc(var(--gutter) * 2);
+		overflow-x: clip;
+	}
 
-  /* Fluid headings: rem minimum, cqi ideal, rem max. */
-  h1 { font-size: clamp(2rem, 6cqi, 3.5rem); }
-  h2 { font-size: clamp(1.5rem, 4cqi, 2.25rem); }
-  h3 { font-size: 1.25rem; }
+	main {
+		grid-column: bleed;
+		display: grid;
+		grid-template-columns: subgrid;
+		align-items: start;
+	}
 
-  p { margin-block: var(--stack); }
+	main > * {
+		grid-column: content;
+	}
 
-  a { color: var(--color-accent); }
+	main > * + * {
+		margin-block-start: calc(var(--stack) * 2);
+	}
 
-  :focus-visible {
-    outline: 2px solid var(--color-accent);
-    outline-offset: 0.125rem;
-  }
+	a {
+		color: inherit;
+		text-underline-offset: 0.15em;
+		text-decoration-thickness: 0.05em;
+	}
+
+	a:hover {
+		text-decoration-color: var(--color-accent);
+	}
+
+	h1,
+	h2,
+	h3 {
+		margin-block-end: calc(var(--stack) / 2);
+		text-wrap: balance;
+		overflow-wrap: break-word;
+		hyphens: auto;
+	}
+
+	p,
+	ul,
+	ol {
+		margin-block-end: var(--stack);
+		text-wrap: pretty;
+	}
+
+	ul,
+	ol {
+		padding-inline-start: 2ch;
+	}
+
+	::selection {
+		background: var(--color-accent);
+		color: var(--color-bg);
+	}
+
+	:where(:focus-visible) {
+		outline: 2px solid var(--color-accent);
+		outline-offset: 2px;
+	}
+
+	:where(img, svg, video, iframe) {
+		max-inline-size: 100%;
+		block-size: auto;
+	}
+
+	:where(svg) {
+		fill: currentColor;
+	}
+
+	article {
+		content-visibility: auto;
+	}
 }
 
 @layer components {
-  /* Root-only component: a single plain rule, no descendants. */
-  .button {
-    display: inline-block;
-    padding: var(--stack) var(--gutter);
-    border-radius: var(--radius);
-    background: var(--color-accent);
-    color: var(--color-bg);
-    font-family: var(--font-sans);
-    text-decoration: none;
-  }
+	/* Each component: @scope to the root; use ` + "`to (...)`" + ` to stop at
+	   nested component boundaries. Example shape:
 
-  @media (prefers-reduced-motion: no-preference) {
-    .button { transition: background-color 150ms ease; }
-  }
+	@scope (.site-nav) {
+		:scope {
+			display: flex;
+			gap: var(--gutter);
+		}
 
-  @media (hover: hover) {
-    /* Darker accent derived inline, not a separate token. */
-    .button:hover { background: oklch(from var(--color-accent) calc(l - 0.07) c h); }
-  }
+		a {
+			text-decoration: none;
+		}
+	}
 
-  /* Component with descendants: scoped so its selectors never leak out. */
-  @scope (.card) {
-    :scope {
-      padding: var(--gutter);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius);
-      background: var(--color-bg);
-    }
-
-    @media (prefers-reduced-transparency: no-preference) {
-      :scope { background: oklch(from var(--color-bg) l c h / 0.75); }
-    }
-
-    h3 { margin-block: 0 var(--stack); }
-
-    /* Muted text derived from --color-text, not a separate token. */
-    p { color: color-mix(in oklch, var(--color-text), var(--color-bg) 40%); }
-  }
+	@scope (.card) to (.card-body) {
+		img {
+			border-radius: var(--radius);
+		}
+	}
+	*/
 }
 `
 
