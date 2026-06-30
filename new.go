@@ -51,7 +51,7 @@ const scaffoldStyles = `/* Starter stylesheet — extracted from mattsafaii.com 
 @layer config {
 	:root {
 		/* ── Color ── always oklch; swap per project */
-		color-scheme: light;
+		color-scheme: light; /* light-only by default; opt into dark deliberately */
 		--color-bg: oklch(98% 0 0);
 		--color-text: oklch(22% 0 0);
 		--color-accent: oklch(55% 0.13 250); /* placeholder accent */
@@ -207,6 +207,10 @@ const scaffoldStyles = `/* Starter stylesheet — extracted from mattsafaii.com 
 
 	:where(svg) {
 		fill: currentColor;
+	}
+
+	:where(input:is([type="checkbox"], [type="radio"]), select, label, button) {
+		cursor: pointer;
 	}
 
 	article {
