@@ -214,7 +214,8 @@ const scaffoldStyles = `/* Starter stylesheet — extracted from mattsafaii.com 
 	}
 
 	article {
-		content-visibility: auto;
+		content-visibility: auto; /* skip rendering off-screen articles */
+		contain-intrinsic-size: auto 60rem; /* size estimate so the scrollbar doesn't jump; auto remembers the real size after first render */
 	}
 }
 
