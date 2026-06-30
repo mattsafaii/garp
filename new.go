@@ -50,17 +50,44 @@ const scaffoldStyles = `/* Starter stylesheet — extracted from mattsafaii.com 
 
 @layer config {
 	:root {
+		/* ── Color ── always oklch; swap per project */
 		color-scheme: light;
-		font-size: clamp(95%, 85% + 0.5dvi, 115%);
-		--gutter: clamp(1ch, 2.5vmax, 3ch); /* inline spacing */
-		--stack: clamp(1.25ex, 2.5vmax, 1.75ex); /* block spacing */
-		--measure: 64ch;
-		--radius: 0.25rem; /* corner radius — one rem token, not literal px */
-		/* Project palette — always oklch */
 		--color-bg: oklch(98% 0 0);
-		--color-text: oklch(20% 0 0);
-		--color-accent: oklch(45% 0.15 25);
+		--color-text: oklch(22% 0 0);
+		--color-accent: oklch(55% 0.13 250); /* placeholder accent */
 		accent-color: var(--color-accent);
+
+		/* ── Typography ── */
+		font-size: clamp(95%, 85% + 0.5dvi, 115%);
+		--font-sans: system-ui, sans-serif;
+		--font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
+		--font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+		--font-body: var(--font-serif); /* document default */
+		--line-height: 1.5;
+		--measure: 64ch; /* line length */
+
+		/* ── Spacing ── 4px grid, rem-based */
+		--space-1: 0.25rem; /* 4 */
+		--space-2: 0.5rem; /* 8 */
+		--space-3: 0.75rem; /* 12 */
+		--space-4: 1rem; /* 16 */
+		--space-5: 1.25rem; /* 20 */
+		--space-6: 1.5rem; /* 24 */
+		--space-8: 2rem; /* 32 */
+		--space-10: 2.5rem; /* 40 */
+		--space-12: 3rem; /* 48 */
+		--space-16: 4rem; /* 64 */
+
+		/* Semantic spacing — fluid, bounded by scale steps. The scale gives
+		   fixed values; these two give responsive rhythm without leaving the
+		   grid. Anything needing an exact value uses --space-* directly. */
+		--gutter: clamp(var(--space-4), 2.5vmax, var(--space-6)); /* inline, 16 → 24 */
+		--stack: clamp(var(--space-3), 2vmax, var(--space-4)); /* block, 12 → 16 */
+
+		/* ── Radius ── */
+		--radius-sm: 0.125rem; /* 2 */
+		--radius: 0.25rem; /* 4 — base */
+		--radius-lg: 0.5rem; /* 8 */
 	}
 
 	@view-transition {
@@ -101,7 +128,9 @@ const scaffoldStyles = `/* Starter stylesheet — extracted from mattsafaii.com 
 
 	body {
 		-webkit-font-smoothing: antialiased;
-		font: 1rem / 1.35 Georgia, serif; /* project type goes here */
+		font-family: var(--font-body);
+		font-size: 1rem;
+		line-height: var(--line-height);
 		color: var(--color-text);
 		background-color: var(--color-bg);
 		display: grid;
@@ -186,7 +215,7 @@ const scaffoldStyles = `/* Starter stylesheet — extracted from mattsafaii.com 
 }
 
 @layer components {
-	/* Each component: @scope to the root; use ` + "`to (...)`" + ` to stop at
+	/* Each component: @scope to the root; use ` + "`" + `to (...)` + "`" + ` to stop at
 	   nested component boundaries. Example shape:
 
 	@scope (.site-nav) {
