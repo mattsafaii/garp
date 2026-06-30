@@ -233,9 +233,21 @@ const scaffoldStyles = `/* Starter stylesheet — extracted from mattsafaii.com 
 		}
 	}
 
-	@scope (.card) to (.card-body) {
+	   In .card below, the inset img uses a nested concentric corner —
+	   inner = outer − gap (padding + border) — as a calc() from tokens, so
+	   the curves stay parallel and the relationship holds if spacing changes.
+	   Use ` + "`" + `@scope (.card) to (.card-body)` + "`" + ` instead when the card wraps
+	   another component, to stop these rules at that nested boundary.
+
+	@scope (.card) {
+		:scope {
+			padding: var(--gutter);
+			border: 1px solid var(--color-text);
+			border-radius: var(--radius-lg);
+		}
+
 		img {
-			border-radius: var(--radius);
+			border-radius: calc(var(--radius-lg) - var(--gutter) - 1px);
 		}
 	}
 	*/
