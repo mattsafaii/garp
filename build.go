@@ -64,8 +64,8 @@ func buildSite(root string) (int, error) {
 	collections := buildCollections(refs)
 
 	outDir := filepath.Join(root, cfg.OutputDir)
-	if outDir == filepath.Clean(root) {
-		return 0, fmt.Errorf("output_dir %q would overwrite the project itself", cfg.OutputDir)
+	if err := checkOutputDir(root, outDir, cfg.OutputDir); err != nil {
+		return 0, err
 	}
 	if err := os.RemoveAll(outDir); err != nil {
 		return 0, err
@@ -109,6 +109,26 @@ func buildSite(root string) (int, error) {
 	}
 
 	return len(refs) + staticCount + seoCount, nil
+}
+
+// checkOutputDir rejects an output_dir the build would wipe destructively:
+// the project root itself, anything outside it, or a source directory —
+// os.RemoveAll(outDir) must only ever hit generated output.
+func checkOutputDir(root, outDir, configured string) error {
+	rel, err := filepath.Rel(root, outDir)
+	if err != nil || rel == "." {
+		return fmt.Errorf("output_dir %q would overwrite the project itself", configured)
+	}
+	if rel == ".." || strings.HasPrefix(rel, ".."+string(filepath.Separator)) {
+		return fmt.Errorf("output_dir %q is outside the project", configured)
+	}
+	top, _, _ := strings.Cut(rel, string(filepath.Separator))
+	for _, d := range []string{"content", "layouts", "components", "data", "static"} {
+		if top == d {
+			return fmt.Errorf("output_dir %q would delete the %s/ source directory", configured, d)
+		}
+	}
+	return nil
 }
 
 // synthesizeSEO writes sitemap.xml and robots.txt into outDir from the page

@@ -328,6 +328,31 @@ func TestBuildSiteRemovesStaleOutput(t *testing.T) {
 	}
 }
 
+// TestBuildSiteRejectsDangerousOutputDir guards the os.RemoveAll in buildSite:
+// an output_dir pointing at the project root, a source dir, or anywhere
+// outside the project must fail before anything is deleted.
+func TestBuildSiteRejectsDangerousOutputDir(t *testing.T) {
+	for _, dir := range []string{".", "..", "../elsewhere", "content", "content/out", "layouts", "components", "data", "static"} {
+		root := t.TempDir()
+		writeFile(t, root, "config.yaml", "site_name: X\noutput_dir: "+dir+"\n")
+		writeFile(t, root, "content/index.md", "home\n")
+		if _, err := buildSite(root); err == nil {
+			t.Errorf("output_dir %q should be rejected", dir)
+		}
+		if _, statErr := os.Stat(filepath.Join(root, "content", "index.md")); statErr != nil {
+			t.Errorf("output_dir %q: source content was deleted", dir)
+		}
+	}
+
+	// a harmless custom dir still works
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", "site_name: X\noutput_dir: dist\n")
+	writeFile(t, root, "content/index.md", "home\n")
+	if _, err := buildSite(root); err != nil {
+		t.Errorf("output_dir \"dist\" should build: %v", err)
+	}
+}
+
 func TestBuildSiteNoConfig(t *testing.T) {
 	_, err := buildSite(t.TempDir())
 	if err == nil || !strings.Contains(err.Error(), "config.yaml") {
