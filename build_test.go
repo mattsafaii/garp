@@ -254,6 +254,38 @@ func TestJSONLDValidates(t *testing.T) {
 	}
 }
 
+// TestShopifyBuyRenders exercises the real scaffold shopify-buy.html snippet
+// with a store domain/token from config.yaml and a product id from page
+// frontmatter — the two config slots the usage note documents.
+func TestShopifyBuyRenders(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", `site_name: Fixture
+base_url: https://fixture.test
+shopify:
+  domain: fixture-store.myshopify.com
+  storefront_access_token: fixture-token
+`)
+	writeFile(t, root, "components/shopify-buy.html", readScaffold(t, "scaffold/components/shopify-buy.html"))
+	writeFile(t, root, "layouts/base.html", `{% block content %}{{ content | safe }}{% endblock %}
+{% include "shopify-buy.html" %}`)
+	writeFile(t, root, "content/index.md", "---\nlayout: base.html\nshopify_product_id: \"123456789\"\n---\nhome\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+
+	html := read(t, root, "index.html")
+	for _, want := range []string{
+		`<div id="product-component-123456789">`,
+		`domain: "fixture-store.myshopify.com"`,
+		`storefrontAccessToken: "fixture-token"`,
+		`id: "123456789"`,
+	} {
+		if !strings.Contains(html, want) {
+			t.Errorf("shopify-buy.html missing %q:\n%s", want, html)
+		}
+	}
+}
+
 func TestBuildSiteRemovesStaleOutput(t *testing.T) {
 	root := buildFixture(t)
 	writeFile(t, root, "site/stale.html", "old")
