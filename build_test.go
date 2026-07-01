@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -214,6 +215,42 @@ func TestAnalyticsFathom(t *testing.T) {
 	html := read(t, root, "index.html")
 	if !strings.Contains(html, `data-site="XYZ987"`) || !strings.Contains(html, "usefathom.com/script.js") {
 		t.Errorf("fathom analytics not emitted:\n%s", html)
+	}
+}
+
+// TestJSONLDValidates builds a project with the real scaffold business.yaml
+// and jsonld.html, then parses the emitted <script type="application/ld+json">
+// block as JSON — guarding against a stray/missing comma in the conditional
+// fields breaking the output.
+func TestJSONLDValidates(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", "site_name: Fixture\nbase_url: https://fixture.test\n")
+	writeFile(t, root, "data/business.yaml", readScaffold(t, "scaffold/data/business.yaml"))
+	writeFile(t, root, "components/jsonld.html", readScaffold(t, "scaffold/components/jsonld.html"))
+	writeFile(t, root, "layouts/base.html", `{% block content %}{{ content | safe }}{% endblock %}
+{% include "jsonld.html" %}`)
+	writeFile(t, root, "content/index.md", "---\nlayout: base.html\n---\nhome\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+
+	html := read(t, root, "index.html")
+	start := strings.Index(html, "<script type=\"application/ld+json\">")
+	if start == -1 {
+		t.Fatalf("jsonld script not emitted:\n%s", html)
+	}
+	start += len("<script type=\"application/ld+json\">")
+	end := strings.Index(html[start:], "</script>")
+	if end == -1 {
+		t.Fatalf("jsonld script not closed:\n%s", html)
+	}
+
+	var parsed map[string]any
+	if err := json.Unmarshal([]byte(html[start:start+end]), &parsed); err != nil {
+		t.Fatalf("jsonld did not parse as JSON: %v\n%s", err, html[start:start+end])
+	}
+	if parsed["name"] != "My Business" {
+		t.Errorf("jsonld name = %v, want %q", parsed["name"], "My Business")
 	}
 }
 

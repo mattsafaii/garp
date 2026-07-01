@@ -15,3 +15,5 @@
 <meta name="twitter:title" content="{% if title %}{{ title }}{% else %}{{ site.site_name }}{% endif %}">
 {% if description %}<meta name="twitter:description" content="{{ description }}">{% endif %}
 {% if image %}<meta name="twitter:image" content="{{ site.base_url }}{{ image }}">{% endif %}
+
+{% include "jsonld.html" %}
