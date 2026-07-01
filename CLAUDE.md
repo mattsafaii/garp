@@ -14,7 +14,7 @@ Garp is organized in three layers. Keep them separate — the separation is what
 - **Toolbelt (Go)** — opt-in commands that automate recurring client chores (SEO files, favicons, OG images, handoff bundles). Each is subject to the litmus test below. Grows incrementally, driven by real client demand — never speculatively. Toolbelt commands live in their own files/packages and must never bloat the engine.
 - **Cockpit (Swift, later)** — a separate native Mac app ("my own Framer") that *drives* the garp binary; it never replaces it. Native SwiftUI + iCloud for Matt's own multi-site management and editing. Deferred; its own project, not bolted onto an engine cycle. The engine stays **Go** because the build must run portably in CI and on any future developer's machine — a Swift build tool would lock buildability to macOS and destroy the handoff/bus-factor guarantee.
 
-## Ground rules
+## Constraints
 
 1. **Litmus test.** Every tool garp gains must leave behind a plain artifact that survives without garp. If a feature would make the *output* depend on garp to function, it doesn't belong.
 2. **Handoff = repo + committed binary.** Clients receive the full source repo plus the compiled garp binary (optionally vendored garp source for the "outlive me forever" case). **Source is always committed; output-only handoff is never done.** This is deliberately *anti*-lock-in: a client can leave, or Matt can go MIA, and any developer picks the site up. A single dependency-free Go binary makes this handoff *more* durable than an npm-based SSG repo, not less — it builds with one command, no toolchain, forever.
@@ -39,7 +39,7 @@ Garp is organized in three layers. Keep them separate — the separation is what
 
 ### Toolbelt (planned — build incrementally, only when a real client job needs it)
 
-Not yet built. Each is a separate command subject to the litmus test. See the roadmap for batch order.
+Not yet built. Each is a separate command subject to the litmus test. See the roadmap for phase order.
 
 ## Conventions (hard rules)
 
@@ -60,11 +60,11 @@ Not yet built. Each is a separate command subject to the litmus test. See the ro
 
 ## Roadmap (build incrementally)
 
-Batches, not deadlines. Build a toolbelt command when a real client job needs it, not before.
+Phases, not deadlines. Build a toolbelt command when a real client job needs it, not before.
 
-- **Batch 1** — unblocks the small-catalog Shopify client and every future site. No new commands; a richer `garp new` scaffold plus one small build-time step. Scaffold cluster: `<head>` meta/OG/Twitter partial (with canonical, via the existing `page.url`), 404 page, `_headers` security defaults, config-driven analytics partial (Cloudflare Web Analytics / Plausible / Fathom), JSON-LD LocalBusiness partial + `data/business.yaml`, client-side Shopify Buy SDK snippet. Build step: synthesize **sitemap.xml** and **robots.txt** (from the page refs + `base_url`; both author-overridable — if the file exists in `static/`, the author's wins).
-- **Batch 2** — a **favicons** command (pure-Go resize; adds `golang.org/x/image` for quality downscaling), templated **OG images** (pure-Go text-on-image), **blog scaffold**, **RSS/Atom feed**, **`garp handoff`** (bundle repo + binary + a per-project "how to build/edit/deploy this" README — the bus-factor command), cookie/privacy boilerplate, Stripe buy button.
-- **Batch 3 / later** — **`garp fetch`** (snapshot remote data from Airtable / a third-party API / a SQLite DB into committed static data files → the cascade reads them; Mac-authoring-time, never in CI — see the data cascade rule), **image optimization** (the one genuine dependency fork: modern-format encoding needs vips/cwebp or cgo → Mac-authoring-time, artifacts committed), the client self-edit **CMS** track (git-based web CMS like PagesCMS, wired by a command — not built into the binary), and the **Swift cockpit**.
+- **Phase 1** — unblocks the small-catalog Shopify client and every future site. No new commands; a richer `garp new` scaffold plus one small build-time step. Scaffold cluster: `<head>` meta/OG/Twitter partial (with canonical, via the existing `page.url`), 404 page, `_headers` security defaults, config-driven analytics partial (Cloudflare Web Analytics / Plausible / Fathom), JSON-LD LocalBusiness partial + `data/business.yaml`, client-side Shopify Buy SDK snippet. Build step: synthesize **sitemap.xml** and **robots.txt** (from the page refs + `base_url`; both author-overridable — if the file exists in `static/`, the author's wins).
+- **Phase 2** — a **favicons** command (pure-Go resize; adds `golang.org/x/image` for quality downscaling), templated **OG images** (pure-Go text-on-image), **blog scaffold**, **RSS/Atom feed**, **`garp handoff`** (bundle repo + binary + a per-project "how to build/edit/deploy this" README — the bus-factor command), cookie/privacy boilerplate, Stripe buy button.
+- **Phase 3 / later** — **`garp fetch`** (snapshot remote data from Airtable / a third-party API / a SQLite DB into committed static data files → the cascade reads them; Mac-authoring-time, never in CI — see the data cascade rule), **image optimization** (the one genuine dependency fork: modern-format encoding needs vips/cwebp or cgo → Mac-authoring-time, artifacts committed), the client self-edit **CMS** track (git-based web CMS like PagesCMS, wired by a command — not built into the binary), and the **Swift cockpit**.
 
 ## No-gos
 
@@ -73,7 +73,7 @@ Batches, not deadlines. Build a toolbelt command when a real client job needs it
 - Auto-generated taxonomy / archive pages. A page set generated from a data collection — local *or* fetched — is out. Fetched data may populate template variables; it may never emit one-page-per-item. This is the line that keeps large-catalog ecommerce out of garp.
 - Built-in pagination.
 - Remote / computed / function-derived data **inside the build** — `build` and the cascade read only static local files. Remote data enters only via the out-of-band `garp fetch` snapshot command (see roadmap), which writes static files the cascade then reads. What stays forbidden is `build` itself reaching the network or running data functions.
-- Asset pipeline in the build — no Sass, no JS bundling, no minification. Vanilla CSS copied as a static file. (Image optimization is a *Mac-authoring-time toolbelt command*, never a CI build step — see batch 3.)
+- Asset pipeline in the build — no Sass, no JS bundling, no minification. Vanilla CSS copied as a static file. (Image optimization is a *Mac-authoring-time toolbelt command*, never a CI build step — see phase 3.)
 - Plugin or extensibility API.
 - Incremental / cached builds — full rebuild every time.
 - Multiple template engines — Pongo2 only.
@@ -82,8 +82,8 @@ Batches, not deadlines. Build a toolbelt command when a real client job needs it
 
 ### Reclassified (were flat no-gos; now planned, out of the durable core)
 
-- **Swift Mac app / CMS** — no longer forbidden, but it is the **cockpit layer** (batch 3+), a separate app that drives the binary. Still not part of an engine cycle.
-- **Image processing / responsive images** — a batch 3 **toolbelt** command that runs at Mac-authoring-time and commits plain artifacts. Never in the engine, never in the CI build path.
+- **Swift Mac app / CMS** — no longer forbidden, but it is the **cockpit layer** (phase 3+), a separate app that drives the binary. Still not part of an engine cycle.
+- **Image processing / responsive images** — a phase 3 **toolbelt** command that runs at Mac-authoring-time and commits plain artifacts. Never in the engine, never in the CI build path.
 
 ### The governing line
 
@@ -97,7 +97,7 @@ Do the obvious thing. No magic, no unnecessary abstractions. Single binary. Conv
 
 This project's Basecamp config (account / project / todolist IDs) is already set in `.basecamp/config.json` (gitignored), so `basecamp` commands work without flags from this directory.
 
-**Work is always tracked in Basecamp** — it's where the project, todos, and progress live. Run `basecamp todos list` to see the active todolist and check items off as you complete them. Each build cycle/batch gets its own todolist; the original **Build** list (v1) and **Batch 1 — SEO scaffold + Shopify snippet** are both complete. The full PRD is a Basecamp doc: run `basecamp docs list` and open the one titled **PRD**. The shaped pitch lives on the project's card in the Lab Ideas board.
+**Work is always tracked in Basecamp** — it's where the project, todos, and progress live. Run `basecamp todos list` to see the active todolist and check items off as you complete them. Each build cycle/phase gets its own todolist; the original **Build** list (v1) and **Phase 1 — SEO scaffold + Shopify snippet** are both complete. The full PRD is a Basecamp doc: run `basecamp docs list` and open the one titled **PRD**. The shaped pitch lives on the project's card in the Lab Ideas board.
 
 ## Solo
 
