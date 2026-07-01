@@ -1,0 +1,8 @@
+# Build output
+site/
+
+# Local session config
+.basecamp/
+
+# macOS
+.DS_Store
