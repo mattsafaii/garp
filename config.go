@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -39,8 +40,13 @@ func loadConfig(path string) (*Config, error) {
 	if v, ok := raw["site_name"].(string); ok {
 		cfg.SiteName = v
 	}
+	// A trailing slash on base_url would double up everywhere it's joined
+	// with a page URL (canonical, OG, sitemap, robots) — normalize it away,
+	// in the site.* map too so templates see the same value.
 	if v, ok := raw["base_url"].(string); ok {
+		v = strings.TrimRight(v, "/")
 		cfg.BaseURL = v
+		raw["base_url"] = v
 	}
 	if v, ok := raw["output_dir"].(string); ok && v != "" {
 		cfg.OutputDir = v

@@ -49,6 +49,19 @@ nav:
 	}
 }
 
+func TestLoadConfigNormalizesBaseURL(t *testing.T) {
+	cfg, err := loadConfig(writeConfig(t, "base_url: https://example.com/\n"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.BaseURL != "https://example.com" {
+		t.Errorf("BaseURL = %q, want trailing slash stripped", cfg.BaseURL)
+	}
+	if cfg.Site["base_url"] != "https://example.com" {
+		t.Errorf("Site[base_url] = %v, want normalized value for templates", cfg.Site["base_url"])
+	}
+}
+
 func TestLoadConfigDefaults(t *testing.T) {
 	cfg, err := loadConfig(writeConfig(t, "site_name: X\n"))
 	if err != nil {
