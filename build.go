@@ -1,12 +1,14 @@
 package main
 
 import (
+	"encoding/xml"
 	"errors"
 	"flag"
 	"fmt"
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -100,5 +102,70 @@ func buildSite(root string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-	return len(refs) + staticCount, nil
+
+	seoCount, err := synthesizeSEO(root, outDir, cfg, refs)
+	if err != nil {
+		return 0, err
+	}
+
+	return len(refs) + staticCount + seoCount, nil
+}
+
+// synthesizeSEO writes sitemap.xml and robots.txt into outDir from the page
+// refs and base_url. Either is author-overridable: if static/sitemap.xml or
+// static/robots.txt already exists, copyStatic has just placed the author's
+// own version in outDir and synthesis for that file is skipped so it isn't
+// clobbered.
+func synthesizeSEO(root, outDir string, cfg *Config, refs []*pageRef) (int, error) {
+	n := 0
+	if _, err := os.Stat(filepath.Join(root, "static", "sitemap.xml")); os.IsNotExist(err) {
+		if err := os.WriteFile(filepath.Join(outDir, "sitemap.xml"), []byte(renderSitemap(cfg.BaseURL, refs)), 0o644); err != nil {
+			return n, err
+		}
+		n++
+	} else if err != nil {
+		return n, err
+	}
+
+	if _, err := os.Stat(filepath.Join(root, "static", "robots.txt")); os.IsNotExist(err) {
+		if err := os.WriteFile(filepath.Join(outDir, "robots.txt"), []byte(renderRobots(cfg.BaseURL)), 0o644); err != nil {
+			return n, err
+		}
+		n++
+	} else if err != nil {
+		return n, err
+	}
+	return n, nil
+}
+
+// renderSitemap lists every page ref as an absolute URL under base_url, with
+// lastmod from the page's frontmatter date when it has one. The 404 page is
+// excluded — it isn't a real destination to index.
+func renderSitemap(baseURL string, refs []*pageRef) string {
+	var b strings.Builder
+	b.WriteString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
+	b.WriteString("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n")
+	for _, ref := range refs {
+		if ref.page.Source == "404.md" {
+			continue
+		}
+		b.WriteString("\t<url>\n")
+		b.WriteString("\t\t<loc>" + xmlEscape(baseURL+ref.url) + "</loc>\n")
+		if d := pageDate(ref.data); !d.IsZero() {
+			b.WriteString("\t\t<lastmod>" + d.Format("2006-01-02") + "</lastmod>\n")
+		}
+		b.WriteString("\t</url>\n")
+	}
+	b.WriteString("</urlset>\n")
+	return b.String()
+}
+
+func renderRobots(baseURL string) string {
+	return "User-agent: *\nAllow: /\n\nSitemap: " + baseURL + "/sitemap.xml\n"
+}
+
+func xmlEscape(s string) string {
+	var b strings.Builder
+	xml.EscapeText(&b, []byte(s))
+	return b.String()
 }

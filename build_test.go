@@ -51,8 +51,8 @@ func TestBuildSite(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if n != 6 {
-		t.Errorf("built %d files, want 6 (5 pages + 1 static)", n)
+	if n != 8 {
+		t.Errorf("built %d files, want 8 (5 pages + 1 static + sitemap.xml + robots.txt)", n)
 	}
 
 	index := read(t, root, "index.html")
@@ -97,6 +97,67 @@ func TestBuildSite(t *testing.T) {
 	// static passthrough
 	if read(t, root, "css/style.css") != "body{}" {
 		t.Error("static file not copied verbatim")
+	}
+}
+
+func TestBuildSiteSynthesizesSEO(t *testing.T) {
+	root := buildFixture(t)
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+
+	sitemap := read(t, root, "sitemap.xml")
+	if !strings.Contains(sitemap, "<loc>https://fixture.test/blog/first</loc>") {
+		t.Errorf("sitemap missing page url:\n%s", sitemap)
+	}
+	if !strings.Contains(sitemap, "<lastmod>2026-01-05</lastmod>") {
+		t.Errorf("sitemap missing lastmod for dated page:\n%s", sitemap)
+	}
+	start := strings.Index(sitemap, "<loc>https://fixture.test/about-us</loc>")
+	if start == -1 {
+		t.Fatalf("sitemap missing undated page url:\n%s", sitemap)
+	}
+	end := start + strings.Index(sitemap[start:], "</url>")
+	if strings.Contains(sitemap[start:end], "<lastmod>") {
+		t.Errorf("undated page should not have lastmod:\n%s", sitemap[start:end])
+	}
+
+	robots := read(t, root, "robots.txt")
+	if !strings.Contains(robots, "Sitemap: https://fixture.test/sitemap.xml") {
+		t.Errorf("robots.txt missing sitemap line:\n%s", robots)
+	}
+}
+
+func TestBuildSiteSitemapExcludes404(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", "site_name: Fixture\nbase_url: https://fixture.test\n")
+	writeFile(t, root, "layouts/base.html", "{% block content %}{{ content | safe }}{% endblock %}")
+	writeFile(t, root, "content/index.md", "---\nlayout: base.html\n---\nhome\n")
+	writeFile(t, root, "content/404.md", "---\nlayout: base.html\n---\nnot found\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+	sitemap := read(t, root, "sitemap.xml")
+	if strings.Contains(sitemap, "/404") {
+		t.Errorf("sitemap should exclude 404 page:\n%s", sitemap)
+	}
+}
+
+func TestBuildSiteSEOOverride(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", "site_name: Fixture\nbase_url: https://fixture.test\n")
+	writeFile(t, root, "layouts/base.html", "{% block content %}{{ content | safe }}{% endblock %}")
+	writeFile(t, root, "content/index.md", "---\nlayout: base.html\n---\nhome\n")
+	writeFile(t, root, "static/sitemap.xml", "custom sitemap\n")
+	writeFile(t, root, "static/robots.txt", "custom robots\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+	if read(t, root, "sitemap.xml") != "custom sitemap\n" {
+		t.Error("author's sitemap.xml should win over synthesis")
+	}
+	if read(t, root, "robots.txt") != "custom robots\n" {
+		t.Error("author's robots.txt should win over synthesis")
 	}
 }
 
