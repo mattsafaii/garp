@@ -1,0 +1,29 @@
+<!--
+Shopify Buy SDK snippet — opt-in, not included by default.
+
+To use on a page:
+  1. In config.yaml, add:
+       shopify:
+         domain: your-store.myshopify.com
+         storefront_access_token: your-storefront-access-token
+  2. In that page's frontmatter, set shopify_product_id to the product's
+     Shopify ID.
+  3. Include this component where the buy button should render.
+-->
+<div id="product-component-{{ shopify_product_id }}"></div>
+<script type="text/javascript" src="https://sdks.shopifycdn.com/buy-button/latest/buy-button-storefront.min.js"></script>
+<script type="text/javascript">
+	(function () {
+		var client = ShopifyBuy.buildClient({
+			domain: "{{ site.shopify.domain }}",
+			storefrontAccessToken: "{{ site.shopify.storefront_access_token }}",
+		});
+		ShopifyBuy.UI.onReady(client).then(function (ui) {
+			ui.createComponent("product", {
+				id: "{{ shopify_product_id }}",
+				node: document.getElementById("product-component-{{ shopify_product_id }}"),
+				moneyFormat: "%24%7B%7Bamount%7D%7D",
+			});
+		});
+	})();
+</script>

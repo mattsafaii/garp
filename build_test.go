@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"strings"
@@ -51,8 +52,8 @@ func TestBuildSite(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if n != 6 {
-		t.Errorf("built %d files, want 6 (5 pages + 1 static)", n)
+	if n != 8 {
+		t.Errorf("built %d files, want 8 (5 pages + 1 static + sitemap.xml + robots.txt)", n)
 	}
 
 	index := read(t, root, "index.html")
@@ -97,6 +98,222 @@ func TestBuildSite(t *testing.T) {
 	// static passthrough
 	if read(t, root, "css/style.css") != "body{}" {
 		t.Error("static file not copied verbatim")
+	}
+}
+
+func TestBuildSiteSynthesizesSEO(t *testing.T) {
+	root := buildFixture(t)
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+
+	sitemap := read(t, root, "sitemap.xml")
+	if !strings.Contains(sitemap, "<loc>https://fixture.test/blog/first</loc>") {
+		t.Errorf("sitemap missing page url:\n%s", sitemap)
+	}
+	if !strings.Contains(sitemap, "<lastmod>2026-01-05</lastmod>") {
+		t.Errorf("sitemap missing lastmod for dated page:\n%s", sitemap)
+	}
+	start := strings.Index(sitemap, "<loc>https://fixture.test/about-us</loc>")
+	if start == -1 {
+		t.Fatalf("sitemap missing undated page url:\n%s", sitemap)
+	}
+	end := start + strings.Index(sitemap[start:], "</url>")
+	if strings.Contains(sitemap[start:end], "<lastmod>") {
+		t.Errorf("undated page should not have lastmod:\n%s", sitemap[start:end])
+	}
+
+	robots := read(t, root, "robots.txt")
+	if !strings.Contains(robots, "Sitemap: https://fixture.test/sitemap.xml") {
+		t.Errorf("robots.txt missing sitemap line:\n%s", robots)
+	}
+}
+
+func TestBuildSiteSitemapExcludes404(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", "site_name: Fixture\nbase_url: https://fixture.test\n")
+	writeFile(t, root, "layouts/base.html", "{% block content %}{{ content | safe }}{% endblock %}")
+	writeFile(t, root, "content/index.md", "---\nlayout: base.html\n---\nhome\n")
+	writeFile(t, root, "content/404.md", "---\nlayout: base.html\n---\nnot found\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+	sitemap := read(t, root, "sitemap.xml")
+	if strings.Contains(sitemap, "/404") {
+		t.Errorf("sitemap should exclude 404 page:\n%s", sitemap)
+	}
+}
+
+func TestBuildSiteSEOOverride(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", "site_name: Fixture\nbase_url: https://fixture.test\n")
+	writeFile(t, root, "layouts/base.html", "{% block content %}{{ content | safe }}{% endblock %}")
+	writeFile(t, root, "content/index.md", "---\nlayout: base.html\n---\nhome\n")
+	writeFile(t, root, "static/sitemap.xml", "custom sitemap\n")
+	writeFile(t, root, "static/robots.txt", "custom robots\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+	if read(t, root, "sitemap.xml") != "custom sitemap\n" {
+		t.Error("author's sitemap.xml should win over synthesis")
+	}
+	if read(t, root, "robots.txt") != "custom robots\n" {
+		t.Error("author's robots.txt should win over synthesis")
+	}
+}
+
+// analyticsFixture builds a minimal site including the real scaffold
+// analytics.html, so these tests exercise the shipped file, not a copy.
+func analyticsFixture(t *testing.T, configExtra string) string {
+	t.Helper()
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", "site_name: Fixture\nbase_url: https://fixture.test\n"+configExtra)
+	writeFile(t, root, "layouts/base.html", `{% block content %}{{ content | safe }}{% endblock %}
+{% include "analytics.html" %}`)
+	writeFile(t, root, "components/analytics.html", readScaffold(t, "scaffold/components/analytics.html"))
+	writeFile(t, root, "content/index.md", "---\nlayout: base.html\n---\nhome\n")
+	return root
+}
+
+func TestAnalyticsEmitsNothingWhenUnset(t *testing.T) {
+	root := analyticsFixture(t, "")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+	if html := read(t, root, "index.html"); strings.Contains(html, "<script") {
+		t.Errorf("analytics should emit nothing when unset:\n%s", html)
+	}
+}
+
+func TestAnalyticsCloudflare(t *testing.T) {
+	root := analyticsFixture(t, "analytics:\n  provider: cloudflare\n  token: abc123\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+	html := read(t, root, "index.html")
+	if !strings.Contains(html, `data-cf-beacon='{"token": "abc123"}'`) {
+		t.Errorf("cloudflare analytics not emitted:\n%s", html)
+	}
+}
+
+func TestAnalyticsPlausible(t *testing.T) {
+	root := analyticsFixture(t, "analytics:\n  provider: plausible\n  domain: example.com\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+	html := read(t, root, "index.html")
+	if !strings.Contains(html, `data-domain="example.com"`) || !strings.Contains(html, "plausible.io/js/script.js") {
+		t.Errorf("plausible analytics not emitted:\n%s", html)
+	}
+}
+
+func TestAnalyticsFathom(t *testing.T) {
+	root := analyticsFixture(t, "analytics:\n  provider: fathom\n  site_id: XYZ987\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+	html := read(t, root, "index.html")
+	if !strings.Contains(html, `data-site="XYZ987"`) || !strings.Contains(html, "usefathom.com/script.js") {
+		t.Errorf("fathom analytics not emitted:\n%s", html)
+	}
+}
+
+// TestJSONLDValidates builds a project with the real scaffold business.yaml
+// and jsonld.html, then parses the emitted <script type="application/ld+json">
+// block as JSON — guarding against a stray/missing comma in the conditional
+// fields breaking the output.
+func TestJSONLDValidates(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", "site_name: Fixture\nbase_url: https://fixture.test\n")
+	writeFile(t, root, "data/business.yaml", readScaffold(t, "scaffold/data/business.yaml"))
+	writeFile(t, root, "components/jsonld.html", readScaffold(t, "scaffold/components/jsonld.html"))
+	writeFile(t, root, "layouts/base.html", `{% block content %}{{ content | safe }}{% endblock %}
+{% include "jsonld.html" %}`)
+	writeFile(t, root, "content/index.md", "---\nlayout: base.html\n---\nhome\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+
+	html := read(t, root, "index.html")
+	start := strings.Index(html, "<script type=\"application/ld+json\">")
+	if start == -1 {
+		t.Fatalf("jsonld script not emitted:\n%s", html)
+	}
+	start += len("<script type=\"application/ld+json\">")
+	end := strings.Index(html[start:], "</script>")
+	if end == -1 {
+		t.Fatalf("jsonld script not closed:\n%s", html)
+	}
+
+	var parsed map[string]any
+	if err := json.Unmarshal([]byte(html[start:start+end]), &parsed); err != nil {
+		t.Fatalf("jsonld did not parse as JSON: %v\n%s", err, html[start:start+end])
+	}
+	if parsed["name"] != "My Business" {
+		t.Errorf("jsonld name = %v, want %q", parsed["name"], "My Business")
+	}
+}
+
+// TestShopifyBuyRenders exercises the real scaffold shopify-buy.html snippet
+// with a store domain/token from config.yaml and a product id from page
+// frontmatter — the two config slots the usage note documents.
+func TestShopifyBuyRenders(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", `site_name: Fixture
+base_url: https://fixture.test
+shopify:
+  domain: fixture-store.myshopify.com
+  storefront_access_token: fixture-token
+`)
+	writeFile(t, root, "components/shopify-buy.html", readScaffold(t, "scaffold/components/shopify-buy.html"))
+	writeFile(t, root, "layouts/base.html", `{% block content %}{{ content | safe }}{% endblock %}
+{% include "shopify-buy.html" %}`)
+	writeFile(t, root, "content/index.md", "---\nlayout: base.html\nshopify_product_id: \"123456789\"\n---\nhome\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+
+	html := read(t, root, "index.html")
+	for _, want := range []string{
+		`<div id="product-component-123456789">`,
+		`domain: "fixture-store.myshopify.com"`,
+		`storefrontAccessToken: "fixture-token"`,
+		`id: "123456789"`,
+	} {
+		if !strings.Contains(html, want) {
+			t.Errorf("shopify-buy.html missing %q:\n%s", want, html)
+		}
+	}
+}
+
+// TestHeadPartialRenders exercises the real scaffold head.html against the
+// acceptance criteria: correct title, description, canonical, and OG +
+// Twitter tags from frontmatter/config.
+func TestHeadPartialRenders(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", "site_name: Fixture\nbase_url: https://fixture.test\n")
+	writeFile(t, root, "components/head.html", readScaffold(t, "scaffold/components/head.html"))
+	writeFile(t, root, "components/jsonld.html", readScaffold(t, "scaffold/components/jsonld.html"))
+	writeFile(t, root, "layouts/base.html", `<head>{% include "head.html" %}</head>{% block content %}{{ content | safe }}{% endblock %}`)
+	writeFile(t, root, "content/index.md", "---\ntitle: Home\ndescription: A test page.\nimage: /og.jpg\nlayout: base.html\n---\nbody\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+
+	html := read(t, root, "index.html")
+	for _, want := range []string{
+		"<title>Home — Fixture</title>",
+		`<meta name="description" content="A test page.">`,
+		`<link rel="canonical" href="https://fixture.test/">`,
+		`<meta property="og:title" content="Home">`,
+		`<meta property="og:description" content="A test page.">`,
+		`<meta property="og:image" content="https://fixture.test/og.jpg">`,
+		`<meta name="twitter:card" content="summary_large_image">`,
+		`<meta name="twitter:image" content="https://fixture.test/og.jpg">`,
+	} {
+		if !strings.Contains(html, want) {
+			t.Errorf("head.html missing %q:\n%s", want, html)
+		}
 	}
 }
 

@@ -1,15 +1,13 @@
 <!doctype html>
 <html lang="en">
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>{% if title %}{{ title }} — {% endif %}{{ site.site_name }}</title>
-	{% if description %}<meta name="description" content="{{ description }}">{% endif %}
+	{% include "head.html" %}
 	<link rel="stylesheet" href="/style.css">
 </head>
 <body>
 	<main>
 		{% block content %}{{ content | safe }}{% endblock %}
 	</main>
+	{% include "analytics.html" %}
 </body>
 </html>

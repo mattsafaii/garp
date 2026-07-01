@@ -1,0 +1,22 @@
+{% if business.name %}
+<script type="application/ld+json">
+{
+	"@context": "https://schema.org",
+	"@type": "LocalBusiness",
+	{% if business.description %}"description": "{{ business.description }}",{% endif %}
+	{% if business.telephone %}"telephone": "{{ business.telephone }}",{% endif %}
+	{% if business.image %}"image": "{{ business.image }}",{% endif %}
+	{% if business.address %}"address": {
+		"@type": "PostalAddress",
+		{% if business.address.streetAddress %}"streetAddress": "{{ business.address.streetAddress }}",{% endif %}
+		{% if business.address.addressLocality %}"addressLocality": "{{ business.address.addressLocality }}",{% endif %}
+		{% if business.address.addressRegion %}"addressRegion": "{{ business.address.addressRegion }}",{% endif %}
+		{% if business.address.postalCode %}"postalCode": "{{ business.address.postalCode }}",{% endif %}
+		"addressCountry": "{{ business.address.addressCountry }}"
+	},{% endif %}
+	{% if business.sameAs %}"sameAs": [{% for url in business.sameAs %}"{{ url }}"{% if not forloop.Last %},{% endif %}{% endfor %}],{% endif %}
+	"name": "{{ business.name }}",
+	"url": "{{ site.base_url }}"
+}
+</script>
+{% endif %}

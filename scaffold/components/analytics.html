@@ -1,0 +1,8 @@
+{# Config-driven analytics: set site.analytics in config.yaml to opt in. Emits nothing when unset. #}
+{% if site.analytics.provider == "cloudflare" and site.analytics.token %}
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token": "{{ site.analytics.token }}"}'></script>
+{% elif site.analytics.provider == "plausible" and site.analytics.domain %}
+<script defer data-domain="{{ site.analytics.domain }}" src="https://plausible.io/js/script.js"></script>
+{% elif site.analytics.provider == "fathom" and site.analytics.site_id %}
+<script src="https://cdn.usefathom.com/script.js" data-site="{{ site.analytics.site_id }}" defer></script>
+{% endif %}

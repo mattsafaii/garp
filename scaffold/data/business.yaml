@@ -1,0 +1,10 @@
+name: My Business
+description: A short description of what this business does.
+telephone: "+1-555-555-5555"
+address:
+  streetAddress: 123 Main St
+  addressLocality: Los Angeles
+  addressRegion: CA
+  postalCode: "90001"
+  addressCountry: US
+sameAs: []

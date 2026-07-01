@@ -34,7 +34,7 @@ Garp is organized in three layers. Keep them separate — the separation is what
 ### Engine (built, stable)
 
 - **`garp new <path>`** — scaffolds a project: the six reserved dirs (`content/ layouts/ components/ data/ static/ site/`), a `config.yaml`, one base layout, and a sample `content/index.md` that renders immediately with zero edits. This scaffold is also where most SEO/head/security defaults ship (see roadmap).
-- **`garp build`** — reads `config.yaml`, walks `content/`, merges the data cascade, renders Markdown + Pongo2 with layout chaining, writes flat `.html` to `site/`, copies `static/` verbatim. Prints file count + build time.
+- **`garp build`** — reads `config.yaml`, walks `content/`, merges the data cascade, renders Markdown + Pongo2 with layout chaining, writes flat `.html` to `site/`, copies `static/` verbatim. Also synthesizes `sitemap.xml` and `robots.txt` from the page refs and `base_url`; both are author-overridable — a file already present in `static/` always wins and synthesis for it is skipped. Prints file count + build time.
 - **`garp serve`** — runs build, serves `site/` over local HTTP, watches `content/ layouts/ components/ data/ static/ config.yaml` via fsnotify, rebuilds on change. Prints the local URL. Takes `-port N` (default 8080); without an explicit `-port` it falls back to an OS-assigned port if 8080 is taken. The HTTP handler mirrors the host: a clean URL like `/about` falls back to `about.html`.
 
 ### Toolbelt (planned — build incrementally, only when a real client job needs it)
