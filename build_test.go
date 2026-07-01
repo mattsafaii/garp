@@ -161,6 +161,62 @@ func TestBuildSiteSEOOverride(t *testing.T) {
 	}
 }
 
+// analyticsFixture builds a minimal site including the real scaffold
+// analytics.html, so these tests exercise the shipped file, not a copy.
+func analyticsFixture(t *testing.T, configExtra string) string {
+	t.Helper()
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", "site_name: Fixture\nbase_url: https://fixture.test\n"+configExtra)
+	writeFile(t, root, "layouts/base.html", `{% block content %}{{ content | safe }}{% endblock %}
+{% include "analytics.html" %}`)
+	writeFile(t, root, "components/analytics.html", readScaffold(t, "scaffold/components/analytics.html"))
+	writeFile(t, root, "content/index.md", "---\nlayout: base.html\n---\nhome\n")
+	return root
+}
+
+func TestAnalyticsEmitsNothingWhenUnset(t *testing.T) {
+	root := analyticsFixture(t, "")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+	if html := read(t, root, "index.html"); strings.Contains(html, "<script") {
+		t.Errorf("analytics should emit nothing when unset:\n%s", html)
+	}
+}
+
+func TestAnalyticsCloudflare(t *testing.T) {
+	root := analyticsFixture(t, "analytics:\n  provider: cloudflare\n  token: abc123\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+	html := read(t, root, "index.html")
+	if !strings.Contains(html, `data-cf-beacon='{"token": "abc123"}'`) {
+		t.Errorf("cloudflare analytics not emitted:\n%s", html)
+	}
+}
+
+func TestAnalyticsPlausible(t *testing.T) {
+	root := analyticsFixture(t, "analytics:\n  provider: plausible\n  domain: example.com\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+	html := read(t, root, "index.html")
+	if !strings.Contains(html, `data-domain="example.com"`) || !strings.Contains(html, "plausible.io/js/script.js") {
+		t.Errorf("plausible analytics not emitted:\n%s", html)
+	}
+}
+
+func TestAnalyticsFathom(t *testing.T) {
+	root := analyticsFixture(t, "analytics:\n  provider: fathom\n  site_id: XYZ987\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+	html := read(t, root, "index.html")
+	if !strings.Contains(html, `data-site="XYZ987"`) || !strings.Contains(html, "usefathom.com/script.js") {
+		t.Errorf("fathom analytics not emitted:\n%s", html)
+	}
+}
+
 func TestBuildSiteRemovesStaleOutput(t *testing.T) {
 	root := buildFixture(t)
 	writeFile(t, root, "site/stale.html", "old")
