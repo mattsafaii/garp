@@ -1,0 +1,17 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if title %}{{ title }} — {% endif %}{{ site.site_name }}</title>
+{% if description %}<meta name="description" content="{{ description }}">{% endif %}
+<link rel="canonical" href="{{ site.base_url }}{{ page.url }}">
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{ site.site_name }}">
+<meta property="og:title" content="{% if title %}{{ title }}{% else %}{{ site.site_name }}{% endif %}">
+{% if description %}<meta property="og:description" content="{{ description }}">{% endif %}
+<meta property="og:url" content="{{ site.base_url }}{{ page.url }}">
+{% if image %}<meta property="og:image" content="{{ site.base_url }}{{ image }}">{% endif %}
+
+<meta name="twitter:card" content="{% if image %}summary_large_image{% else %}summary{% endif %}">
+<meta name="twitter:title" content="{% if title %}{{ title }}{% else %}{{ site.site_name }}{% endif %}">
+{% if description %}<meta name="twitter:description" content="{{ description }}">{% endif %}
+{% if image %}<meta name="twitter:image" content="{{ site.base_url }}{{ image }}">{% endif %}
