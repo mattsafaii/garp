@@ -286,6 +286,37 @@ shopify:
 	}
 }
 
+// TestHeadPartialRenders exercises the real scaffold head.html against the
+// acceptance criteria: correct title, description, canonical, and OG +
+// Twitter tags from frontmatter/config.
+func TestHeadPartialRenders(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", "site_name: Fixture\nbase_url: https://fixture.test\n")
+	writeFile(t, root, "components/head.html", readScaffold(t, "scaffold/components/head.html"))
+	writeFile(t, root, "components/jsonld.html", readScaffold(t, "scaffold/components/jsonld.html"))
+	writeFile(t, root, "layouts/base.html", `<head>{% include "head.html" %}</head>{% block content %}{{ content | safe }}{% endblock %}`)
+	writeFile(t, root, "content/index.md", "---\ntitle: Home\ndescription: A test page.\nimage: /og.jpg\nlayout: base.html\n---\nbody\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+
+	html := read(t, root, "index.html")
+	for _, want := range []string{
+		"<title>Home — Fixture</title>",
+		`<meta name="description" content="A test page.">`,
+		`<link rel="canonical" href="https://fixture.test/">`,
+		`<meta property="og:title" content="Home">`,
+		`<meta property="og:description" content="A test page.">`,
+		`<meta property="og:image" content="https://fixture.test/og.jpg">`,
+		`<meta name="twitter:card" content="summary_large_image">`,
+		`<meta name="twitter:image" content="https://fixture.test/og.jpg">`,
+	} {
+		if !strings.Contains(html, want) {
+			t.Errorf("head.html missing %q:\n%s", want, html)
+		}
+	}
+}
+
 func TestBuildSiteRemovesStaleOutput(t *testing.T) {
 	root := buildFixture(t)
 	writeFile(t, root, "site/stale.html", "old")
