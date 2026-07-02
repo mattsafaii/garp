@@ -91,7 +91,11 @@ Not in the durable core; allowed as an opt-in toolbelt (or the cockpit), and onl
 
 ## Philosophy
 
-Do the obvious thing. No magic, no unnecessary abstractions. Single binary. Convention over configuration. Zero client-side JS shipped by default (opt-in snippets like Shopify or analytics are the author's explicit choice). Build speed is a first-class feature. Above all: **the tooling vanishes into a self-sufficient deliverable, and the engine stays small enough that any developer — including a future you — can read the whole thing in an afternoon.**
+Do the obvious thing. No magic, no unnecessary abstractions. Single binary. Convention over configuration. Zero client-side JS shipped by default (opt-in snippets like Shopify or analytics are the author's explicit choice). Build speed is a first-class feature.
+
+**AI-accelerated, never AI-dependent.** Agents and skills may drive garp; garp, its output, and its handoffs never reference or require AI. The dependency arrow points one way only — and no convention may live solely in an AI layer: human-readable docs (README, HANDOFF.md) are the source of truth, a skill is at most a translation of them. If AI disappeared tomorrow, everything still works; the only thing lost is speed.
+
+Above all: **the tooling vanishes into a self-sufficient deliverable, and the engine stays small enough that any developer — including a future you — can read the whole thing in an afternoon.**
 
 ## Basecamp
 
