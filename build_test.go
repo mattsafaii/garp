@@ -353,6 +353,23 @@ func TestBuildSiteRejectsDangerousOutputDir(t *testing.T) {
 	}
 }
 
+// TestBuildSiteRejectsEscapingPermalink guards the page-write path the same
+// way checkOutputDir guards the wipe: a permalink must never resolve outside
+// the output dir.
+func TestBuildSiteRejectsEscapingPermalink(t *testing.T) {
+	for _, permalink := range []string{"../evil", "/../evil", "/a/../../evil"} {
+		root := t.TempDir()
+		writeFile(t, root, "config.yaml", "site_name: X\n")
+		writeFile(t, root, "content/evil.md", "---\npermalink: "+permalink+"\n---\nowned\n")
+		if _, err := buildSite(root); err == nil {
+			t.Errorf("permalink %q should be rejected", permalink)
+		}
+		if _, statErr := os.Stat(filepath.Join(root, "evil.html")); statErr == nil {
+			t.Errorf("permalink %q: wrote outside the output dir", permalink)
+		}
+	}
+}
+
 func TestBuildSiteNoConfig(t *testing.T) {
 	_, err := buildSite(t.TempDir())
 	if err == nil || !strings.Contains(err.Error(), "config.yaml") {

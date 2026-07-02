@@ -59,6 +59,11 @@ func buildSite(root string) (int, error) {
 	for i, page := range pages {
 		data := pageData(global, dirData, page)
 		out := outputPath(page, data)
+		// out is joined into the output dir below — a permalink like
+		// "../../x" must not write outside it
+		if !filepath.IsLocal(out) {
+			return 0, fmt.Errorf("%s: permalink %q escapes the output directory", page.Source, data["permalink"])
+		}
 		refs[i] = &pageRef{page: page, data: data, out: out, url: pageURL(out)}
 	}
 	collections := buildCollections(refs)
