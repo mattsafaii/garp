@@ -15,6 +15,8 @@ func TestOutputPath(t *testing.T) {
 		{"about.md", "/about-us", "about-us.html"},
 		{"about.md", "/docs/", "docs/index.html"},
 		{"about.md", "/legal/terms.html", "legal/terms.html"},
+		{"about.md", "/feed.xml", "feed.xml"},
+		{"about.md", "/humans.txt", "humans.txt"},
 		{"about.md", "/", "index.html"},
 	}
 	for _, c := range cases {

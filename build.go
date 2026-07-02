@@ -171,13 +171,14 @@ func synthesizeSEO(root, outDir string, cfg *Config, refs []*pageRef) (int, erro
 
 // renderSitemap lists every page ref as an absolute URL under base_url, with
 // lastmod from the page's frontmatter date when it has one. The 404 page is
-// excluded — it isn't a real destination to index.
+// excluded — it isn't a real destination to index — as are non-.html outputs
+// (a permalinked feed.xml isn't a page).
 func renderSitemap(baseURL string, refs []*pageRef) string {
 	var b strings.Builder
 	b.WriteString("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n")
 	b.WriteString("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n")
 	for _, ref := range refs {
-		if ref.page.Source == "404.md" {
+		if ref.page.Source == "404.md" || !strings.HasSuffix(ref.out, ".html") {
 			continue
 		}
 		b.WriteString("\t<url>\n")

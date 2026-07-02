@@ -144,6 +144,27 @@ func TestBuildSiteSitemapExcludes404(t *testing.T) {
 	}
 }
 
+// A permalink with a non-.html extension is kept as-is — the page renders to
+// feed.xml, not feed.xml.html — and stays out of the sitemap (it isn't a page).
+func TestBuildSiteNonHTMLPermalink(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", "site_name: Fixture\nbase_url: https://fixture.test\n")
+	writeFile(t, root, "content/index.md", "home\n")
+	writeFile(t, root, "content/feed.md", "---\npermalink: /feed.xml\n---\nfeed body\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(filepath.Join(root, "site", "feed.xml")); err != nil {
+		t.Error("feed.xml not written:", err)
+	}
+	if _, err := os.Stat(filepath.Join(root, "site", "feed.xml.html")); err == nil {
+		t.Error("permalink extension should be preserved, got feed.xml.html")
+	}
+	if sitemap := read(t, root, "sitemap.xml"); strings.Contains(sitemap, "feed.xml</loc>") {
+		t.Errorf("sitemap should exclude non-html outputs:\n%s", sitemap)
+	}
+}
+
 // Without base_url the sitemap/robots URLs would be relative — invalid per
 // both specs — so synthesis is skipped entirely.
 func TestBuildSiteSkipsSEOWithoutBaseURL(t *testing.T) {
