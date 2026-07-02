@@ -144,6 +144,22 @@ func TestBuildSiteSitemapExcludes404(t *testing.T) {
 	}
 }
 
+// Without base_url the sitemap/robots URLs would be relative — invalid per
+// both specs — so synthesis is skipped entirely.
+func TestBuildSiteSkipsSEOWithoutBaseURL(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", "site_name: Fixture\n")
+	writeFile(t, root, "content/index.md", "home\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+	for _, f := range []string{"sitemap.xml", "robots.txt"} {
+		if _, err := os.Stat(filepath.Join(root, "site", f)); err == nil {
+			t.Errorf("%s should not be synthesized without base_url", f)
+		}
+	}
+}
+
 func TestBuildSiteSEOOverride(t *testing.T) {
 	root := t.TempDir()
 	writeFile(t, root, "config.yaml", "site_name: Fixture\nbase_url: https://fixture.test\n")

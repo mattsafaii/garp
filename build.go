@@ -142,6 +142,12 @@ func checkOutputDir(root, outDir, configured string) error {
 // own version in outDir and synthesis for that file is skipped so it isn't
 // clobbered.
 func synthesizeSEO(root, outDir string, cfg *Config, refs []*pageRef) (int, error) {
+	// both files require absolute URLs per spec — without base_url they'd
+	// come out invalid, so skip synthesis rather than emit broken files
+	if cfg.BaseURL == "" {
+		fmt.Fprintln(os.Stderr, "garp: base_url not set in config.yaml — skipping sitemap.xml and robots.txt")
+		return 0, nil
+	}
 	n := 0
 	if _, err := os.Stat(filepath.Join(root, "static", "sitemap.xml")); os.IsNotExist(err) {
 		if err := os.WriteFile(filepath.Join(outDir, "sitemap.xml"), []byte(renderSitemap(cfg.BaseURL, refs)), 0o644); err != nil {
