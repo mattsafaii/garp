@@ -11,7 +11,7 @@ Garp is a **private studio tool** — Matt's kit for building and maintaining Sa
 Garp is organized in three layers. Keep them separate — the separation is what keeps the durable core small.
 
 - **Engine (Go)** — `build` / `serve` / `new`. Tiny, fast, dependency-free, afternoon-readable. This is the deliverable-maker and the thing whose longevity everything depends on. It changes rarely and stays legible on purpose (bus-factor). Already built.
-- **Toolbelt (Go)** — opt-in commands that automate recurring client chores (SEO files, favicons, OG images, handoff bundles). Each is subject to the litmus test below. Grows incrementally, driven by real client demand — never speculatively. Toolbelt commands live in their own files/packages and must never bloat the engine.
+- **Toolbelt (Go)** — opt-in commands that automate recurring client chores (SEO files, favicons, OG images, handoff bundles). Each is subject to the litmus test below. Grows phase by phase through the roadmap below — nothing speculative beyond it. Toolbelt commands live in their own files/packages and must never bloat the engine.
 - **Cockpit (Swift, later)** — a separate native Mac app ("my own Framer") that *drives* the garp binary; it never replaces it. Native SwiftUI + iCloud for Matt's own multi-site management and editing. Deferred; its own project, not bolted onto an engine cycle. The engine stays **Go** because the build must run portably in CI and on any future developer's machine — a Swift build tool would lock buildability to macOS and destroy the handoff/bus-factor guarantee.
 
 ## Constraints
@@ -37,9 +37,9 @@ Garp is organized in three layers. Keep them separate — the separation is what
 - **`garp build`** — reads `config.yaml`, walks `content/`, merges the data cascade, renders Markdown + Pongo2 with layout chaining, writes flat `.html` to `site/`, copies `static/` verbatim. Also synthesizes `sitemap.xml` and `robots.txt` from the page refs and `base_url`; both are author-overridable — a file already present in `static/` always wins and synthesis for it is skipped. Prints file count + build time.
 - **`garp serve`** — runs build, serves `site/` over local HTTP, watches `content/ layouts/ components/ data/ static/ config.yaml` via fsnotify, rebuilds on change. Prints the local URL. Takes `-port N` (default 8080); without an explicit `-port` it falls back to an OS-assigned port if 8080 is taken. The HTTP handler mirrors the host: a clean URL like `/about` falls back to `about.html`.
 
-### Toolbelt (planned — build incrementally, only when a real client job needs it)
+### Toolbelt (planned — Phase 2 is next)
 
-Not yet built. Each is a separate command subject to the litmus test. See the roadmap for phase order.
+Not yet built. Each is a separate command subject to the litmus test. See the roadmap for phase order and sequencing.
 
 ## Conventions (hard rules)
 
@@ -60,9 +60,9 @@ Not yet built. Each is a separate command subject to the litmus test. See the ro
 
 ## Roadmap (build incrementally)
 
-Phases, not deadlines. Build a toolbelt command when a real client job needs it, not before.
+Phases, not deadlines. Sequencing (decided 2026-07-01): build Phase 2 next and finish the toolbelt, then prove the whole kit on the first real client site — dogfooding comes after the toolbelt is complete. Stick to the commands listed; nothing speculative beyond the roadmap.
 
-- **Phase 1** — unblocks the small-catalog Shopify client and every future site. No new commands; a richer `garp new` scaffold plus one small build-time step. Scaffold cluster: `<head>` meta/OG/Twitter partial (with canonical, via the existing `page.url`), 404 page, `_headers` security defaults, config-driven analytics partial (Cloudflare Web Analytics / Plausible / Fathom), JSON-LD LocalBusiness partial + `data/business.yaml`, client-side Shopify Buy SDK snippet. Build step: synthesize **sitemap.xml** and **robots.txt** (from the page refs + `base_url`; both author-overridable — if the file exists in `static/`, the author's wins).
+- **Phase 1 (shipped 2026-07-01)** — unblocks the small-catalog Shopify client and every future site. No new commands; a richer `garp new` scaffold plus one small build-time step. Scaffold cluster: `<head>` meta/OG/Twitter partial (with canonical, via the existing `page.url`), 404 page, `_headers` security defaults, config-driven analytics partial (Cloudflare Web Analytics / Plausible / Fathom), JSON-LD LocalBusiness partial + `data/business.yaml`, client-side Shopify Buy SDK snippet. Build step: synthesize **sitemap.xml** and **robots.txt** (from the page refs + `base_url`; both author-overridable — if the file exists in `static/`, the author's wins).
 - **Phase 2** — a **favicons** command (pure-Go resize; adds `golang.org/x/image` for quality downscaling), templated **OG images** (pure-Go text-on-image), **blog scaffold**, **RSS/Atom feed**, **`garp handoff`** (bundle repo + binary + a per-project "how to build/edit/deploy this" README — the bus-factor command), cookie/privacy boilerplate, Stripe buy button.
 - **Phase 3 / later** — **`garp fetch`** (snapshot remote data from Airtable / a third-party API / a SQLite DB into committed static data files → the cascade reads them; Mac-authoring-time, never in CI — see the data cascade rule), **image optimization** (the one genuine dependency fork: modern-format encoding needs vips/cwebp or cgo → Mac-authoring-time, artifacts committed), the client self-edit **CMS** track (git-based web CMS like PagesCMS, wired by a command — not built into the binary), and the **Swift cockpit**.
 
