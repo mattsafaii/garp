@@ -234,7 +234,16 @@ func TestJSONLDValidates(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	html := read(t, root, "index.html")
+	parsed := parseJSONLD(t, read(t, root, "index.html"))
+	if parsed["name"] != "My Business" {
+		t.Errorf("jsonld name = %v, want %q", parsed["name"], "My Business")
+	}
+}
+
+// parseJSONLD extracts the <script type="application/ld+json"> block from
+// rendered HTML and parses it as JSON.
+func parseJSONLD(t *testing.T, html string) map[string]any {
+	t.Helper()
 	start := strings.Index(html, "<script type=\"application/ld+json\">")
 	if start == -1 {
 		t.Fatalf("jsonld script not emitted:\n%s", html)
@@ -244,13 +253,42 @@ func TestJSONLDValidates(t *testing.T) {
 	if end == -1 {
 		t.Fatalf("jsonld script not closed:\n%s", html)
 	}
-
 	var parsed map[string]any
 	if err := json.Unmarshal([]byte(html[start:start+end]), &parsed); err != nil {
 		t.Fatalf("jsonld did not parse as JSON: %v\n%s", err, html[start:start+end])
 	}
-	if parsed["name"] != "My Business" {
-		t.Errorf("jsonld name = %v, want %q", parsed["name"], "My Business")
+	return parsed
+}
+
+// TestJSONLDEscapesQuotes guards the common case that broke under HTML
+// autoescape: a business name with an apostrophe (Joe's Pizza) must
+// round-trip through the emitted JSON verbatim, not as Joe&#39;s.
+func TestJSONLDEscapesQuotes(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", "site_name: Fixture\nbase_url: https://fixture.test\n")
+	writeFile(t, root, "data/business.yaml", `name: Joe's "Best" Cameras
+description: LA's top shop <est. 1999>
+sameAs:
+  - https://example.com/?a=1&b=2
+`)
+	writeFile(t, root, "components/jsonld.html", readScaffold(t, "scaffold/components/jsonld.html"))
+	writeFile(t, root, "layouts/base.html", `{% block content %}{{ content | safe }}{% endblock %}
+{% include "jsonld.html" %}`)
+	writeFile(t, root, "content/index.md", "---\nlayout: base.html\n---\nhome\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+
+	parsed := parseJSONLD(t, read(t, root, "index.html"))
+	if parsed["name"] != `Joe's "Best" Cameras` {
+		t.Errorf("jsonld name = %v, want the raw quoted name", parsed["name"])
+	}
+	if parsed["description"] != "LA's top shop <est. 1999>" {
+		t.Errorf("jsonld description = %v", parsed["description"])
+	}
+	sameAs, _ := parsed["sameAs"].([]any)
+	if len(sameAs) != 1 || sameAs[0] != "https://example.com/?a=1&b=2" {
+		t.Errorf("jsonld sameAs = %v", parsed["sameAs"])
 	}
 }
 
