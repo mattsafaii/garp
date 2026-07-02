@@ -103,9 +103,16 @@ func buildSite(root string) (int, error) {
 		}
 	}
 
-	staticCount, err := copyStatic(filepath.Join(root, "static"), outDir)
+	pageOuts := make(map[string]bool, len(refs))
+	for _, ref := range refs {
+		pageOuts[ref.out] = true
+	}
+	staticCount, collisions, err := copyStatic(filepath.Join(root, "static"), outDir, pageOuts)
 	if err != nil {
 		return 0, err
+	}
+	for _, rel := range collisions {
+		fmt.Fprintf(os.Stderr, "garp: static/%s overwrote the page rendered at %s (static wins)\n", rel, rel)
 	}
 
 	seoCount, err := synthesizeSEO(root, outDir, cfg, refs)

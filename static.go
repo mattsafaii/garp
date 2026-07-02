@@ -8,10 +8,13 @@ import (
 )
 
 // copyStatic copies static/ into the output dir verbatim, preserving the
-// directory structure. Returns the number of files copied. A missing
-// static/ dir is fine.
-func copyStatic(staticDir, outDir string) (int, error) {
+// directory structure. Returns the number of files copied, plus which of
+// them landed on a path in pageOuts — static runs after the page writes, so
+// those silently replaced a rendered page and the caller should warn. A
+// missing static/ dir is fine.
+func copyStatic(staticDir, outDir string, pageOuts map[string]bool) (int, []string, error) {
 	count := 0
+	var collisions []string
 	err := filepath.WalkDir(staticDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
@@ -30,13 +33,16 @@ func copyStatic(staticDir, outDir string) (int, error) {
 		if err := copyFile(path, dst); err != nil {
 			return err
 		}
+		if pageOuts[rel] {
+			collisions = append(collisions, rel)
+		}
 		count++
 		return nil
 	})
 	if os.IsNotExist(err) {
-		return 0, nil
+		return 0, nil, nil
 	}
-	return count, err
+	return count, collisions, err
 }
 
 func copyFile(src, dst string) error {
