@@ -43,9 +43,33 @@ func TestParseFrontmatterEmptyBody(t *testing.T) {
 	}
 }
 
-func TestParseFrontmatterUnclosed(t *testing.T) {
-	if _, _, err := parseFrontmatter([]byte("---\ntitle: Hi\n")); err == nil {
-		t.Error("expected error for unclosed frontmatter")
+func TestParseFrontmatterEmpty(t *testing.T) {
+	for src, wantBody := range map[string]string{
+		"---\n---\nbody\n": "body\n",
+		"---\n---\n":       "",
+		"---\n---":         "",
+	} {
+		front, body, err := parseFrontmatter([]byte(src))
+		if err != nil {
+			t.Fatalf("%q: %v", src, err)
+		}
+		if len(front) != 0 || body != wantBody {
+			t.Errorf("%q: front = %v, body = %q, want empty front, body %q", src, front, body, wantBody)
+		}
+	}
+}
+
+// A leading --- that never closes isn't frontmatter — e.g. a file opening
+// with a thematic break. The whole source is body.
+func TestParseFrontmatterUnclosedIsBody(t *testing.T) {
+	for _, src := range []string{"---\n\na horizontal rule opener\n", "---\ntitle: Hi\n"} {
+		front, body, err := parseFrontmatter([]byte(src))
+		if err != nil {
+			t.Fatalf("%q: %v", src, err)
+		}
+		if len(front) != 0 || body != src {
+			t.Errorf("%q: front = %v, body = %q, want full source as body", src, front, body)
+		}
 	}
 }
 

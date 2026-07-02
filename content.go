@@ -51,8 +51,9 @@ func discoverContent(contentDir string) ([]*Page, error) {
 }
 
 // parseFrontmatter splits a leading YAML frontmatter block (fenced by ---
-// lines) from the body. Files without frontmatter return an empty map and
-// the full source as body.
+// lines) from the body. Frontmatter is only a leading --- with a matching
+// closing --- line; anything else — including a file opening with a ---
+// thematic break that never closes — is plain body.
 func parseFrontmatter(src []byte) (map[string]any, string, error) {
 	s := string(src)
 	if !strings.HasPrefix(s, "---\n") {
@@ -60,12 +61,19 @@ func parseFrontmatter(src []byte) (map[string]any, string, error) {
 	}
 	rest := s[4:]
 	var fm, body string
-	if idx := strings.Index(rest, "\n---\n"); idx >= 0 {
-		fm, body = rest[:idx], rest[idx+5:]
-	} else if strings.HasSuffix(rest, "\n---") {
-		fm, body = rest[:len(rest)-4], ""
-	} else {
-		return nil, "", fmt.Errorf("unclosed frontmatter")
+	switch {
+	case strings.HasPrefix(rest, "---\n"): // empty frontmatter
+		fm, body = "", rest[4:]
+	case rest == "---": // empty frontmatter, empty body
+		fm, body = "", ""
+	default:
+		if idx := strings.Index(rest, "\n---\n"); idx >= 0 {
+			fm, body = rest[:idx], rest[idx+5:]
+		} else if strings.HasSuffix(rest, "\n---") {
+			fm, body = rest[:len(rest)-4], ""
+		} else {
+			return map[string]any{}, s, nil
+		}
 	}
 
 	var front map[string]any
