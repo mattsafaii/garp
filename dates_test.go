@@ -43,6 +43,24 @@ func TestDateFilter(t *testing.T) {
 	}
 }
 
+// A collection mixes dated and undated pages — {{ p.date | date }} over it
+// must render "" for the undated ones, not fail the build.
+func TestDateFilterNilRendersEmpty(t *testing.T) {
+	for _, tmpl := range []string{`{{ date | date }}`, `{{ date | date:"January 2, 2006" }}`} {
+		tpl, err := pongo2.FromString(tmpl)
+		if err != nil {
+			t.Fatal(err)
+		}
+		out, err := tpl.Execute(pongo2.Context{"date": nil})
+		if err != nil {
+			t.Fatalf("%s: %v", tmpl, err)
+		}
+		if out != "" {
+			t.Errorf("%s = %q, want empty", tmpl, out)
+		}
+	}
+}
+
 func TestDateFilterAcceptsRawTime(t *testing.T) {
 	tpl, _ := pongo2.FromString(`{{ date | date:"2006" }}`)
 	out, err := tpl.Execute(pongo2.Context{"date": time.Date(2026, 5, 22, 0, 0, 0, 0, time.UTC)})

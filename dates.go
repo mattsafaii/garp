@@ -23,7 +23,9 @@ func init() {
 
 // filterDate formats a Date or time.Time with a Go reference layout, e.g.
 // {{ post.date | date:"January 2, 2006" }}. With no argument it falls back to
-// the ISO default, so {{ post.date | date }} is also safe.
+// the ISO default, so {{ post.date | date }} is also safe. A missing value
+// renders as "" — collections mix dated and undated pages, and one undated
+// entry must not fail the build.
 func filterDate(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.Error) {
 	var t time.Time
 	switch v := in.Interface().(type) {
@@ -31,6 +33,8 @@ func filterDate(in *pongo2.Value, param *pongo2.Value) (*pongo2.Value, *pongo2.E
 		t = v.Time
 	case time.Time:
 		t = v
+	case nil:
+		return pongo2.AsValue(""), nil
 	default:
 		return nil, &pongo2.Error{
 			Sender:    "filter:date",
