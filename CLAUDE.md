@@ -101,7 +101,7 @@ Above all: **the tooling vanishes into a self-sufficient deliverable, and the en
 
 This project's Basecamp config (account / project / todolist IDs) is already set in `.basecamp/config.json` (gitignored), so `basecamp` commands work without flags from this directory.
 
-**Work is always tracked in Basecamp** — it's where the project, todos, and progress live. Run `basecamp todos list` to see the active todolist and check items off as you complete them. Each build cycle/phase gets its own todolist; the original **Build** list (v1) and **Phase 1 — SEO scaffold + Shopify snippet** are both complete. The full PRD is a Basecamp doc: run `basecamp docs list` and open the one titled **PRD**. The shaped pitch lives on the project's card in the Lab Ideas board.
+**Work is always tracked in Basecamp** — it's where the project, todos, and progress live. Run `basecamp todos list` to see the active todolist and check items off as you complete them. Each build cycle/phase gets its own todolist; the original **Build** list (v1), **Phase 1 — SEO scaffold + Shopify snippet**, and **Post-review fixes — 2026-07-02** are all complete. The active cycle is **Phase 2 — Toolbelt**; its spec is the doc titled **PRD: Phase 2 — Toolbelt** (run `basecamp docs list`), including the two design notes decided at scoping (layout-driven feed, per-platform committed binaries). The v1 PRD is the doc titled **PRD**; the shaped pitch lives on the project's card in the Lab Ideas board.
 
 ## Solo
 
