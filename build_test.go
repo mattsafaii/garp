@@ -361,6 +361,36 @@ shopify:
 	}
 }
 
+// TestStripeBuyRenders exercises the real scaffold stripe-buy.html snippet
+// with a publishable key from config.yaml and a buy button id from page
+// frontmatter — the two config slots the usage note documents.
+func TestStripeBuyRenders(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", `site_name: Fixture
+base_url: https://fixture.test
+stripe:
+  publishable_key: pk_live_fixture
+`)
+	writeFile(t, root, "components/stripe-buy.html", readScaffold(t, "scaffold/components/stripe-buy.html"))
+	writeFile(t, root, "layouts/base.html", `{% block content %}{{ content | safe }}{% endblock %}
+{% include "stripe-buy.html" %}`)
+	writeFile(t, root, "content/index.md", "---\nlayout: base.html\nstripe_buy_button_id: buy_btn_fixture\n---\nhome\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+
+	html := read(t, root, "index.html")
+	for _, want := range []string{
+		`<script async src="https://js.stripe.com/v3/buy-button.js"></script>`,
+		`buy-button-id="buy_btn_fixture"`,
+		`publishable-key="pk_live_fixture"`,
+	} {
+		if !strings.Contains(html, want) {
+			t.Errorf("stripe-buy.html missing %q:\n%s", want, html)
+		}
+	}
+}
+
 // TestHeadPartialRenders exercises the real scaffold head.html against the
 // acceptance criteria: correct title, description, canonical, and OG +
 // Twitter tags from frontmatter/config.
@@ -369,6 +399,7 @@ func TestHeadPartialRenders(t *testing.T) {
 	writeFile(t, root, "config.yaml", "site_name: Fixture\nbase_url: https://fixture.test\n")
 	writeFile(t, root, "components/head.html", readScaffold(t, "scaffold/components/head.html"))
 	writeFile(t, root, "components/jsonld.html", readScaffold(t, "scaffold/components/jsonld.html"))
+	writeFile(t, root, "components/favicons.html", readScaffold(t, "scaffold/components/favicons.html"))
 	writeFile(t, root, "layouts/base.html", `<head>{% include "head.html" %}</head>{% block content %}{{ content | safe }}{% endblock %}`)
 	writeFile(t, root, "content/index.md", "---\ntitle: Home\ndescription: A test page.\nimage: /og.jpg\nlayout: base.html\n---\nbody\n")
 	if _, err := buildSite(root); err != nil {

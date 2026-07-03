@@ -37,6 +37,10 @@ Point your host at `site/` and you're live.
 | `garp new <path>` | Scaffold a project: the six reserved dirs, a `config.yaml`, a base layout, and a sample `content/index.md` that renders immediately. |
 | `garp build` | Read `config.yaml`, walk `content/`, merge the data cascade, render Markdown + Pongo2 with layout chaining, write flat `.html` to `site/`, copy `static/` verbatim. Prints the file count and build time. |
 | `garp serve [-port N]` | Run a build, serve `site/` over local HTTP, watch the source via fsnotify, and rebuild on change. Defaults to port 8080, falling back to an OS-assigned port if it's taken. |
+| `garp favicons <source>` | Generate a full favicon set (`favicon.ico`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, `site.webmanifest`) from one square source image, into `static/`. |
+| `garp og` | Generate a templated 1200×630 OG image per content page, into `static/og/`. |
+| `garp blog` | Stamp an opt-in blog section — a post layout, a listing page, a sample post, and an Atom feed. Refuses to overwrite existing files. |
+| `garp handoff` | Write committed per-platform binaries (`bin/`) plus a generated `HANDOFF.md` — makes the repo buildable and deployable by anyone, without garp installed. |
 
 ## How a project is laid out
 
@@ -124,6 +128,26 @@ phone: "(555) 555-0148"   # → {{ site.phone }}
 
 Garp does nothing host-specific. It writes plain static files; clean no-trailing-slash URLs are the host's job (e.g. Cloudflare Pages serves `about.html` at `/about`). Host config files like `_headers` or `_redirects` go in `static/` and are copied through untouched.
 
+## Toolbelt
+
+Opt-in commands for recurring chores, run at authoring time (never in CI) with their artifacts committed.
+
+**`garp favicons <source>`** — reads one square source image (1024px+) and writes `favicon.ico`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, and `site.webmanifest` into `static/`. The scaffold's head partial already links them; rerun any time the source logo changes — output is byte-stable for the same input.
+
+**`garp og`** — renders a 1200×630 PNG per page (title + site name on a solid background) into `static/og/`, mirroring each page's URL. Needs a font pointed at from `config.yaml`:
+
+```yaml
+og:
+  font: fonts/YourFont-Bold.ttf   # a committed .ttf — nothing is embedded
+  background: "#111111"           # optional, defaults to a dark gray
+```
+
+With `og:` set, any page without an `image:` in frontmatter gets the matching OG/Twitter meta tags automatically; an explicit `image:` still overrides.
+
+**`garp blog`** — stamps an opt-in blog section into a new or existing project: `content/blog/_data.yaml`, `layouts/post.html`, a sample post, a listing page, and an Atom feed (`content/feed.md` + `layouts/feed.xml`, served at `/feed.xml`). Refuses to run if any target file already exists.
+
+**`garp handoff`** — writes `bin/` (the running binary plus any other `garp-<goos>-<goarch>` binaries sitting next to it — build both with `make release` in the garp repo) and a generated `HANDOFF.md` describing the project's actual shape. Safe to rerun any time. Point Cloudflare Pages at build command `bin/garp build`, output directory `site/`.
+
 ## Built with
 
-[Pongo2](https://github.com/flosch/pongo2) (templating), [goldmark](https://github.com/yuin/goldmark) (Markdown), [fsnotify](https://github.com/fsnotify/fsnotify) (file watching), and [yaml.v3](https://pkg.go.dev/gopkg.in/yaml.v3) (config + frontmatter + data). The CLI is the Go standard library only.
+[Pongo2](https://github.com/flosch/pongo2) (templating), [goldmark](https://github.com/yuin/goldmark) (Markdown), [fsnotify](https://github.com/fsnotify/fsnotify) (file watching), [yaml.v3](https://pkg.go.dev/gopkg.in/yaml.v3) (config + frontmatter + data), and [golang.org/x/image](https://pkg.go.dev/golang.org/x/image) (favicon resizing + OG text rendering, toolbelt-only). The CLI is the Go standard library only.

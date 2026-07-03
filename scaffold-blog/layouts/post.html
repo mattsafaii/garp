@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<article>
+	<h1>{{ title }}</h1>
+	{% if date %}<time datetime="{{ date | date:"2006-01-02" }}">{{ date | date:"January 2, 2006" }}</time>{% endif %}
+	{{ content | safe }}
+</article>
+{% endblock %}

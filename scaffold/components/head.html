@@ -9,11 +9,12 @@
 <meta property="og:title" content="{% if title %}{{ title }}{% else %}{{ site.site_name }}{% endif %}">
 {% if description %}<meta property="og:description" content="{{ description }}">{% endif %}
 <meta property="og:url" content="{{ site.base_url }}{{ page.url }}">
-{% if image %}<meta property="og:image" content="{{ site.base_url }}{{ image }}">{% endif %}
+{% if image %}<meta property="og:image" content="{{ site.base_url }}{{ image }}">{% elif site.og %}<meta property="og:image" content="{% if page.url == "/" %}{{ site.base_url }}/og/index.png{% else %}{{ site.base_url }}/og{{ page.url }}.png{% endif %}">{% endif %}
 
-<meta name="twitter:card" content="{% if image %}summary_large_image{% else %}summary{% endif %}">
+<meta name="twitter:card" content="{% if image or site.og %}summary_large_image{% else %}summary{% endif %}">
 <meta name="twitter:title" content="{% if title %}{{ title }}{% else %}{{ site.site_name }}{% endif %}">
 {% if description %}<meta name="twitter:description" content="{{ description }}">{% endif %}
-{% if image %}<meta name="twitter:image" content="{{ site.base_url }}{{ image }}">{% endif %}
+{% if image %}<meta name="twitter:image" content="{{ site.base_url }}{{ image }}">{% elif site.og %}<meta name="twitter:image" content="{% if page.url == "/" %}{{ site.base_url }}/og/index.png{% else %}{{ site.base_url }}/og{{ page.url }}.png{% endif %}">{% endif %}
 
 {% include "jsonld.html" %}
+{% include "favicons.html" %}

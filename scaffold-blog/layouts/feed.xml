@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Layout-driven, not body-driven: content/feed.md is frontmatter-only with
+     an empty body, so goldmark never touches this XML. This template ignores
+     {{ content }} entirely and loops collections.blog directly. -->
+<feed xmlns="http://www.w3.org/2005/Atom">
+	<title>{{ site.site_name }}</title>
+	<link href="{{ site.base_url }}/feed.xml" rel="self"/>
+	<link href="{{ site.base_url }}/"/>
+	<id>{{ site.base_url }}/</id>
+	<updated>{{ collections.blog.0.date | date:"2006-01-02T15:04:05Z07:00" }}</updated>
+	{% for post in collections.blog %}
+	<entry>
+		<title>{{ post.title }}</title>
+		<link href="{{ site.base_url }}{{ post.url }}"/>
+		<id>{{ site.base_url }}{{ post.url }}</id>
+		<updated>{{ post.date | date:"2006-01-02T15:04:05Z07:00" }}</updated>
+		{% if post.data.description %}<summary>{{ post.data.description }}</summary>{% endif %}
+	</entry>
+	{% endfor %}
+</feed>

@@ -1,0 +1,17 @@
+<!--
+Stripe Buy Button snippet — opt-in, not included by default.
+
+To use on a page:
+  1. In config.yaml, add:
+       stripe:
+         publishable_key: pk_live_your-publishable-key
+  2. In that page's frontmatter, set stripe_buy_button_id to the Buy
+     Button's ID (Stripe Dashboard → Payment Links → Buy buttons).
+  3. Include this component where the buy button should render.
+-->
+<script async src="https://js.stripe.com/v3/buy-button.js"></script>
+<stripe-buy-button
+	buy-button-id="{{ stripe_buy_button_id }}"
+	publishable-key="{{ site.stripe.publishable_key }}"
+>
+</stripe-buy-button>

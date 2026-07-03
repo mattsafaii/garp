@@ -4,6 +4,9 @@ site/
 # Compiled binary
 /garp
 
+# make release cross-compile output
+/bin/
+
 # Local session config
 .basecamp/
 solo.yml

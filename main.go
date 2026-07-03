@@ -19,6 +19,14 @@ func main() {
 		run(cmdBuild(os.Args[2:]))
 	case "serve":
 		run(cmdServe(os.Args[2:]))
+	case "favicons":
+		run(cmdFavicons(os.Args[2:]))
+	case "og":
+		run(cmdOG(os.Args[2:]))
+	case "blog":
+		run(cmdBlog(os.Args[2:]))
+	case "handoff":
+		run(cmdHandoff(os.Args[2:]))
 	case "-h", "--help", "help":
 		usage()
 	default:
@@ -39,8 +47,12 @@ func usage() {
 	fmt.Fprint(os.Stderr, `garp — a minimal static site generator
 
 Usage:
-  garp new <path>   Scaffold a new site
-  garp build        Build the site to site/
-  garp serve        Build, serve, and rebuild on change
+  garp new <path>          Scaffold a new site
+  garp build               Build the site to site/
+  garp serve               Build, serve, and rebuild on change
+  garp favicons <source>   Generate a favicon set from a square source image
+  garp og                  Generate a templated OG image per content page
+  garp blog                Scaffold an opt-in blog section + Atom feed
+  garp handoff             Commit per-platform binaries + a generated HANDOFF.md
 `)
 }
