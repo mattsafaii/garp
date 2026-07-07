@@ -186,6 +186,22 @@ func renderHandoffDoc(root string, cfg *Config) (string, error) {
 	fmt.Fprintf(&b, "- **Stripe Buy button:** %s\n", yesNo(hasStripe))
 	fmt.Fprintf(&b, "- **Analytics:** %s\n\n", yesNo(hasAnalytics))
 
+	b.WriteString("## External integrations\n\n")
+	b.WriteString("Opt-in snippets that call out to a third-party service. Each is wired via a `config.yaml` key and a component file whose header comment has the full setup steps — nothing else in this repo depends on these.\n\n")
+	if hasShopify {
+		b.WriteString("- **Shopify Buy button** — active via `site.shopify` in `config.yaml`. Setup steps: `components/shopify-buy.html`.\n")
+	}
+	if hasStripe {
+		b.WriteString("- **Stripe Buy button** — active via `site.stripe` in `config.yaml`. Setup steps: `components/stripe-buy.html`.\n")
+	}
+	if hasAnalytics {
+		b.WriteString("- **Analytics** — active via `site.analytics` in `config.yaml`. Setup steps: `components/analytics.html`.\n")
+	}
+	if !hasShopify && !hasStripe && !hasAnalytics {
+		b.WriteString("- None active. Available: Shopify Buy button, Stripe Buy button, analytics (Cloudflare/Plausible/Fathom) — see `components/shopify-buy.html`, `components/stripe-buy.html`, `components/analytics.html` for setup steps.\n")
+	}
+	b.WriteString("\n")
+
 	b.WriteString(`## Directory map
 
 ` + "```" + `
