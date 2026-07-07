@@ -391,6 +391,47 @@ stripe:
 	}
 }
 
+// TestChatWidgetRenders exercises the real scaffold chat-widget.html snippet
+// gated on the single config slot the usage note documents, and confirms it
+// emits nothing when that slot is unset.
+func TestChatWidgetRenders(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", `site_name: Fixture
+base_url: https://fixture.test
+chat:
+  embed_id: fixture-widget-id
+`)
+	writeFile(t, root, "components/chat-widget.html", readScaffold(t, "scaffold/components/chat-widget.html"))
+	writeFile(t, root, "layouts/base.html", `{% block content %}{{ content | safe }}{% endblock %}
+{% include "chat-widget.html" %}`)
+	writeFile(t, root, "content/index.md", "---\nlayout: base.html\n---\nhome\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+
+	html := read(t, root, "index.html")
+	if !strings.Contains(html, `window.chatWidgetId = "fixture-widget-id";`) {
+		t.Errorf("chat-widget.html missing embed id:\n%s", html)
+	}
+}
+
+func TestChatWidgetOmittedWhenUnset(t *testing.T) {
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", "site_name: Fixture\nbase_url: https://fixture.test\n")
+	writeFile(t, root, "components/chat-widget.html", readScaffold(t, "scaffold/components/chat-widget.html"))
+	writeFile(t, root, "layouts/base.html", `{% block content %}{{ content | safe }}{% endblock %}
+{% include "chat-widget.html" %}`)
+	writeFile(t, root, "content/index.md", "---\nlayout: base.html\n---\nhome\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+
+	html := read(t, root, "index.html")
+	if strings.Contains(html, "chatWidgetId") || strings.Contains(html, "widget.your-chat-provider.example") {
+		t.Errorf("chat-widget.html should emit nothing when site.chat.embed_id is unset:\n%s", html)
+	}
+}
+
 // TestHeadPartialRenders exercises the real scaffold head.html against the
 // acceptance criteria: correct title, description, canonical, and OG +
 // Twitter tags from frontmatter/config.

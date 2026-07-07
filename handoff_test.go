@@ -116,7 +116,7 @@ func TestRunHandoffDocReflectsProjectShape(t *testing.T) {
 		"**OG images:** yes",
 		"bin/garp favicons <source>",
 		"bin/garp og",
-		"None active. Available: Shopify Buy button, Stripe Buy button, analytics",
+		"None active. Available: Shopify Buy button, Stripe Buy button, analytics (Cloudflare/Plausible/Fathom), chat widget",
 	} {
 		if !strings.Contains(s, want) {
 			t.Errorf("HANDOFF.md missing %q:\n%s", want, s)
@@ -126,7 +126,7 @@ func TestRunHandoffDocReflectsProjectShape(t *testing.T) {
 
 func TestRunHandoffDocListsActiveIntegrations(t *testing.T) {
 	root := t.TempDir()
-	writeFile(t, root, "config.yaml", "site_name: Fixture\nbase_url: https://fixture.test\nshopify:\n  domain: fixture.myshopify.com\nstripe:\n  publishable_key: pk_test_fixture\nanalytics:\n  provider: fathom\n")
+	writeFile(t, root, "config.yaml", "site_name: Fixture\nbase_url: https://fixture.test\nshopify:\n  domain: fixture.myshopify.com\nstripe:\n  publishable_key: pk_test_fixture\nanalytics:\n  provider: fathom\nchat:\n  embed_id: fixture-widget-id\n")
 	writeFile(t, root, "content/index.md", "home\n")
 
 	_, _, err := runHandoff(root)
@@ -142,6 +142,7 @@ func TestRunHandoffDocListsActiveIntegrations(t *testing.T) {
 		"**Shopify Buy button** — active via `site.shopify` in `config.yaml`. Setup steps: `components/shopify-buy.html`.",
 		"**Stripe Buy button** — active via `site.stripe` in `config.yaml`. Setup steps: `components/stripe-buy.html`.",
 		"**Analytics** — active via `site.analytics` in `config.yaml`. Setup steps: `components/analytics.html`.",
+		"**Chat widget** — active via `site.chat` in `config.yaml`. Setup steps: `components/chat-widget.html`.",
 	} {
 		if !strings.Contains(s, want) {
 			t.Errorf("HANDOFF.md missing %q:\n%s", want, s)
