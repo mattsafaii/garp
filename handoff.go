@@ -153,10 +153,10 @@ func renderHandoffDoc(root string, cfg *Config) (string, error) {
 	hasFeed := fileExists(filepath.Join(root, "content", "feed.md"))
 	hasFavicons := fileExists(filepath.Join(root, "static", "favicon.ico"))
 	hasOG := dirExists(filepath.Join(root, "static", "og"))
+	hasSearch := dirExists(filepath.Join(root, "static", "pagefind"))
 	_, hasShopify := cfg.Site["shopify"]
 	_, hasStripe := cfg.Site["stripe"]
 	_, hasAnalytics := cfg.Site["analytics"]
-	_, hasChat := cfg.Site["chat"]
 
 	var b strings.Builder
 	name := cfg.SiteName
@@ -183,10 +183,10 @@ func renderHandoffDoc(root string, cfg *Config) (string, error) {
 	fmt.Fprintf(&b, "- **Atom feed:** %s\n", yesNo(hasFeed))
 	fmt.Fprintf(&b, "- **Favicons:** %s\n", yesNo(hasFavicons))
 	fmt.Fprintf(&b, "- **OG images:** %s\n", yesNo(hasOG))
+	fmt.Fprintf(&b, "- **Search:** %s\n", yesNo(hasSearch))
 	fmt.Fprintf(&b, "- **Shopify Buy button:** %s\n", yesNo(hasShopify))
 	fmt.Fprintf(&b, "- **Stripe Buy button:** %s\n", yesNo(hasStripe))
-	fmt.Fprintf(&b, "- **Analytics:** %s\n", yesNo(hasAnalytics))
-	fmt.Fprintf(&b, "- **Chat widget:** %s\n\n", yesNo(hasChat))
+	fmt.Fprintf(&b, "- **Analytics:** %s\n\n", yesNo(hasAnalytics))
 
 	b.WriteString("## External integrations\n\n")
 	b.WriteString("Opt-in snippets that call out to a third-party service. Each is wired via a `config.yaml` key and a component file whose header comment has the full setup steps — nothing else in this repo depends on these.\n\n")
@@ -199,11 +199,8 @@ func renderHandoffDoc(root string, cfg *Config) (string, error) {
 	if hasAnalytics {
 		b.WriteString("- **Analytics** — active via `site.analytics` in `config.yaml`. Setup steps: `components/analytics.html`.\n")
 	}
-	if hasChat {
-		b.WriteString("- **Chat widget** — active via `site.chat` in `config.yaml`. Setup steps: `components/chat-widget.html`. This is an example snippet, not a bundled provider — the actual chat backend (Chatbase, Crisp, Intercom, etc.) is a separate system this repo doesn't manage.\n")
-	}
-	if !hasShopify && !hasStripe && !hasAnalytics && !hasChat {
-		b.WriteString("- None active. Available: Shopify Buy button, Stripe Buy button, analytics (Cloudflare/Plausible/Fathom), chat widget — see `components/shopify-buy.html`, `components/stripe-buy.html`, `components/analytics.html`, `components/chat-widget.html` for setup steps.\n")
+	if !hasShopify && !hasStripe && !hasAnalytics {
+		b.WriteString("- None active. Available: Shopify Buy button, Stripe Buy button, analytics (Cloudflare/Plausible/Fathom) — see `components/shopify-buy.html`, `components/stripe-buy.html`, `components/analytics.html` for setup steps.\n")
 	}
 	b.WriteString("\n")
 
@@ -246,6 +243,9 @@ Frontmatter, a directory's ` + "`_data.yaml`" + `, and files in ` + "`data/`" + 
 	}
 	if hasOG {
 		b.WriteString("| `bin/garp og` | Regenerate the per-page OG images. |\n")
+	}
+	if hasSearch {
+		b.WriteString("| `bin/garp search` | Rebuild the search index. Requires the pagefind CLI installed (https://pagefind.app) — authoring-time only, never needed in CI. |\n")
 	}
 	b.WriteString("| `bin/garp handoff` | Regenerate this file and refresh the committed binaries. |\n\n")
 

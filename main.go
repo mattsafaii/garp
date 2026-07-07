@@ -27,6 +27,8 @@ func main() {
 		run(cmdBlog(os.Args[2:]))
 	case "handoff":
 		run(cmdHandoff(os.Args[2:]))
+	case "search":
+		run(cmdSearch(os.Args[2:]))
 	case "-h", "--help", "help":
 		usage()
 	default:
@@ -54,5 +56,6 @@ Usage:
   garp og                  Generate a templated OG image per content page
   garp blog                Scaffold an opt-in blog section + Atom feed
   garp handoff             Commit per-platform binaries + a generated HANDOFF.md
+  garp search              Index the built site with pagefind into static/pagefind/
 `)
 }
