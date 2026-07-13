@@ -10,7 +10,7 @@ func TestRenderMarkdown(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(out, "<h1>Hi</h1>") || !strings.Contains(out, "<strong>bold</strong>") {
+	if !strings.Contains(out, `<h1 id="hi">Hi</h1>`) || !strings.Contains(out, "<strong>bold</strong>") {
 		t.Errorf("out = %q", out)
 	}
 }

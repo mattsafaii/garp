@@ -57,7 +57,7 @@ func TestBuildSite(t *testing.T) {
 	}
 
 	index := read(t, root, "index.html")
-	for _, want := range []string{"<title>Home | Fixture</title>", "<h1>Welcome</h1>", "Call 555.", "<a>Home</a>", "<footer>555</footer>"} {
+	for _, want := range []string{"<title>Home | Fixture</title>", `<h1 id="welcome">Welcome</h1>`, "Call 555.", "<a>Home</a>", "<footer>555</footer>"} {
 		if !strings.Contains(index, want) {
 			t.Errorf("index.html missing %q:\n%s", want, index)
 		}

@@ -5,13 +5,16 @@ import (
 
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/extension"
+	"github.com/yuin/goldmark/parser"
 	"github.com/yuin/goldmark/renderer/html"
 )
 
 // md renders GitHub-flavored Markdown. Raw HTML passes through — authors
-// are building their own sites.
+// are building their own sites. Headings get auto-generated ids so
+// #section deep links and search sub-results work.
 var md = goldmark.New(
 	goldmark.WithExtensions(extension.GFM),
+	goldmark.WithParserOptions(parser.WithAutoHeadingID()),
 	goldmark.WithRendererOptions(html.WithUnsafe()),
 )
 

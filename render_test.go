@@ -32,7 +32,7 @@ func TestRenderPageWithLayout(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, want := range []string{"<title>Test Site</title>", "<h1>Hello</h1>", "<footer>Test Site footer</footer>"} {
+	for _, want := range []string{"<title>Test Site</title>", `<h1 id="hello">Hello</h1>`, "<footer>Test Site footer</footer>"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("missing %q in:\n%s", want, out)
 		}
