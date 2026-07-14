@@ -15,15 +15,15 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-// watchedDirs are the source dirs serve watches recursively. config.yaml is
+// watchedDirs are the source dirs dev watches recursively. config.yaml is
 // caught by a non-recursive watch on the project root.
 var watchedDirs = []string{"content", "layouts", "components", "data", "static"}
 
-func cmdServe(args []string) error {
-	fs := flag.NewFlagSet("serve", flag.ExitOnError)
+func cmdDev(args []string) error {
+	fs := flag.NewFlagSet("dev", flag.ExitOnError)
 	port := fs.Int("port", 8080, "port to listen on")
 	fs.Usage = func() {
-		fmt.Fprintln(os.Stderr, "Usage: garp serve [-port N]")
+		fmt.Fprintln(os.Stderr, "Usage: garp dev [-port N]")
 	}
 	fs.Parse(args)
 	root := "."

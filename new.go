@@ -47,7 +47,7 @@ func cmdNew(args []string) error {
 		return err
 	}
 
-	fmt.Printf("Created %s\n\n  cd %s\n  garp serve\n", root, root)
+	fmt.Printf("Created %s\n\n  cd %s\n  garp dev\n", root, root)
 	return nil
 }
 

@@ -10,7 +10,7 @@ Garp is a **private studio tool** — Matt's kit for building and maintaining Sa
 
 Garp is organized in three layers. Keep them separate — the separation is what keeps the durable core small.
 
-- **Engine (Go)** — `build` / `serve` / `new`. Tiny, fast, dependency-free, afternoon-readable. This is the deliverable-maker and the thing whose longevity everything depends on. It changes rarely and stays legible on purpose (bus-factor). Already built.
+- **Engine (Go)** — `build` / `dev` / `new`. Tiny, fast, dependency-free, afternoon-readable. This is the deliverable-maker and the thing whose longevity everything depends on. It changes rarely and stays legible on purpose (bus-factor). Already built.
 - **Toolbelt (Go)** — opt-in commands that automate recurring client chores (SEO files, favicons, OG images, handoff bundles). Each is subject to the litmus test below. Grows phase by phase through the roadmap below — nothing speculative beyond it. Toolbelt commands live in their own files/packages and must never bloat the engine.
 - **Cockpit (Swift, later)** — a separate native Mac app ("my own Framer") that *drives* the garp binary; it never replaces it. Native SwiftUI + iCloud for Matt's own multi-site management and editing. Deferred; its own project, not bolted onto an engine cycle. The engine stays **Go** because the build must run portably in CI and on any future developer's machine — a Swift build tool would lock buildability to macOS and destroy the handoff/bus-factor guarantee.
 
@@ -25,7 +25,7 @@ Garp is organized in three layers. Keep them separate — the separation is what
 ## Stack
 
 - **Language:** Go (single binary, no runtime dependencies for the end user). Compiles for Mac/Linux only — Windows may compile but is not tested or supported.
-- **Engine dependencies:** Pongo2 (templating), goldmark (Markdown), fsnotify (file watching — `serve` only), gopkg.in/yaml.v3 (config + frontmatter). Don't add others to the engine without a clear reason. Vendor dependencies (`go mod vendor`) so garp builds offline and survives upstream deletion — combined with Go's compat promise, a vendored garp compiles for decades.
+- **Engine dependencies:** Pongo2 (templating), goldmark (Markdown), fsnotify (file watching — `dev` only), gopkg.in/yaml.v3 (config + frontmatter). Don't add others to the engine without a clear reason. Vendor dependencies (`go mod vendor`) so garp builds offline and survives upstream deletion — combined with Go's compat promise, a vendored garp compiles for decades.
 - **Toolbelt dependencies:** a toolbelt command may pull an additional *Go* library (compiled into the binary — categorically different from npm baggage). External binaries (pagefind, vips/cwebp) are allowed only for Mac-authoring-time commands, never for CI-path commands. Still ask before adding.
 - **CLI:** **stdlib `flag` only — do NOT use Cobra or any CLI framework.** Commands dispatch via `switch os.Args[1]`, each with its own `flag.FlagSet`. The flat command list will grow as the toolbelt fills in; that's fine — a bigger switch is not a reason for Cobra. Reconsider only if commands ever gain genuinely *nested* subcommands (they shouldn't).
 
@@ -35,7 +35,7 @@ Garp is organized in three layers. Keep them separate — the separation is what
 
 - **`garp new <path>`** — scaffolds a project: the six reserved dirs (`content/ layouts/ components/ data/ static/ site/`), a `config.yaml`, one base layout, and a sample `content/index.md` that renders immediately with zero edits. This scaffold is also where most SEO/head/security defaults ship (see roadmap).
 - **`garp build`** — reads `config.yaml`, walks `content/`, merges the data cascade, renders Markdown + Pongo2 with layout chaining, writes flat `.html` to `site/`, copies `static/` verbatim. Also synthesizes `sitemap.xml` and `robots.txt` from the page refs and `base_url`; both are author-overridable — a file already present in `static/` always wins and synthesis for it is skipped. Prints file count + build time.
-- **`garp serve`** — runs build, serves `site/` over local HTTP, watches `content/ layouts/ components/ data/ static/ config.yaml` via fsnotify, rebuilds on change. Prints the local URL. Takes `-port N` (default 8080); without an explicit `-port` it falls back to an OS-assigned port if 8080 is taken. The HTTP handler mirrors the host: a clean URL like `/about` falls back to `about.html`.
+- **`garp dev`** — runs build, serves `site/` over local HTTP, watches `content/ layouts/ components/ data/ static/ config.yaml` via fsnotify, rebuilds on change. Prints the local URL. Takes `-port N` (default 8080); without an explicit `-port` it falls back to an OS-assigned port if 8080 is taken. The HTTP handler mirrors the host: a clean URL like `/about` falls back to `about.html`. (Renamed from `garp serve` 2026-07-13 — local development only, never a production server.)
 
 ### Toolbelt (Phase 2, shipped 2026-07-02)
 

@@ -17,8 +17,8 @@ func main() {
 		run(cmdNew(os.Args[2:]))
 	case "build":
 		run(cmdBuild(os.Args[2:]))
-	case "serve":
-		run(cmdServe(os.Args[2:]))
+	case "dev":
+		run(cmdDev(os.Args[2:]))
 	case "favicons":
 		run(cmdFavicons(os.Args[2:]))
 	case "og":
@@ -51,7 +51,7 @@ func usage() {
 Usage:
   garp new <path>          Scaffold a new site
   garp build               Build the site to site/
-  garp serve               Build, serve, and rebuild on change
+  garp dev                 Build, serve locally, and rebuild on change
   garp favicons <source>   Generate a favicon set from a square source image
   garp og                  Generate a templated OG image per content page
   garp blog                Scaffold an opt-in blog section + Atom feed

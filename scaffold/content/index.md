@@ -7,4 +7,4 @@ layout: base.html
 # Welcome to Garp
 
 This page is `content/index.md`, rendered through `layouts/base.html`.
-Edit it, run `garp serve`, and refresh.
+Edit it, run `garp dev`, and refresh.
