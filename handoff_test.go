@@ -120,6 +120,7 @@ func TestRunHandoffDocReflectsProjectShape(t *testing.T) {
 		"bin/garp og",
 		"bin/garp search",
 		"None active. Available: Shopify Buy button, Stripe Buy button, analytics (Cloudflare/Plausible/Fathom)",
+		"**Staging:** push any other branch and Cloudflare Pages builds it as a preview deployment",
 	} {
 		if !strings.Contains(s, want) {
 			t.Errorf("HANDOFF.md missing %q:\n%s", want, s)

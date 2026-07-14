@@ -253,7 +253,8 @@ Frontmatter, a directory's ` + "`_data.yaml`" + `, and files in ` + "`data/`" + 
 	b.WriteString("- **Build command:** `bin/garp build`\n")
 	b.WriteString("- **Build output directory:** `site/`\n")
 	b.WriteString("- **Root directory:** `/` (this repo's root)\n\n")
-	b.WriteString("Push to the connected branch and Cloudflare rebuilds automatically — no environment variables or external services required; the build reads only this repo.\n")
+	b.WriteString("Push to the connected branch and Cloudflare rebuilds automatically — no environment variables or external services required; the build reads only this repo.\n\n")
+	b.WriteString("**Staging:** push any other branch and Cloudflare Pages builds it as a preview deployment with its own URL — review there, then merge to the connected branch to go live.\n")
 
 	return b.String(), nil
 }
