@@ -50,6 +50,7 @@ Each is a separate command in its own file, subject to the litmus test. See the 
 
 Added ad hoc from a dogfooding conversation, not a formal phase — passes the litmus test on its own terms.
 
+- **Speculation Rules prefetch** (added 2026-07-13, from the Maudit comparison) — `components/prefetch.html`, included from `head.html` and gated like analytics: emits nothing unless `prefetch: true` is set in `config.yaml`, then emits a `<script type="speculationrules">` block prefetching same-site links on hover/intent (`eagerness: moderate`). A platform primitive — no JS ships; unsupported browsers ignore the script type.
 - **`garp search`** — the first command needing an external binary outside Phase 3's planned image-optimization fork: shells out to the `pagefind` CLI (https://pagefind.app) against the already-built site, writing the index straight to `static/pagefind/` (via pagefind's own `--output-path` flag) instead of the gitignored `site/pagefind/`. Mac-authoring-time only, per the CI-purity line — errors clearly if `site/` hasn't been built yet or `pagefind` isn't on `PATH`. Because the index lands in `static/`, a plain `garp build` (no pagefind installed) reproduces it in CI on every deploy — same authoring-time-then-commit pattern as favicons/OG. The scaffold's opt-in `components/search-ui.html` wires up pagefind's own prebuilt `PagefindUI` widget; nothing to build ourselves.
 
 ## Conventions (hard rules)

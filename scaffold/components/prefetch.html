@@ -1,0 +1,12 @@
+{# Config-driven prefetch: set prefetch: true in config.yaml to opt in. Emits nothing when unset. #}
+{# Speculation Rules are a platform primitive — the browser prefetches same-site links on hover/intent; browsers without support ignore the script type. No JS ships. #}
+{% if site.prefetch %}
+<script type="speculationrules">
+{
+	"prefetch": [{
+		"where": { "href_matches": "/*" },
+		"eagerness": "moderate"
+	}]
+}
+</script>
+{% endif %}

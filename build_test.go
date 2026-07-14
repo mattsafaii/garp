@@ -222,6 +222,40 @@ func TestAnalyticsEmitsNothingWhenUnset(t *testing.T) {
 	}
 }
 
+// prefetchFixture builds a minimal site including the real scaffold
+// prefetch.html, so these tests exercise the shipped file, not a copy.
+func prefetchFixture(t *testing.T, configExtra string) string {
+	t.Helper()
+	root := t.TempDir()
+	writeFile(t, root, "config.yaml", "site_name: Fixture\nbase_url: https://fixture.test\n"+configExtra)
+	writeFile(t, root, "layouts/base.html", `{% block content %}{{ content | safe }}{% endblock %}
+{% include "prefetch.html" %}`)
+	writeFile(t, root, "components/prefetch.html", readScaffold(t, "scaffold/components/prefetch.html"))
+	writeFile(t, root, "content/index.md", "---\nlayout: base.html\n---\nhome\n")
+	return root
+}
+
+func TestPrefetchEmitsNothingWhenUnset(t *testing.T) {
+	root := prefetchFixture(t, "")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+	if html := read(t, root, "index.html"); strings.Contains(html, "<script") {
+		t.Errorf("prefetch should emit nothing when unset:\n%s", html)
+	}
+}
+
+func TestPrefetchEmitsSpeculationRules(t *testing.T) {
+	root := prefetchFixture(t, "prefetch: true\n")
+	if _, err := buildSite(root); err != nil {
+		t.Fatal(err)
+	}
+	html := read(t, root, "index.html")
+	if !strings.Contains(html, `<script type="speculationrules">`) || !strings.Contains(html, `"href_matches": "/*"`) {
+		t.Errorf("speculation rules not emitted:\n%s", html)
+	}
+}
+
 func TestAnalyticsCloudflare(t *testing.T) {
 	root := analyticsFixture(t, "analytics:\n  provider: cloudflare\n  token: abc123\n")
 	if _, err := buildSite(root); err != nil {
@@ -427,6 +461,7 @@ func TestHeadPartialRenders(t *testing.T) {
 	writeFile(t, root, "components/head.html", readScaffold(t, "scaffold/components/head.html"))
 	writeFile(t, root, "components/jsonld.html", readScaffold(t, "scaffold/components/jsonld.html"))
 	writeFile(t, root, "components/favicons.html", readScaffold(t, "scaffold/components/favicons.html"))
+	writeFile(t, root, "components/prefetch.html", readScaffold(t, "scaffold/components/prefetch.html"))
 	writeFile(t, root, "layouts/base.html", `<head>{% include "head.html" %}</head>{% block content %}{{ content | safe }}{% endblock %}`)
 	writeFile(t, root, "content/index.md", "---\ntitle: Home\ndescription: A test page.\nimage: /og.jpg\nlayout: base.html\n---\nbody\n")
 	if _, err := buildSite(root); err != nil {

@@ -125,6 +125,7 @@ func TestOGFallbackMetaTag(t *testing.T) {
 	writeFile(t, root, "components/head.html", readScaffold(t, "scaffold/components/head.html"))
 	writeFile(t, root, "components/jsonld.html", readScaffold(t, "scaffold/components/jsonld.html"))
 	writeFile(t, root, "components/favicons.html", readScaffold(t, "scaffold/components/favicons.html"))
+	writeFile(t, root, "components/prefetch.html", readScaffold(t, "scaffold/components/prefetch.html"))
 	writeFile(t, root, "layouts/base.html", `<head>{% include "head.html" %}</head>{% block content %}{{ content | safe }}{% endblock %}`)
 	writeFile(t, root, "content/index.md", "---\ntitle: Home\nlayout: base.html\n---\nbody\n")
 	writeFile(t, root, "content/about.md", "---\ntitle: About\nlayout: base.html\nimage: /custom-og.jpg\n---\nbody\n")
