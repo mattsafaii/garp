@@ -10,6 +10,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -54,7 +55,8 @@ func cmdDev(args []string) error {
 			return err
 		}
 	}
-	go watchLoop(watcher, root, outDir)
+	rl := newReloader()
+	go watchLoop(watcher, root, outDir, rl)
 
 	portExplicit := false
 	fs.Visit(func(f *flag.Flag) {
@@ -70,7 +72,65 @@ func cmdDev(args []string) error {
 		return err
 	}
 	fmt.Printf("Serving %s/ at http://localhost:%d\n", cfg.OutputDir, ln.Addr().(*net.TCPAddr).Port)
-	return http.Serve(ln, siteHandler(outDir))
+	return http.Serve(ln, siteHandler(outDir, rl))
+}
+
+// reloadScript rides along on every HTML response dev serves — it is
+// never written to site/. EventSource reconnects on its own after a
+// server restart.
+const reloadScript = `<script>new EventSource("/_garp/reload").onmessage = () => location.reload();</script>` + "\n"
+
+// reloader broadcasts rebuild events to connected browsers over SSE;
+// the injected reloadScript listens and reloads the page.
+type reloader struct {
+	mu   sync.Mutex
+	subs map[chan struct{}]struct{}
+}
+
+func newReloader() *reloader {
+	return &reloader{subs: make(map[chan struct{}]struct{})}
+}
+
+func (rl *reloader) broadcast() {
+	rl.mu.Lock()
+	defer rl.mu.Unlock()
+	for ch := range rl.subs {
+		select {
+		case ch <- struct{}{}:
+		default: // subscriber already has a pending event
+		}
+	}
+}
+
+func (rl *reloader) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	flusher, ok := w.(http.Flusher)
+	if !ok {
+		http.Error(w, "streaming unsupported", http.StatusInternalServerError)
+		return
+	}
+	ch := make(chan struct{}, 1)
+	rl.mu.Lock()
+	rl.subs[ch] = struct{}{}
+	rl.mu.Unlock()
+	defer func() {
+		rl.mu.Lock()
+		delete(rl.subs, ch)
+		rl.mu.Unlock()
+	}()
+
+	w.Header().Set("Content-Type", "text/event-stream")
+	w.Header().Set("Cache-Control", "no-store")
+	w.WriteHeader(http.StatusOK)
+	flusher.Flush()
+	for {
+		select {
+		case <-r.Context().Done():
+			return
+		case <-ch:
+			fmt.Fprint(w, "data: reload\n\n")
+			flusher.Flush()
+		}
+	}
 }
 
 // siteHandler serves the output dir the way a static host serves it: a
@@ -78,10 +138,15 @@ func cmdDev(args []string) error {
 // resolves to nothing gets the project's 404.html with a 404 status —
 // the same way Cloudflare Pages serves it in production. Directory
 // requests (/blog → blog/index.html) are http.FileServer's native
-// behavior.
-func siteHandler(dir string) http.Handler {
+// behavior. HTML responses get the live-reload script appended;
+// everything else streams through FileServer untouched.
+func siteHandler(dir string, rl *reloader) http.Handler {
 	fileServer := http.FileServer(http.Dir(dir))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/_garp/reload" {
+			rl.ServeHTTP(w, r)
+			return
+		}
 		p := r.URL.Path
 		if p != "/" && path.Ext(p) == "" {
 			cand := strings.TrimSuffix(p, "/") + ".html"
@@ -89,20 +154,52 @@ func siteHandler(dir string) http.Handler {
 				r.URL.Path = cand
 			}
 		}
+		if name, ok := htmlTarget(dir, r.URL.Path); ok {
+			serveHTML(w, http.StatusOK, name)
+			return
+		}
 		if onDisk(dir, r.URL.Path) {
 			fileServer.ServeHTTP(w, r)
 			return
 		}
-		body, err := os.ReadFile(filepath.Join(dir, "404.html"))
-		if err != nil {
-			// no 404 page in this project; FileServer's plain 404 will do
-			fileServer.ServeHTTP(w, r)
+		if serveHTML(w, http.StatusNotFound, filepath.Join(dir, "404.html")) {
 			return
 		}
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		w.WriteHeader(http.StatusNotFound)
-		w.Write(body)
+		// no 404 page in this project; FileServer's plain 404 will do
+		fileServer.ServeHTTP(w, r)
 	})
+}
+
+// htmlTarget resolves a request path to the .html file dev serves by
+// hand: direct .html requests, and directory requests' index.html ("/"
+// or a trailing slash). Bare directory paths (/blog) stay with
+// FileServer for its canonical trailing-slash redirect.
+func htmlTarget(dir, p string) (string, bool) {
+	fsp := filepath.Join(dir, filepath.FromSlash(path.Clean("/"+p)))
+	switch {
+	case strings.HasSuffix(p, ".html"):
+	case p == "/" || strings.HasSuffix(p, "/"):
+		fsp = filepath.Join(fsp, "index.html")
+	default:
+		return "", false
+	}
+	if fi, err := os.Stat(fsp); err == nil && !fi.IsDir() {
+		return fsp, true
+	}
+	return "", false
+}
+
+// serveHTML writes an HTML file with the live-reload script appended.
+func serveHTML(w http.ResponseWriter, status int, name string) bool {
+	body, err := os.ReadFile(name)
+	if err != nil {
+		return false
+	}
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(status)
+	w.Write(body)
+	w.Write([]byte(reloadScript))
+	return true
 }
 
 // onDisk reports whether a request path resolves to an existing file or
@@ -132,7 +229,7 @@ func watchRecursive(watcher *fsnotify.Watcher, dir string) error {
 // events per save. Rebuild failures print and keep serving the last good
 // output. Events in the output dir and hidden files are ignored; the root
 // watch only counts for config.yaml.
-func watchLoop(watcher *fsnotify.Watcher, root, outDir string) {
+func watchLoop(watcher *fsnotify.Watcher, root, outDir string, rl *reloader) {
 	var timer *time.Timer
 	rebuild := func() {
 		start := time.Now()
@@ -142,6 +239,7 @@ func watchLoop(watcher *fsnotify.Watcher, root, outDir string) {
 			return
 		}
 		fmt.Printf("Rebuilt %d files in %s\n", n, time.Since(start).Round(time.Millisecond))
+		rl.broadcast()
 	}
 
 	for {
