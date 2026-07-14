@@ -74,8 +74,11 @@ func cmdDev(args []string) error {
 }
 
 // siteHandler serves the output dir the way a static host serves it: a
-// clean URL like /about falls back to about.html. Directory requests
-// (/blog → blog/index.html) are http.FileServer's native behavior.
+// clean URL like /about falls back to about.html, and a path that
+// resolves to nothing gets the project's 404.html with a 404 status —
+// the same way Cloudflare Pages serves it in production. Directory
+// requests (/blog → blog/index.html) are http.FileServer's native
+// behavior.
 func siteHandler(dir string) http.Handler {
 	fileServer := http.FileServer(http.Dir(dir))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -86,8 +89,28 @@ func siteHandler(dir string) http.Handler {
 				r.URL.Path = cand
 			}
 		}
-		fileServer.ServeHTTP(w, r)
+		if onDisk(dir, r.URL.Path) {
+			fileServer.ServeHTTP(w, r)
+			return
+		}
+		body, err := os.ReadFile(filepath.Join(dir, "404.html"))
+		if err != nil {
+			// no 404 page in this project; FileServer's plain 404 will do
+			fileServer.ServeHTTP(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.WriteHeader(http.StatusNotFound)
+		w.Write(body)
 	})
+}
+
+// onDisk reports whether a request path resolves to an existing file or
+// directory under dir (directories are FileServer's job: redirects,
+// index.html).
+func onDisk(dir, p string) bool {
+	_, err := os.Stat(filepath.Join(dir, filepath.FromSlash(path.Clean("/"+p))))
+	return err == nil
 }
 
 func watchRecursive(watcher *fsnotify.Watcher, dir string) error {
