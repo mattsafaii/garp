@@ -184,6 +184,7 @@ type webManifest struct {
 	ThemeColor      string         `json:"theme_color"`
 	BackgroundColor string         `json:"background_color"`
 	Display         string         `json:"display"`
+	StartURL        string         `json:"start_url"`
 }
 
 type manifestIcon struct {
@@ -203,6 +204,8 @@ func encodeManifest(siteName string) ([]byte, error) {
 		ThemeColor:      "#ffffff",
 		BackgroundColor: "#ffffff",
 		Display:         "standalone",
+		// Without start_url, installs open at whatever page linked the manifest.
+		StartURL: "/",
 	}
 	b, err := json.MarshalIndent(m, "", "  ")
 	if err != nil {
