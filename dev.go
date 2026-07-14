@@ -72,13 +72,13 @@ func cmdDev(args []string) error {
 		return err
 	}
 	fmt.Printf("Serving %s/ at http://localhost:%d\n", cfg.OutputDir, ln.Addr().(*net.TCPAddr).Port)
-	return http.Serve(ln, siteHandler(outDir, rl))
+	return http.Serve(ln, siteHandler(root, outDir, rl))
 }
 
-// reloadScript rides along on every HTML response dev serves — it is
-// never written to site/. EventSource reconnects on its own after a
-// server restart.
-const reloadScript = `<script>new EventSource("/_garp/reload").onmessage = () => location.reload();</script>` + "\n"
+// toolbarTag rides along on every HTML response dev serves — it is never
+// written to site/. The script itself (live reload + the page inspector
+// toolbar) is embedded in the binary and served at /_garp/toolbar.js.
+const toolbarTag = `<script src="/_garp/toolbar.js" defer></script>` + "\n"
 
 // reloader broadcasts rebuild events to connected browsers over SSE;
 // the injected reloadScript listens and reloads the page.
@@ -138,13 +138,24 @@ func (rl *reloader) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 // resolves to nothing gets the project's 404.html with a 404 status —
 // the same way Cloudflare Pages serves it in production. Directory
 // requests (/blog → blog/index.html) are http.FileServer's native
-// behavior. HTML responses get the live-reload script appended;
-// everything else streams through FileServer untouched.
-func siteHandler(dir string, rl *reloader) http.Handler {
+// behavior. HTML responses get the dev toolbar script tag appended;
+// everything else streams through FileServer untouched. root is the
+// project root — dev-only endpoints under /_garp/ read source files
+// (content/, data/, layouts/) the output dir no longer carries.
+func siteHandler(root, dir string, rl *reloader) http.Handler {
 	fileServer := http.FileServer(http.Dir(dir))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/_garp/reload" {
-			rl.ServeHTTP(w, r)
+		if strings.HasPrefix(r.URL.Path, "/_garp/") {
+			switch r.URL.Path {
+			case "/_garp/reload":
+				rl.ServeHTTP(w, r)
+			case "/_garp/toolbar.js":
+				serveToolbar(w)
+			case "/_garp/page":
+				servePageInfo(root, w, r)
+			default:
+				http.NotFound(w, r)
+			}
 			return
 		}
 		p := r.URL.Path
@@ -189,7 +200,7 @@ func htmlTarget(dir, p string) (string, bool) {
 	return "", false
 }
 
-// serveHTML writes an HTML file with the live-reload script appended.
+// serveHTML writes an HTML file with the dev toolbar script tag appended.
 func serveHTML(w http.ResponseWriter, status int, name string) bool {
 	body, err := os.ReadFile(name)
 	if err != nil {
@@ -198,7 +209,7 @@ func serveHTML(w http.ResponseWriter, status int, name string) bool {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(status)
 	w.Write(body)
-	w.Write([]byte(reloadScript))
+	w.Write([]byte(toolbarTag))
 	return true
 }
 

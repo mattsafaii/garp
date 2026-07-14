@@ -36,7 +36,7 @@ Point your host at `site/` and you're live.
 |---|---|
 | `garp new <path>` | Scaffold a project: the six reserved dirs, a `config.yaml`, a base layout, and a sample `content/index.md` that renders immediately. |
 | `garp build` | Read `config.yaml`, walk `content/`, merge the data cascade, render Markdown + Pongo2 with layout chaining, write flat `.html` to `site/`, copy `static/` verbatim. Prints the file count and build time. |
-| `garp dev [-port N]` | Run a build, serve `site/` over local HTTP, watch the source via fsnotify, rebuild on change, and live-reload the browser (a script injected into dev responses only — never into `site/`). Defaults to port 8080, falling back to an OS-assigned port if it's taken. |
+| `garp dev [-port N]` | Run a build, serve `site/` over local HTTP, watch the source via fsnotify, rebuild on change, and live-reload the browser. Includes a dev toolbar (the "g" button, bottom-right) that inspects the current page's data cascade — each key labeled with the layer that set it — plus its layout chain and collections. Injected into dev responses only, never into `site/`. Defaults to port 8080, falling back to an OS-assigned port if it's taken. |
 | `garp favicons <source>` | Generate a full favicon set (`favicon.ico`, `icon-192.png`, `icon-512.png`, `apple-touch-icon.png`, `site.webmanifest`) from one square source image, into `static/`. |
 | `garp og` | Generate a templated 1200×630 OG image per content page, into `static/og/`. |
 | `garp blog` | Stamp an opt-in blog section — a post layout, a listing page, a sample post, and an Atom feed. Refuses to overwrite existing files. |
