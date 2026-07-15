@@ -2,10 +2,16 @@
 
 STARTER := $(HOME)/.claude/skills/safaii-css/references/starter.css
 
-.PHONY: build test sync release
+.PHONY: build test sync release install
 
 build:
 	go build -o garp .
+
+# Refresh the global garp on PATH (~/go/bin) — daily-authoring convenience.
+# Client repos still build with their own committed bin/garp; that pinning
+# is the reproducibility guarantee, this is just Matt's local binary.
+install:
+	go install .
 
 test:
 	go test ./...
