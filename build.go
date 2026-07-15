@@ -120,7 +120,12 @@ func buildSite(root string) (int, error) {
 		return 0, err
 	}
 
-	return len(refs) + staticCount + seoCount, nil
+	sinkCount, err := synthesizeSink(root, outDir, cfg)
+	if err != nil {
+		return 0, err
+	}
+
+	return len(refs) + staticCount + seoCount + sinkCount, nil
 }
 
 // checkOutputDir rejects an output_dir the build would wipe destructively:

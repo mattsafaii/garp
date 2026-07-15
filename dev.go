@@ -153,6 +153,8 @@ func siteHandler(root, dir string, rl *reloader) http.Handler {
 				serveToolbar(w)
 			case "/_garp/page":
 				servePageInfo(root, w, r)
+			case "/_garp/sink":
+				serveSink(root, w)
 			default:
 				http.NotFound(w, r)
 			}
