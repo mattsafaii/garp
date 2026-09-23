@@ -1,20 +1,81 @@
-/* Starter stylesheet — extracted from mattsafaii.com (src/css/style.css).
-   Copy as the project's single stylesheet. Fill in the palette, keep the bones. */
+/* Starter stylesheet — extracted from mattsafaii and the safaii-css skill.
+   CUBE. Copy as the project's single stylesheet. Fill in the palette, keep the bones. */
 
 /* ── Layers ──────────────────────────────────────────────── */
 
-@layer config, reset, elements, components;
+@layer reset, tokens, base, composition, block, utility, exception;
 
-@layer config {
+/* _global/reset.css */
+@layer reset {
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+		margin: 0;
+		padding: 0;
+		font-kerning: normal;
+	}
+
+	html {
+		hanging-punctuation: first last;
+		overflow-x: clip;
+	}
+
+	body {
+		min-height: 100vh;
+	}
+
+	img,
+	picture,
+	video,
+	canvas,
+	svg {
+		display: block;
+		max-inline-size: 100%;
+		block-size: auto;
+	}
+
+	input,
+	button,
+	textarea,
+	select {
+		font: inherit;
+	}
+
+	p,
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		overflow-wrap: break-word;
+	}
+
+	:target {
+		scroll-margin-block: 2rlh;
+	}
+
+	@media (forced-colors: active) {
+		:where(button) {
+			border: 1px solid;
+		}
+	}
+}
+
+/* _global/tokens.css */
+@layer tokens {
 	:root {
-		/* ── Color ── always oklch; swap per project */
-		color-scheme: light; /* light-only by default; opt into dark deliberately */
+		color-scheme: light; /* light-only by default; dark is an opt-in, not a reflex */
+		accent-color: var(--color-accent);
+
+		/* Color — oklch only */
 		--color-bg: oklch(98% 0 0);
 		--color-text: oklch(22% 0 0);
 		--color-accent: oklch(55% 0.13 250); /* placeholder accent */
-		accent-color: var(--color-accent);
+		--color-border: color-mix(in oklch, var(--color-text) 18%, transparent);
 
-		/* ── Typography ── */
+		/* Type */
 		font-size: clamp(95%, 85% + 0.5dvi, 115%);
 		--font-sans: system-ui, sans-serif;
 		--font-serif: Georgia, Cambria, "Times New Roman", Times, serif;
@@ -23,7 +84,7 @@
 		--line-height: 1.5;
 		--measure: 64ch; /* line length */
 
-		/* ── Spacing ── 4px grid, rem-based */
+		/* Space — 4px grid, rem-based; the number is px ÷ 4 */
 		--space-1: 0.25rem; /* 4 */
 		--space-2: 0.5rem; /* 8 */
 		--space-3: 0.75rem; /* 12 */
@@ -35,85 +96,44 @@
 		--space-12: 3rem; /* 48 */
 		--space-16: 4rem; /* 64 */
 
-		/* Semantic spacing — fluid, bounded by scale steps. The scale gives
-		   fixed values; these two give responsive rhythm without leaving the
-		   grid. Anything needing an exact value uses --space-* directly. */
-		--gutter: clamp(var(--space-4), 2.5vmax, var(--space-6)); /* inline, 16 → 24 */
-		--stack: clamp(var(--space-3), 2vmax, var(--space-4)); /* block, 12 → 16 */
+		/* Fluid, but bounded by scale steps — spacing rides between grid stops
+		   and never leaves the system. Exact values use --space-* directly. */
+		--gutter: clamp(
+			var(--space-4),
+			2.5vmax,
+			var(--space-6)
+		); /* inline, 16 → 24 */
+		--wrapper-max-width: 72rem;
 
-		/* ── Radius ── */
+		/* Radius — a small rem scale, not literal px */
 		--radius-sm: 0.125rem; /* 2 */
 		--radius: 0.25rem; /* 4 — base */
 		--radius-lg: 0.5rem; /* 8 */
 	}
+}
 
+/* _global/base.css */
+@layer base {
 	@view-transition {
 		navigation: auto;
 	}
-}
 
-@layer reset {
-	*,
-	*::before,
-	*::after {
-		box-sizing: border-box;
-		margin: 0;
-		padding: 0;
-		font-kerning: normal;
-	}
-
-	input,
-	button,
-	textarea,
-	select {
-		font: inherit;
-	}
-
-	@media (forced-colors: active) {
-		:where(button) {
-			border: 1px solid;
-		}
-	}
-}
-
-@layer elements {
-	@media (prefers-reduced-motion: no-preference) {
-		:root {
-			scroll-behavior: smooth;
-		}
+	html {
+		background-color: var(--color-bg);
+		color: var(--color-text);
 	}
 
 	body {
-		-webkit-font-smoothing: antialiased;
 		font-family: var(--font-body);
-		font-size: 1rem;
 		line-height: var(--line-height);
-		color: var(--color-text);
-		background-color: var(--color-bg);
-		display: grid;
-		grid-template-columns:
-			[bleed-start] minmax(var(--gutter), 1fr)
-			[content-start] minmax(0, var(--measure))
-			[content-end] minmax(var(--gutter), 1fr)
-			[bleed-end];
-		align-items: start;
-		padding-block: 8vh calc(var(--gutter) * 2);
-		overflow-x: clip;
+		-webkit-font-smoothing: antialiased;
 	}
 
-	main {
-		grid-column: bleed;
-		display: grid;
-		grid-template-columns: subgrid;
-		align-items: start;
-	}
-
-	main > * {
-		grid-column: content;
-	}
-
-	main > * + * {
-		margin-block-start: calc(var(--stack) * 2);
+	h1,
+	h2,
+	h3 {
+		text-wrap: balance;
+		hyphens: auto;
 	}
 
 	a {
@@ -126,19 +146,9 @@
 		text-decoration-color: var(--color-accent);
 	}
 
-	h1,
-	h2,
-	h3 {
-		margin-block-end: calc(var(--stack) / 2);
-		text-wrap: balance;
-		overflow-wrap: break-word;
-		hyphens: auto;
-	}
-
 	p,
 	ul,
 	ol {
-		margin-block-end: var(--stack);
 		text-wrap: pretty;
 	}
 
@@ -174,39 +184,224 @@
 		content-visibility: auto; /* skip rendering off-screen articles */
 		contain-intrinsic-size: auto 60rem; /* size estimate so the scrollbar doesn't jump; auto remembers the real size after first render */
 	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		:root {
+			scroll-behavior: smooth;
+		}
+	}
 }
 
-@layer components {
-	/* Each component: @scope to the root; use `to (...)` to stop at
-	   nested component boundaries. Example shape:
+/* _compositions/flow.css */
+@layer composition {
+	.flow > * + * {
+		margin-block-start: var(--flow-space, 1em);
+	}
+}
 
-	@scope (.site-nav) {
-		:scope {
-			display: flex;
-			gap: var(--gutter);
-		}
+/* _compositions/wrapper.css */
+@layer composition {
+	.wrapper {
+		inline-size: min(100% - var(--gutter) * 2, var(--wrapper-max-width));
+		margin-inline: auto;
+	}
+}
 
-		a {
-			text-decoration: none;
+/* _compositions/cluster.css */
+@layer composition {
+	.cluster {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--cluster-gap, var(--space-3));
+		justify-content: var(--cluster-justify, flex-start);
+		align-items: var(--cluster-align, center);
+	}
+}
+
+/* _compositions/grid.css */
+@layer composition {
+	.grid {
+		display: grid;
+		gap: var(--grid-gap, var(--space-4));
+		grid-template-columns: repeat(
+				auto-fit,
+				minmax(min(100%, var(--grid-min-item-size, 16rem)), 1fr)
+			);
+	}
+
+	/* A new column habit is a data-layout that only changes variables. */
+	.grid[data-layout="50-50"] {
+		--grid-min-item-size: 20rem;
+	}
+
+	.grid[data-layout="thirds"] {
+		--grid-min-item-size: 14rem;
+	}
+}
+
+/* _compositions/repel.css */
+@layer composition {
+	.repel {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		align-items: center;
+		gap: var(--repel-gap, var(--space-3));
+	}
+}
+
+/* _compositions/sidebar.css */
+@layer composition {
+	.sidebar {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--sidebar-gap, var(--space-4));
+	}
+
+	.sidebar > :first-child {
+		flex-basis: var(--sidebar-basis, 18rem);
+		flex-grow: 1;
+	}
+
+	.sidebar > :last-child {
+		flex-basis: 0;
+		flex-grow: 999;
+		min-inline-size: var(--sidebar-content-min, 50%);
+	}
+
+	.sidebar[data-direction="end"] > :first-child {
+		flex-basis: 0;
+		flex-grow: 999;
+		min-inline-size: var(--sidebar-content-min, 50%);
+	}
+
+	.sidebar[data-direction="end"] > :last-child {
+		flex-basis: var(--sidebar-basis, 18rem);
+		flex-grow: 1;
+		min-inline-size: 0;
+	}
+}
+
+/* _compositions/switcher.css */
+@layer composition {
+	.switcher {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--switcher-gap, var(--space-4));
+	}
+
+	.switcher > * {
+		flex-grow: 1;
+		flex-basis: calc((var(--switcher-threshold, 30rem) - 100%) * 999);
+	}
+}
+
+/* _compositions/breakout.css */
+@layer composition {
+	/* The named-column document grid: content sits in a measured middle column,
+	   with bleed line names on either side for full-bleed elements.
+
+	   Opt in on a wrapper element for a page that actually needs breakout — an
+	   essay, a long-form article. It is not a default page shell: most pages use
+	   `.wrapper` and stop there. */
+	.breakout {
+		display: grid;
+		grid-template-columns:
+			[bleed-start] minmax(var(--gutter), 1fr)
+			[content-start] minmax(0, var(--measure))
+			[content-end] minmax(var(--gutter), 1fr)
+			[bleed-end];
+		align-items: start;
+	}
+
+	.breakout > * {
+		grid-column: content;
+	}
+}
+
+/* _blocks/button.css */
+@layer block {
+	.button {
+		--button-bg: var(--color-accent);
+		--button-text: var(--color-text-on-accent, oklch(99% 0 0));
+		--button-border: transparent;
+
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		padding-block: 0.55em;
+		padding-inline: 1em;
+		border: 1px solid var(--button-border);
+		border-radius: var(--radius);
+		background: var(--button-bg);
+		color: var(--button-text);
+		font: inherit;
+		text-decoration: none;
+		cursor: pointer;
+	}
+
+	@media (hover: hover) {
+		.button:hover {
+			filter: brightness(1.08);
 		}
 	}
 
-	   In .card below, the inset img uses a nested concentric corner —
-	   inner = outer − gap (padding + border) — as a calc() from tokens, so
-	   the curves stay parallel and the relationship holds if spacing changes.
-	   Use `@scope (.card) to (.card-body)` instead when the card wraps
-	   another component, to stop these rules at that nested boundary.
-
-	@scope (.card) {
-		:scope {
-			padding: var(--gutter);
-			border: 1px solid var(--color-text);
-			border-radius: var(--radius-lg);
-		}
-
-		img {
-			border-radius: calc(var(--radius-lg) - var(--gutter) - 1px);
-		}
+	/* A new look is another [data-variant] that only assigns variables. */
+	.button[data-variant="ghost"] {
+		--button-bg: transparent;
+		--button-text: var(--color-text);
+		--button-border: var(--color-border);
 	}
-	*/
+}
+
+/* _blocks/prose.css */
+@layer block {
+	.prose {
+		--flow-space: 1em;
+		max-inline-size: var(--measure);
+	}
+
+	.prose :is(h2, h3) {
+		--flow-space: 1.5em;
+	}
+
+	.prose ul,
+	.prose ol {
+		padding-inline-start: 1.2em;
+	}
+}
+
+/* _utilities/region.css */
+@layer utility {
+	.region {
+		padding-block: var(--region-space, var(--space-10));
+	}
+}
+
+/* _utilities/visually-hidden.css */
+@layer utility {
+	.visually-hidden:not(:focus):not(:active) {
+		position: absolute;
+		inline-size: 1px;
+		block-size: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
+}
+
+/* _utilities/indent.css */
+@layer utility {
+	.indent {
+		padding-inline-start: var(--indent, var(--space-6));
+	}
+}
+
+/* _utilities/bleed.css */
+@layer utility {
+	/* Full-bleed inside `.breakout` — spans from the bleed-start line to
+	   bleed-end, ignoring the measured content column. */
+	.bleed {
+		grid-column: bleed;
+	}
 }

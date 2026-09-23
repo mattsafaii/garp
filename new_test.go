@@ -71,7 +71,7 @@ func TestScaffoldContract(t *testing.T) {
 	if strings.Contains(css, "grid-column: content") && !strings.Contains(layout, "<main>") {
 		t.Error("style.css places children in a content grid but base.html has no <main> wrapper")
 	}
-	if !strings.Contains(css, "@layer config, reset, elements, components;") {
+	if !strings.Contains(css, "@layer reset, tokens, base, composition, block, utility, exception;") {
 		t.Error("style.css missing the canonical @layer declaration — looks empty or mangled")
 	}
 }

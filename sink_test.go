@@ -7,9 +7,9 @@ import (
 	"testing"
 )
 
-const sinkFixtureCSS = `@layer config, reset, elements, components;
+const sinkFixtureCSS = `@layer reset, tokens, base, composition, block, utility, exception;
 
-@layer config {
+@layer tokens {
 	:root {
 		--color-bg: oklch(98% 0 0);
 		--color-accent: oklch(55% 0.13 250); /* placeholder */
@@ -25,18 +25,18 @@ const sinkFixtureCSS = `@layer config, reset, elements, components;
 	}
 }
 
-@layer elements {
+@layer base {
 	:root {
 		--not-a-token: red;
 	}
 }
 `
 
-// TestExtractConfigTokens: only @layer config declarations count, order
+// TestExtractTokens: only @layer tokens declarations count, order
 // is preserved, comments are stripped from values, and nested blocks
 // inside the layer don't break brace matching.
 func TestExtractConfigTokens(t *testing.T) {
-	tokens := extractConfigTokens(sinkFixtureCSS)
+	tokens := extractTokens(sinkFixtureCSS)
 	var names []string
 	for _, tok := range tokens {
 		names = append(names, tok.Name)
@@ -50,10 +50,10 @@ func TestExtractConfigTokens(t *testing.T) {
 	}
 }
 
-// TestExtractNoConfigLayer: a stylesheet without the config layer yields
+// TestExtractNoTokensLayer: a stylesheet without the tokens layer yields
 // no tokens — the contract is explicit.
-func TestExtractNoConfigLayer(t *testing.T) {
-	if tokens := extractConfigTokens(":root { --loose: 1; }"); tokens != nil {
+func TestExtractNoTokensLayer(t *testing.T) {
+	if tokens := extractTokens(":root { --loose: 1; }"); tokens != nil {
 		t.Errorf("expected no tokens, got %v", tokens)
 	}
 }
@@ -61,7 +61,7 @@ func TestExtractNoConfigLayer(t *testing.T) {
 // TestGroupTokens: prefixes bucket correctly; --gutter counts as
 // Spacing; unknown tokens land in Other.
 func TestGroupTokens(t *testing.T) {
-	groups := groupTokens(extractConfigTokens(sinkFixtureCSS))
+	groups := groupTokens(extractTokens(sinkFixtureCSS))
 	got := map[string]int{}
 	for _, g := range groups {
 		got[g.Title] = len(g.Tokens)
@@ -76,7 +76,7 @@ func TestGroupTokens(t *testing.T) {
 // TestRenderSinkPage: previews are var() references (never computed
 // values), the page is noindex, and the elements section is present.
 func TestRenderSinkPage(t *testing.T) {
-	page := renderSinkPage(groupTokens(extractConfigTokens(sinkFixtureCSS)), "Fixture")
+	page := renderSinkPage(groupTokens(extractTokens(sinkFixtureCSS)), "Fixture")
 	for _, want := range []string{
 		`background-color: var(--color-accent)`,
 		`width: var(--gutter)`,
@@ -160,7 +160,7 @@ func TestBuildSinkAuthorOverride(t *testing.T) {
 // tokens in @layer config where the sink finds them.
 func TestScaffoldSinkConvention(t *testing.T) {
 	css := readScaffold(t, "scaffold/static/style.css")
-	tokens := extractConfigTokens(css)
+	tokens := extractTokens(css)
 	if len(tokens) == 0 {
 		t.Fatal("no tokens extracted from the scaffold starter — did @layer config change?")
 	}
